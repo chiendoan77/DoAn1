@@ -1,10 +1,15 @@
-# Booking flow (đề xuất)
+# Booking flow
 
-1. Khách hàng chọn offering/provider và gửi thời điểm, địa chỉ, mô tả qua API.
-2. Booking domain xác thực người dùng, tham chiếu offering/provider hợp lệ và kiểm tra slot overlap.
-3. Booking tạo bản ghi ở trạng thái ban đầu; trả DTO và mã booking.
-4. Provider được gán xem và chấp nhận/từ chối theo quyền/state transition; provider chỉ bận ở slot bị overlap.
-5. Booking domain ghi nhận các thay đổi trạng thái và cung cấp lịch sử cho khách hàng/provider/Admin theo authorization.
-6. Hủy, thanh toán, hoàn thành, review và khiếu nại đi theo chính sách riêng sau khi được duyệt.
+## Luồng đã triển khai
 
-Mỗi khách có tối đa hai booking đang mở cùng category. Lần hai cảnh báo và chuyển Admin review dựa trên complaint context của booking trước; lần ba bị chặn. Chưa định nghĩa status “đang mở”, Admin hold/approval behavior, slot duration/boundaries, provider assignment, payment timing hoặc cancellation/refund.
+1. CUSTOMER gửi `providerId`, `categoryId`, `scheduledAt`, `address`, `description` tới `POST /api/bookings`.
+2. Booking xác thực role và hỏi Marketplace qua API nội bộ để xác minh provider/category; không đọc database Marketplace.
+3. Booking lưu yêu cầu với trạng thái `REQUESTED`.
+4. Provider được gán xem lịch sử của mình và chuyển trạng thái qua `ACCEPTED`, `REJECTED` hoặc `COMPLETED` theo transition/ownership checks.
+5. Customer/provider xem lịch sử booking của mình.
+
+Booking request hiện không nhận offering ID, không lưu price snapshot và không kiểm tra slot overlap.
+
+## Luồng mục tiêu chưa triển khai
+
+Yêu cầu đã xác nhận gồm slot conflict và giới hạn booking lặp theo category. Việc bắt đầu booking từ một gói dịch vụ và lưu giá tại thời điểm đặt chưa được xác nhận. Trạng thái “đang mở”, timezone/slot boundaries, Admin review behavior và cancellation/refund cũng cần chốt trước khi implementation. Các mục tiêu này không mô tả API đang chạy.

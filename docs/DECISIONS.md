@@ -53,3 +53,11 @@
 - **Trạng thái:** Đã xác nhận.
 - **Quyết định:** Provider chỉ cập nhật profile gắn với account của chính mình. Mỗi lần cập nhật đưa profile về `PENDING`; toàn bộ profile bị ẩn khỏi truy vấn public cho tới khi Admin duyệt lại.
 - **Lý do:** Không để nội dung mới chưa kiểm duyệt hiển thị và cũng không tiếp tục hiển thị nội dung cũ sau khi provider đã gửi chỉnh sửa.
+
+## DEC-010 — Provider offerings cần Admin duyệt
+
+- **Trạng thái:** Yêu cầu nghiệp vụ đã được người dùng xác nhận; implementation chưa có trong source hiện tại.
+- **Quyết định:** Provider cần tạo, cập nhật (bao gồm giá) và archive gói dịch vụ của mình. Giá là giá cố định VND; số điện thoại theo gói được công khai sau khi duyệt. Mọi lần tạo/sửa phải chờ Admin duyệt lại; xóa là archive để giữ dữ liệu.
+- **Ranh giới:** Marketplace sở hữu offering và moderation; Admin là role, không tạo `admin-service`. Booking chưa liên kết offering và chưa lưu price snapshot.
+- **Lý do:** Provider có thể quản lý bảng giá, đồng thời nội dung/giá mới không hiển thị công khai trước moderation.
+- **Implementation note:** Các rule này là yêu cầu đã chọn, không phải API/schema đang chạy. Xem [Marketplace requirements](./services/marketplace/REQUIREMENTS.md) và [development status](./DEVELOPMENT_STATUS.md).

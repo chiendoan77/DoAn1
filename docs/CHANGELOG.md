@@ -1,14 +1,28 @@
 # Changelog
 
+## 2026-11-06 — Sắp xếp source theo feature/domain
+
+- Tách request/response DTO, entity, enum, mapper và lớp nghiệp vụ trong Identity, Marketplace, Booking.
+- Chuyển màn hình Next.js vào `features/` và thành phần dùng chung vào `shared/components/`.
+- Giữ nguyên API, schema, hành vi nghiệp vụ và ranh giới microservice; đồng bộ tài liệu cấu trúc/status.
+- Xác minh Maven 16 tests, frontend lint, typecheck và production build đều pass.
+
+## 2026-11-06 — Kiểm kê cấu trúc và đồng bộ implementation status
+
+- Thêm [PROJECT_STRUCTURE.md](./PROJECT_STRUCTURE.md) mô tả cây source thực tế, ranh giới deployable và ownership.
+- Làm rõ repository hiện dùng Next.js + Spring Boot microservices, không phải Angular + modular monolith trong sơ đồ tham khảo.
+- Đối chiếu lại Marketplace: offering CRUD/API/schema/UI được giữ ở trạng thái yêu cầu chưa triển khai vì không có trong source hiện tại; cập nhật API, database và frontend docs để không mô tả endpoint giả là API hoạt động.
+- Không di chuyển source code hoặc thay đổi runtime behavior.
+
 ## 2026-11-05 — Provider tự cập nhật hồ sơ có duyệt lại
 
 - Thêm `PUT /api/provider/profile`, xác thực role và ownership bằng account ID trong JWT.
 - Mỗi lần cập nhật chuyển hồ sơ sang `PENDING`, ẩn khỏi public cho tới khi Admin duyệt lại.
 - Bổ sung kiểm thử ownership, ẩn hồ sơ và hiển thị lại sau duyệt.
 
-## 2026-11-05 — CORS cho Angular local qua API Gateway
+## 2026-11-05 — CORS cho origin local `localhost:4200` qua API Gateway
 
-- Cho phép origin `http://localhost:4200` gọi Gateway với các method API và headers `Content-Type`/`Authorization`.
+- Cho phép origin `http://localhost:4200` gọi Gateway với các method API và headers `Content-Type`/`Authorization`; đây là origin dev client, không phải frontend framework đang có trong repository.
 - Thêm kiểm thử preflight cho origin được phép và từ chối origin ngoài allowlist.
 
 ## 2026-11-04 — Tài liệu khởi tạo

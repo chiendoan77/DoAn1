@@ -8,4 +8,4 @@ Chưa triển khai API quản trị người dùng, xác minh email/số điện
 
 ## Java package layout
 
-`src/main/java/com/doan1/identity` separates `controller`, `dto`, `model`, `repository`, `security`, `config` and `exception`; the Spring Boot entry point stays in the root package. Tests are isolated in `src/test/java/com/doan1/identity`.
+`src/main/java/com/doan1/identity` separates HTTP controllers, request/response DTOs, `entity`, `enums`, `mapper`, `service`, `repository` and security/configuration. Tests are isolated in `src/test/java/com/doan1/identity`.

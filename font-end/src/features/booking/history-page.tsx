@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Account, Booking, Provider, Review, ServiceCategory, apiRequest } from "@/lib/api";
-import { SiteHeader } from "@/components/site-header";
+import { SiteHeader } from "@/shared/components/site-header";
 
 const statusLabels: Record<Booking["status"], string> = {
   REQUESTED: "Chờ nhà cung cấp xác nhận",

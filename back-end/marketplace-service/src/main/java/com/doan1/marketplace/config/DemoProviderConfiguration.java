@@ -1,7 +1,7 @@
 package com.doan1.marketplace.config;
 
-import com.doan1.marketplace.model.ProviderProfile;
-import com.doan1.marketplace.model.ProviderStatus;
+import com.doan1.marketplace.entity.ProviderProfile;
+import com.doan1.marketplace.enums.ProviderStatus;
 import com.doan1.marketplace.repository.ProviderProfileRepository;
 
 import org.springframework.boot.CommandLineRunner;

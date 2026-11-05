@@ -12,8 +12,8 @@ Trạng thái **Đã xác nhận** phản ánh quyết định người dùng đ
 |---|---|---|
 | ID-FR-001 | Người dùng đăng ký và đăng nhập bằng email hoặc số điện thoại. Email, phone, username, họ tên và mật khẩu bắt buộc. | Đã xác nhận; auth cơ bản đã triển khai |
 | ID-FR-002 | Hệ thống phân biệt quyền khách hàng, nhà cung cấp và Admin. | Đã xác nhận trong MVP |
-| MARKET-FR-001 | Khách hàng duyệt/tìm dịch vụ, xem giá và nhà cung cấp. | Đã xác nhận trong MVP |
-| MARKET-FR-002 | Nhà cung cấp khai báo hồ sơ và dịch vụ. | Đã xác nhận trong MVP |
+| MARKET-FR-001 | Khách hàng duyệt/tìm dịch vụ, xem giá và nhà cung cấp. | Đã xác nhận; provider/category browse có một phần triển khai, tìm kiếm nâng cao và offering/giá chưa triển khai |
+| MARKET-FR-002 | Nhà cung cấp khai báo hồ sơ và dịch vụ/gói có giá. | Đã xác nhận; hồ sơ provider có triển khai, quản lý gói/giá chưa có trong source hiện tại |
 | MARKET-FR-003 | Admin quản lý/duyệt/khởi tạo hồ sơ nhà cung cấp và quản lý catalog. | Đã xác nhận; quyền tạo hộ còn chi tiết mở |
 | BOOK-FR-001 | Khách hàng tạo booking với thời gian, địa chỉ và mô tả công việc. | Đã xác nhận trong MVP |
 | BOOK-FR-002 | Nhà cung cấp xử lý booking; chỉ slot trùng mới làm provider không khả dụng. | Đã xác nhận; biên interval/time zone còn mở |
@@ -39,7 +39,7 @@ Chi tiết: [functional requirements](./requirements/functional-requirements.md)
 ## Ranh giới domain đã chọn
 
 1. **Identity & Access** — tài khoản, xác thực, vai trò.
-2. **Marketplace** — provider profile, catalog/offerings, giá và xét duyệt đối tác.
+2. **Marketplace** — provider profile, category, catalog/offerings, giá và xét duyệt đối tác; offering/giá vẫn là yêu cầu chưa triển khai.
 3. **Booking** — đặt lịch, state machine, slot conflict và giới hạn repeat booking theo category.
 4. **Payment** — giao dịch và adapter với nhiều phương thức/provider.
 5. **API Gateway** — edge routing, không phải business domain.

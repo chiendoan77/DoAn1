@@ -1,7 +1,7 @@
 package com.doan1.identity.config;
 
-import com.doan1.identity.model.Account;
-import com.doan1.identity.model.Role;
+import com.doan1.identity.entity.Account;
+import com.doan1.identity.enums.Role;
 import com.doan1.identity.repository.AccountRepository;
 
 import org.springframework.beans.factory.annotation.Value;

@@ -1,6 +1,6 @@
 package com.doan1.booking.repository;
 
-import com.doan1.booking.model.Booking;
+import com.doan1.booking.entity.Booking;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 

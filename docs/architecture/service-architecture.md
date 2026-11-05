@@ -8,4 +8,6 @@
 | Payment | Payment transaction, provider adapters, callback/status handling | Payment transaction/attempt, provider references | Tra cứu giao dịch theo permission | Đã chọn service riêng để tích hợp nhiều provider |
 | API Gateway | Routing và cross-cutting edge policy | Không sở hữu dữ liệu nghiệp vụ | Không phải admin backend | Khi có nhiều backend service và cần edge routing |
 
+Các dòng trên là domain responsibility đã chọn, không đồng nghĩa mọi chức năng đã triển khai. Trong source hiện tại Marketplace có provider profiles/categories/reviews nhưng chưa có offering catalog/giá; Booking có luồng cơ bản; Payment mới là skeleton. Admin là role, review thuộc Marketplace, không có các deployable riêng `admin`, `review`, `user` hoặc `notification`. Cây thực tế xem [PROJECT_STRUCTURE.md](../PROJECT_STRUCTURE.md).
+
 Review hai chiều đã vào scope nhưng chưa có service riêng; complaint workflow và notification chưa được chốt. Payment service đã được chọn; provider/method cụ thể và payment lifecycle còn mở.

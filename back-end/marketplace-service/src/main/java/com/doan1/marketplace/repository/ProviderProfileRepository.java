@@ -1,7 +1,7 @@
 package com.doan1.marketplace.repository;
 
-import com.doan1.marketplace.model.ProviderProfile;
-import com.doan1.marketplace.model.ProviderStatus;
+import com.doan1.marketplace.entity.ProviderProfile;
+import com.doan1.marketplace.enums.ProviderStatus;
 
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Lock;

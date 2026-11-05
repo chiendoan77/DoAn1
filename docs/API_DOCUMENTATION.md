@@ -5,7 +5,7 @@ Public API đi qua Gateway; endpoint `/internal/**` chỉ dùng server-to-server
 | Domain | Đã triển khai |
 |---|---|
 | Identity | `POST /api/auth/register`, `POST /api/auth/login`, `GET /api/me`. |
-| Marketplace | `GET /api/services/categories`, provider listing/detail, provider application/profile, `PUT /api/provider/profile` (cập nhật của chính provider; cần Admin duyệt lại), Admin pending/approval, `POST /api/reviews`, `GET /api/reviews/mine`. |
+| Marketplace | `GET /api/services/categories`, provider listing/detail, provider application/profile, `PUT /api/provider/profile` (cập nhật của chính provider; cần Admin duyệt lại), Admin provider pending/approval, `POST /api/reviews`, `GET /api/reviews/mine`. Chưa có API service offerings/gói dịch vụ. |
 | Booking | `POST /api/bookings`, `GET /api/bookings/mine`, provider status patch. |
 | Nội bộ | Booking xác minh provider qua `GET /internal/providers/{id}`; Marketplace xác minh review qua `GET /internal/bookings/{id}/review-eligibility`; cả hai yêu cầu `X-Service-Api-Key`. |
 

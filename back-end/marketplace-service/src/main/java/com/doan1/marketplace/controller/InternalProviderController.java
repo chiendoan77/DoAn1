@@ -1,9 +1,7 @@
 package com.doan1.marketplace.controller;
 
-import com.doan1.marketplace.dto.InternalProviderResponse;
-import com.doan1.marketplace.model.ProviderProfile;
-import com.doan1.marketplace.model.ProviderStatus;
-import com.doan1.marketplace.repository.ProviderProfileRepository;
+import com.doan1.marketplace.dto.response.InternalProviderResponse;
+import com.doan1.marketplace.service.MarketplaceService;
 
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Value;
@@ -22,13 +20,13 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/internal/providers")
 public class InternalProviderController {
-    private final ProviderProfileRepository providers;
+    private final MarketplaceService marketplace;
     private final byte[] serviceApiKey;
 
     public InternalProviderController(
-            ProviderProfileRepository providers,
+            MarketplaceService marketplace,
             @Value("${service.api-key:}") String serviceApiKey) {
-        this.providers = providers;
+        this.marketplace = marketplace;
         this.serviceApiKey = serviceApiKey.getBytes(StandardCharsets.UTF_8);
     }
 
@@ -45,10 +43,6 @@ public class InternalProviderController {
                 serviceApiKey, providedKey.getBytes(StandardCharsets.UTF_8))) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid internal API key.");
         }
-        ProviderProfile profile = providers.findById(providerId)
-                .filter(candidate -> candidate.getStatus() == ProviderStatus.APPROVED)
-                .filter(candidate -> candidate.getCategoryIds().contains(categoryId))
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Provider is not approved for this category."));
-        return InternalProviderResponse.from(profile);
+        return marketplace.internalProvider(providerId, categoryId);
     }
 }

@@ -1,5 +1,7 @@
 # MASTER PROMPT: XÂY DỰNG HỆ THỐNG DỊCH VỤ ĐẶT LỊCH DỌN DẸP VÀ SỬA CHỮA THEO KIẾN TRÚC MICROSERVICES
 
+> Đây là master prompt và mô tả phạm vi khởi đầu, không phải cây thư mục/runtime inventory. Cấu trúc source hiện tại được ghi tại [docs/PROJECT_STRUCTURE.md](docs/PROJECT_STRUCTURE.md); trạng thái triển khai có bằng chứng được ghi tại [docs/DEVELOPMENT_STATUS.md](docs/DEVELOPMENT_STATUS.md). Các ví dụ cấu trúc và danh sách chức năng trong tài liệu này không mặc nhiên đã được triển khai.
+
 ## 1. VAI TRÒ CỦA BẠN
 
 Bạn là một Senior Software Architect, Senior Backend Developer và Senior Frontend Developer có kinh nghiệm thực tế trong việc thiết kế, xây dựng và triển khai các hệ thống Web Application sử dụng kiến trúc Microservices.
@@ -391,7 +393,7 @@ Nếu cần phối hợp nhiều service, phân tích việc sử dụng Saga Pa
 
 Mỗi Microservice phải là một Spring Boot Application độc lập.
 
-Cấu trúc tiêu chuẩn:
+Cấu trúc tham khảo (không phải cây thư mục hiện tại của repository):
 
 service-name/
 │

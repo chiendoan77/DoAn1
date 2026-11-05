@@ -1,6 +1,6 @@
 # Requirements — Marketplace
 
-> Trạng thái: provider profile/onboarding/approval, public provider browse, service offering CRUD/re-approval and public offering browse, cùng review đã triển khai. Offering-to-booking integration và một số policy vẫn chưa có.
+> Trạng thái source hiện tại: provider profile/onboarding/approval, public provider browse và review đã triển khai một phần. Provider offerings/gói dịch vụ và giá là yêu cầu đã được xác nhận, nhưng chưa có model, API, database hay UI trong source hiện tại.
 
 ## 1. Giới thiệu
 
@@ -8,18 +8,19 @@ Marketplace quản lý nội dung dịch vụ và thông tin provider để khá
 
 ## 2. Mục tiêu và phạm vi
 
-Marketplace service sở hữu hồ sơ provider, danh mục/offerings, giá/khu vực nếu được chốt và public queries.
+Marketplace service sở hữu hồ sơ provider, danh mục và public queries. Offerings/giá là phạm vi nghiệp vụ đã chọn; chưa có schema/API implementation.
 
 ## 3. Trách nhiệm nghiệp vụ
 
-- Sở hữu ProviderProfile, danh mục và offerings.
+- Hiện sở hữu `ProviderProfile`, category code cố định và `ProviderReview`.
+- Theo yêu cầu đã chọn, Marketplace sẽ sở hữu offering, giá và trạng thái moderation khi feature được triển khai.
 - Quản lý trạng thái xét duyệt provider.
 - Cung cấp dữ liệu public cho tìm kiếm/chi tiết dịch vụ.
 - Admin thực hiện moderation trên dữ liệu Marketplace qua API domain này.
 
 ## 4. Chức năng thuộc phạm vi
 
-Đã triển khai duyệt provider, xem/gửi/cập nhật profile, provider-managed offerings (tạo, sửa giá/nội dung, archive), public offering browse và Admin approval. Mỗi cập nhật profile chỉ áp dụng hồ sơ gắn với account trong JWT và đưa về `PENDING`; tạo/sửa offering cũng cần Admin duyệt. Offering archived bị ẩn khỏi khách mới nhưng được giữ trong database. Catalog CRUD của Admin vẫn chưa triển khai.
+Đã triển khai duyệt provider, xem/gửi/cập nhật profile và public provider browse. Mỗi cập nhật profile chỉ áp dụng hồ sơ gắn với account trong JWT và đưa về `PENDING`. Chưa triển khai provider-managed offerings, giá, archive offering, public offering browse hoặc Admin approval cho offering.
 
 ## 5. Chức năng ngoài phạm vi
 
@@ -31,10 +32,9 @@ Khách hàng (đọc public), nhà cung cấp (quản lý dữ liệu của mìn
 
 ## 7. Functional Requirements
 
-- `MARKET-FR-001` (Đã xác nhận): khách hàng liệt kê/tìm kiếm dịch vụ hiển thị công khai.
-- `MARKET-FR-002` (Đã xác nhận): khách hàng xem chi tiết offering/provider và giá được cấu hình.
-- `MARKET-FR-003` (Đã xác nhận): provider tạo/cập nhật hồ sơ và offerings thuộc quyền sở hữu.
-- `MARKET-FR-004` (Đã xác nhận): Admin duyệt provider và quản lý danh mục theo quyền.
+- `MARKET-FR-001` (Đã xác nhận): khách hàng duyệt/tìm dịch vụ, xem giá và provider. Hiện mới có categories và provider list/detail, chưa có offering/giá hoặc tìm kiếm nâng cao.
+- `MARKET-FR-002` (Đã xác nhận): provider khai báo hồ sơ và dịch vụ/gói thuộc quyền sở hữu. Profile có; offering chưa có.
+- `MARKET-FR-003` (Đã xác nhận): Admin quản lý/duyệt provider và catalog theo quyền. Provider approval có; catalog CRUD chưa có.
 
 ## 8. Non-functional Requirements
 
@@ -42,13 +42,12 @@ API public chỉ trả dữ liệu được phép hiển thị; dữ liệu đ�
 
 ## 9. Business Rules
 
-- Chỉ provider đủ điều kiện theo policy được xuất bản offering.
-- Provider chỉ sửa hồ sơ/offerings do mình sở hữu.
-- Booking chỉ tham chiếu offering hợp lệ; booking domain xác thực qua API/DTO.
+- Các rule offering dưới đây là quyết định nghiệp vụ đã chọn, nhưng chưa có API/model thực thi.
+- Provider chỉ được thay đổi profile/offerings thuộc quyền sở hữu.
 - Create/update offering và thay đổi giá phải chờ Admin duyệt lại.
-- Provider phone được provider cung cấp cho mỗi gói và hiển thị công khai khi gói được duyệt.
-- Xóa offering là archive, giữ dữ liệu; không xóa cứng.
-- Giá hiện là số tiền cố định theo VND; tax/fees và booking price snapshot chưa được xác nhận/triển khai.
+- Giá gói là số tiền cố định theo VND; provider cung cấp số điện thoại theo gói, hiển thị công khai sau khi duyệt.
+- Xóa offering là archive để giữ dữ liệu, không hard-delete.
+- Chưa có quyết định xác nhận rằng booking phải bắt đầu từ một offering hay lưu price snapshot; không tích hợp hai domain trước khi chốt scope.
 
 ## 10. Use Cases
 
@@ -59,13 +58,13 @@ API public chỉ trả dữ liệu được phép hiển thị; dữ liệu đ�
 
 ## 11. Input / Output
 
-Input offering: `{categoryId, name, description, price, providerPhone}`; provider ownership lấy từ JWT, không nhận provider ID từ client. Output gồm provider profile ID/tên, số điện thoại công khai theo gói, nội dung, giá VND, trạng thái và timestamps. Public browse trả gói `APPROVED` của provider `APPROVED`, giới hạn tối đa 50 mỗi request.
+Payload dự kiến đã trao đổi cho offering: `{categoryId, name, description, price, providerPhone}`; provider ownership phải lấy từ JWT, không nhận provider ID từ client. Đây là yêu cầu thiết kế, chưa phải API contract đang chạy.
 
 ## 12. API endpoints
 
-Các endpoint hiện triển khai: `GET /api/services/categories`, provider listing/detail, `GET /api/services/{categoryId}/offerings`, provider application/profile, `GET`/`POST /api/provider/services`, `PUT`/`DELETE /api/provider/services/{offeringId}`, Admin pending/approval provider/offerings, `POST /api/reviews` và `GET /api/reviews/mine`. Xem [API.md](./API.md) để biết DTO. Public API qua Gateway; Booking-only lookup dùng endpoint nội bộ.
+Các endpoint hiện triển khai: `GET /api/services/categories`, provider listing/detail, provider application/profile, Admin provider pending/approval, `POST /api/reviews`, `GET /api/reviews/mine` và API nội bộ phục vụ Booking. Chưa có endpoint offering; xem [API.md](./API.md) để biết contract hiện hành.
 
-## 13. Request / Response mẫu
+## 13. Payload offering dự kiến (chưa phải API contract)
 
 Request tạo/sửa offering:
 
@@ -79,7 +78,7 @@ Request tạo/sửa offering:
 }
 ```
 
-Response là `ServiceOfferingResponse`, có `id`, `providerProfileId`, `providerName`, `providerPhone`, category, name, description, `price`, `currency` (`VND`), `status`, `createdAt`, `updatedAt`. Provider được suy ra từ tài khoản trong JWT.
+Request/response DTO và endpoint chưa được triển khai. Khi thiết kế API, cần bảo đảm provider được suy ra từ JWT và mọi create/update đều chờ Admin duyệt theo quyết định nghiệp vụ.
 
 ## 14. Xác thực và phân quyền
 
@@ -87,15 +86,15 @@ Public browse/detail chỉ trả dữ liệu public. Provider endpoints yêu c�
 
 ## 15. Dữ liệu service sở hữu
 
-Provider profile/business profile, service category, offering, price/area (nếu xác nhận), approval state và timestamps. Credential không thuộc service này.
+Hiện tại: provider profile, category code, review và rating. Theo phạm vi đã chọn: offering, giá, trạng thái approval và timestamps thuộc Marketplace khi được triển khai. Credential không thuộc service này.
 
 ## 16. Database schema dự kiến
 
-Entity đã triển khai: `ProviderProfile`, `ServiceOffering` (provider profile, category, name, description, VND price, public contact phone, status/timestamps), `ProviderReview`. Offering states: `PENDING`, `APPROVED`, `REJECTED`, `ARCHIVED`; archive thay cho hard-delete. Booking chưa lưu offering ID hoặc price snapshot.
+Entity hiện có: `ProviderProfile`, `ProviderReview`. Chưa có `ServiceOffering` entity/table. Các trạng thái offering và fields cụ thể cần được triển khai theo quyết định nghiệp vụ, không được xem là schema đang chạy. Chưa có quyết định về việc Booking tham chiếu offering hoặc lưu price snapshot.
 
 ## 17. Quan hệ với service khác
 
-Provider gắn với Identity account ID; Booking tham chiếu provider/offering ID. Không dùng foreign key xuyên database và không để Booking ghi Marketplace data.
+Provider gắn với Identity account ID; Booking hiện tham chiếu provider/category. Có cần cho Booking tham chiếu offering hay không vẫn cần xác nhận. Không dùng foreign key xuyên database và không để Booking ghi Marketplace data.
 
 ## 18. Cách giao tiếp
 
@@ -128,4 +127,4 @@ Provider onboarding/verification; category hierarchy; tax/fees; service area; av
 
 ## 24. Trạng thái triển khai
 
-Đã triển khai: danh mục cố định, provider application/profile/update với re-approval, offering create/update/archive, public offering list, Admin offering approval, Admin provider approval, public provider list/detail, Marketplace reviews/aggregate rating, API nội bộ phục vụ Booking, persistence và tests. Chưa triển khai: gắn offering/price snapshot vào booking, catalog CRUD, tìm kiếm nâng cao, upload ảnh, audit history và migration scripts.
+Đã triển khai: danh mục cố định, provider application/profile/update với re-approval, Admin provider approval, public provider list/detail, Marketplace reviews/aggregate rating, API nội bộ phục vụ Booking, persistence và tests. Chưa triển khai: offering create/update/archive, offering public list/Admin approval, catalog CRUD, tìm kiếm nâng cao, upload ảnh, audit history và migration scripts. Việc Booking tham chiếu offering/price snapshot chưa được xác nhận.

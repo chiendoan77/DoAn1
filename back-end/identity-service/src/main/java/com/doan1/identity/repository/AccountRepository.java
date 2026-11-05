@@ -1,6 +1,6 @@
 package com.doan1.identity.repository;
 
-import com.doan1.identity.model.Account;
+import com.doan1.identity.entity.Account;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 

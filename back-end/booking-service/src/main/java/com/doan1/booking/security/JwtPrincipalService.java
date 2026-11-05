@@ -1,6 +1,6 @@
 package com.doan1.booking.security;
 
-import com.doan1.booking.model.Booking;
+import com.doan1.booking.entity.Booking;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;

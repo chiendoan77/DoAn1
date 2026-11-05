@@ -1,6 +1,6 @@
 package com.doan1.booking;
 
-import com.doan1.booking.model.Booking;
+import com.doan1.booking.entity.Booking;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

@@ -1,9 +1,7 @@
 package com.doan1.booking.controller;
 
-import com.doan1.booking.dto.ReviewEligibilityResponse;
-import com.doan1.booking.model.Booking;
-import com.doan1.booking.model.BookingStatus;
-import com.doan1.booking.repository.BookingRepository;
+import com.doan1.booking.dto.response.ReviewEligibilityResponse;
+import com.doan1.booking.service.BookingService;
 
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Value;
@@ -22,11 +20,11 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/internal/bookings")
 public class InternalReviewEligibilityController {
-    private final BookingRepository bookings;
+    private final BookingService bookings;
     private final byte[] serviceApiKey;
 
     public InternalReviewEligibilityController(
-            BookingRepository bookings,
+            BookingService bookings,
             @Value("${service.api-key:}") String serviceApiKey) {
         this.bookings = bookings;
         this.serviceApiKey = serviceApiKey.getBytes(StandardCharsets.UTF_8);
@@ -47,17 +45,6 @@ public class InternalReviewEligibilityController {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid internal API key.");
         }
 
-        Booking booking = bookings.findById(bookingId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Booking not found."));
-        if (booking.getStatus() != BookingStatus.COMPLETED) {
-            return new ReviewEligibilityResponse(false, null, null);
-        }
-        if ("CUSTOMER".equals(reviewerRole) && booking.getCustomerAccountId().equals(reviewerAccountId)) {
-            return new ReviewEligibilityResponse(true, booking.getProviderProfileId(), "PROVIDER");
-        }
-        if ("PROVIDER".equals(reviewerRole) && booking.getProviderAccountId().equals(reviewerAccountId)) {
-            return new ReviewEligibilityResponse(true, booking.getCustomerAccountId(), "CUSTOMER");
-        }
-        return new ReviewEligibilityResponse(false, null, null);
+        return bookings.reviewEligibility(bookingId, reviewerAccountId, reviewerRole);
     }
 }

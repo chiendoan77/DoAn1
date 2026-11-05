@@ -1,9 +1,9 @@
 package com.doan1.booking;
 
 import com.doan1.booking.client.MarketplaceClient;
-import com.doan1.booking.dto.MarketplaceCategoryResponse;
-import com.doan1.booking.dto.ProviderDetailsResponse;
-import com.doan1.booking.model.Booking;
+import com.doan1.booking.dto.response.MarketplaceCategoryResponse;
+import com.doan1.booking.dto.response.ProviderDetailsResponse;
+import com.doan1.booking.entity.Booking;
 import com.doan1.booking.repository.BookingRepository;
 
 import io.jsonwebtoken.Jwts;

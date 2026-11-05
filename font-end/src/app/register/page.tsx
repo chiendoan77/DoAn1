@@ -1,4 +1,4 @@
-import { AuthForm } from "@/components/auth-form";
+import { AuthForm } from "@/features/auth/auth-form";
 import { Suspense } from "react";
 
 type Props = {

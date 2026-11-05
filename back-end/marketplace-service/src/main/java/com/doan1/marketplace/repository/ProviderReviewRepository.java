@@ -1,6 +1,6 @@
 package com.doan1.marketplace.repository;
 
-import com.doan1.marketplace.model.ProviderReview;
+import com.doan1.marketplace.entity.ProviderReview;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;

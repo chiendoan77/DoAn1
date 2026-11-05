@@ -10,4 +10,4 @@ Slot conflict, quota booking lặp, Admin booking operations, hủy/đổi, paym
 
 ## Java package layout
 
-`src/main/java/com/doan1/booking` separates `controller`, `dto`, `model`, `repository`, `client` and `security`; the Spring Boot entry point stays in the root package. Tests are isolated in `src/test/java/com/doan1/booking`.
+`src/main/java/com/doan1/booking` separates `controller`, request/response DTOs, `entity`, `enums`, `mapper`, `service`, `repository`, internal clients and security. Tests are isolated in `src/test/java/com/doan1/booking`.

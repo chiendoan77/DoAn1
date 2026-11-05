@@ -4,6 +4,7 @@ Tài liệu ghi nhận yêu cầu đã xác nhận, quyết định kiến trúc
 
 ## Tài liệu chính
 
+- [PROJECT_STRUCTURE.md](./PROJECT_STRUCTURE.md): cây thư mục và phân cấp source code đang có trong repository.
 - [PROJECT_OVERVIEW.md](./PROJECT_OVERVIEW.md): mục tiêu và hiện trạng repository.
 - [REQUIREMENTS.md](./REQUIREMENTS.md): yêu cầu tổng hợp và trạng thái xác nhận.
 - [ARCHITECTURE.md](./ARCHITECTURE.md): kiến trúc bốn service đã chọn.

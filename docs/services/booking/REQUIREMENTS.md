@@ -1,6 +1,6 @@
 # Requirements — Booking
 
-> Ranh giới/core rules đã được người dùng chọn. Booking CRUD cơ bản, participant history, state transitions và API eligibility review đã triển khai; các policy còn mở không được suy diễn.
+> Ranh giới/core rules đã được người dùng chọn. Booking CRUD cơ bản, participant history, state transitions và API eligibility review đã triển khai; các policy còn mở không được suy diễn. Chưa có quyết định yêu cầu Booking tham chiếu offering hoặc lưu price snapshot.
 
 ## 1. Giới thiệu
 
@@ -31,7 +31,7 @@ Khách hàng, provider được phân công, Admin; Marketplace/Identity/Payment
 
 ## 7. Functional Requirements
 
-- `BOOK-FR-001` (Đã xác nhận): khách hàng tạo booking với offering, ngày/khung giờ, địa chỉ và mô tả.
+- `BOOK-FR-001` (Đã xác nhận): khách hàng tạo booking với provider, ngày/khung giờ, địa chỉ và mô tả.
 - `BOOK-FR-002` (Đã xác nhận): provider xử lý booking được phân công qua state transition hợp lệ.
 - `BOOK-FR-003` (Đã xác nhận): khách/provider xem booking thuộc phạm vi quyền; Admin tra cứu/xử lý.
 - `BOOK-FR-004` (Đã xác nhận): chỉ slot overlap mới gây provider schedule conflict.
@@ -45,7 +45,7 @@ Không nhận status tùy ý từ client; validate request; tránh lộ booking/
 
 ## 9. Business Rules
 
-- Booking phải tham chiếu offering/provider hợp lệ, kiểm tra qua Marketplace API/DTO.
+- Booking hiện xác minh provider/category qua Marketplace API/DTO. Quan hệ tới offering chưa được chốt.
 - Provider chỉ bận ở các interval bị overlap; booking interval/timezone/boundaries cần chốt.
 - Tối đa hai booking “đang mở” cùng category/customer; định nghĩa open state/terminal state cần chốt.
 - Lần hai báo khách và đưa Admin xem complaint context của booking trước; lần ba bị từ chối nếu quota còn đủ điều kiện đếm.
@@ -62,7 +62,7 @@ Không nhận status tùy ý từ client; validate request; tránh lộ booking/
 
 ## 11. Input / Output
 
-Tạo booking nhận providerId, categoryId, scheduledAt, address và description. Response gồm booking ID, snapshot category/provider, thời gian/địa chỉ/mô tả và status. Warning/review-required result cho booking lặp chưa được triển khai.
+API hiện tại nhận providerId, categoryId, scheduledAt, address và description. Response gồm booking ID, snapshot category/provider, thời gian/địa chỉ/mô tả và status. Có cần bổ sung offering ID/price snapshot hay không chưa được xác nhận. Warning/review-required result cho booking lặp chưa được triển khai.
 
 ## 12. API endpoints dự kiến
 
@@ -90,7 +90,7 @@ Entity hiện tại: `Booking` trong bảng `bookings`. `BookingStatusHistory`/`
 
 ## 17. Quan hệ với service khác
 
-Identity cung cấp claims; Marketplace xác thực provider/offering/category; Payment sở hữu payment state. Không có FK/join trực tiếp sang DB khác.
+Identity cung cấp claims; Marketplace xác thực provider/category. Offering verification và Payment integration chưa có implementation. Không có FK/join trực tiếp sang DB khác.
 
 ## 18. Cách giao tiếp
 

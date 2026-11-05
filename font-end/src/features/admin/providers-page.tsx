@@ -4,7 +4,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Account, Provider, apiRequest } from "@/lib/api";
-import { SiteHeader } from "@/components/site-header";
+import { SiteHeader } from "@/shared/components/site-header";
 
 export function AdminProvidersPage() {
   const router = useRouter();

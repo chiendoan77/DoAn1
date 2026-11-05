@@ -4,7 +4,7 @@
 import Link from "next/link";
 import { FormEvent, useEffect, useState } from "react";
 import { Booking, Provider, ServiceCategory, apiRequest } from "@/lib/api";
-import { SiteHeader } from "@/components/site-header";
+import { SiteHeader } from "@/shared/components/site-header";
 
 function localDateTimeMinimum() {
   const date = new Date(Date.now() + 60 * 60 * 1000);

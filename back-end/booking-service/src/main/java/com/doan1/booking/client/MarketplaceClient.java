@@ -1,7 +1,7 @@
 package com.doan1.booking.client;
 
-import com.doan1.booking.dto.ProviderDetailsResponse;
-import com.doan1.booking.model.Booking;
+import com.doan1.booking.dto.response.ProviderDetailsResponse;
+import com.doan1.booking.entity.Booking;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;

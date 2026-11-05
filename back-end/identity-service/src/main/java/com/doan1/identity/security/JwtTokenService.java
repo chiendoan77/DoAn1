@@ -1,7 +1,7 @@
 package com.doan1.identity.security;
 
-import com.doan1.identity.model.Account;
-import com.doan1.identity.model.Role;
+import com.doan1.identity.entity.Account;
+import com.doan1.identity.enums.Role;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;

@@ -1,10 +1,11 @@
 package com.doan1.marketplace.controller;
 
 import com.doan1.marketplace.client.BookingReviewEligibilityClient;
-import com.doan1.marketplace.dto.CreateReviewRequest;
-import com.doan1.marketplace.dto.ReviewEligibility;
-import com.doan1.marketplace.dto.ReviewResponse;
-import com.doan1.marketplace.model.ProviderReview;
+import com.doan1.marketplace.dto.request.CreateReviewRequest;
+import com.doan1.marketplace.dto.response.ReviewEligibility;
+import com.doan1.marketplace.dto.response.ReviewResponse;
+import com.doan1.marketplace.entity.ProviderReview;
+import com.doan1.marketplace.mapper.MarketplaceMapper;
 import com.doan1.marketplace.repository.ProviderReviewRepository;
 import com.doan1.marketplace.security.JwtPrincipalService;
 import com.doan1.marketplace.service.ProviderReviewService;
@@ -55,14 +56,14 @@ public class ProviderReviewController {
                 eligibility,
                 input.rating(),
                 input.comment());
-        return ReviewResponse.from(review);
+        return MarketplaceMapper.toResponse(review);
     }
 
     @GetMapping("/mine")
     public List<ReviewResponse> mine(HttpServletRequest request) {
         JwtPrincipalService.Principal reviewer = principals.authenticate(request);
         return reviews.findByReviewerAccountIdOrderByCreatedAtDesc(reviewer.accountId())
-                .stream().map(ReviewResponse::from).toList();
+                .stream().map(MarketplaceMapper::toResponse).toList();
     }
 
 }

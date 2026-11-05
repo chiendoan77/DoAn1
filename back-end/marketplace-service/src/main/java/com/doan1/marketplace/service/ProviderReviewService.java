@@ -1,9 +1,9 @@
 package com.doan1.marketplace.service;
 
-import com.doan1.marketplace.dto.ReviewEligibility;
-import com.doan1.marketplace.model.ProviderProfile;
-import com.doan1.marketplace.model.ProviderReview;
-import com.doan1.marketplace.model.ProviderStatus;
+import com.doan1.marketplace.dto.response.ReviewEligibility;
+import com.doan1.marketplace.entity.ProviderProfile;
+import com.doan1.marketplace.entity.ProviderReview;
+import com.doan1.marketplace.enums.ProviderStatus;
 import com.doan1.marketplace.repository.ProviderProfileRepository;
 import com.doan1.marketplace.repository.ProviderReviewRepository;
 

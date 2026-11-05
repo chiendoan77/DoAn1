@@ -1,6 +1,6 @@
 package com.doan1.marketplace.client;
 
-import com.doan1.marketplace.dto.ReviewEligibility;
+import com.doan1.marketplace.dto.response.ReviewEligibility;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
