@@ -1,0 +1,3 @@
+com\doan1\gateway\ApiGatewayApplication.class
+com\doan1\gateway\config\GatewayCorsConfiguration.class
+com\doan1\gateway\config\GatewayRoutes.class

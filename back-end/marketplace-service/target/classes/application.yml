@@ -1,0 +1,42 @@
+server:
+  port: ${SERVER_PORT:8082}
+
+spring:
+  application:
+    name: marketplace-service
+  datasource:
+    url: ${MARKETPLACE_DB_URL:jdbc:mysql://localhost:3306/doan1_marketplace?serverTimezone=UTC}
+    username: ${DB_USERNAME:root}
+    password: ${DB_PASSWORD}
+  jpa:
+    hibernate:
+      ddl-auto: update
+    open-in-view: false
+
+security:
+  jwt:
+    secret: ${JWT_SECRET}
+
+service:
+  api-key: ${SERVICE_API_KEY:}
+
+services:
+  booking:
+    url: ${BOOKING_SERVICE_URL:http://localhost:8083}
+
+app:
+  seed-demo-providers: ${SEED_DEMO_PROVIDERS:true}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      probes:
+        enabled: true
+
+info:
+  app:
+    name: marketplace-service

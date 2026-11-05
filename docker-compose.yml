@@ -1,0 +1,181 @@
+services:
+  mysql:
+    image: mysql:8.0
+    environment:
+      MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
+      MYSQL_ROOT_HOST: "%"
+    volumes:
+      - mysql-data:/var/lib/mysql
+      - ./docker/mysql/init/001-create-schemas.sql:/docker-entrypoint-initdb.d/001-create-schemas.sql:ro
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "--host=127.0.0.1", "--user=root", "--silent"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+      start_period: 30s
+    networks:
+      - backend
+
+  identity-service:
+    build:
+      context: ./back-end
+      args:
+        SERVICE_MODULE: identity-service
+    environment:
+      SERVER_PORT: "8081"
+      IDENTITY_DB_URL: jdbc:mysql://mysql:3306/doan1_identity?serverTimezone=UTC
+      DB_USERNAME: root
+      DB_PASSWORD: ""
+      JWT_SECRET: ${JWT_SECRET:-doan1-local-only-jwt-secret-not-for-production-2026}
+      BOOTSTRAP_ADMIN_ENABLED: ${BOOTSTRAP_ADMIN_ENABLED:-false}
+      BOOTSTRAP_ADMIN_EMAIL: ${BOOTSTRAP_ADMIN_EMAIL:-}
+      BOOTSTRAP_ADMIN_PHONE: ${BOOTSTRAP_ADMIN_PHONE:-}
+      BOOTSTRAP_ADMIN_USERNAME: ${BOOTSTRAP_ADMIN_USERNAME:-}
+      BOOTSTRAP_ADMIN_PASSWORD: ${BOOTSTRAP_ADMIN_PASSWORD:-}
+      BOOTSTRAP_ADMIN_FULL_NAME: ${BOOTSTRAP_ADMIN_FULL_NAME:-Quản trị Nhà Tốt}
+    ports:
+      - "127.0.0.1:${IDENTITY_PORT:-8081}:8081"
+    depends_on:
+      mysql:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O /dev/null http://127.0.0.1:8081/actuator/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+      start_period: 60s
+    networks:
+      - backend
+
+  marketplace-service:
+    build:
+      context: ./back-end
+      args:
+        SERVICE_MODULE: marketplace-service
+    environment:
+      SERVER_PORT: "8082"
+      MARKETPLACE_DB_URL: jdbc:mysql://mysql:3306/doan1_marketplace?serverTimezone=UTC
+      DB_USERNAME: root
+      DB_PASSWORD: ""
+      JWT_SECRET: ${JWT_SECRET:-doan1-local-only-jwt-secret-not-for-production-2026}
+      SERVICE_API_KEY: ${SERVICE_API_KEY:-doan1-local-only-service-api-key-not-for-production}
+      BOOKING_SERVICE_URL: http://booking-service:8083
+      SEED_DEMO_PROVIDERS: "true"
+    ports:
+      - "127.0.0.1:${MARKETPLACE_PORT:-8082}:8082"
+    depends_on:
+      mysql:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O /dev/null http://127.0.0.1:8082/actuator/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+      start_period: 60s
+    networks:
+      - backend
+
+  booking-service:
+    build:
+      context: ./back-end
+      args:
+        SERVICE_MODULE: booking-service
+    environment:
+      SERVER_PORT: "8083"
+      BOOKING_DB_URL: jdbc:mysql://mysql:3306/doan1_booking?serverTimezone=UTC
+      DB_USERNAME: root
+      DB_PASSWORD: ""
+      JWT_SECRET: ${JWT_SECRET:-doan1-local-only-jwt-secret-not-for-production-2026}
+      SERVICE_API_KEY: ${SERVICE_API_KEY:-doan1-local-only-service-api-key-not-for-production}
+      MARKETPLACE_SERVICE_URL: http://marketplace-service:8082
+    ports:
+      - "127.0.0.1:${BOOKING_PORT:-8083}:8083"
+    depends_on:
+      mysql:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O /dev/null http://127.0.0.1:8083/actuator/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+      start_period: 60s
+    networks:
+      - backend
+
+  payment-service:
+    build:
+      context: ./back-end
+      args:
+        SERVICE_MODULE: payment-service
+    environment:
+      SERVER_PORT: "8084"
+    ports:
+      - "127.0.0.1:${PAYMENT_PORT:-8084}:8084"
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O /dev/null http://127.0.0.1:8084/actuator/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+      start_period: 60s
+    networks:
+      - backend
+
+  api-gateway:
+    build:
+      context: ./back-end
+      args:
+        SERVICE_MODULE: api-gateway
+    environment:
+      SERVER_PORT: "8080"
+      IDENTITY_SERVICE_URL: http://identity-service:8081
+      MARKETPLACE_SERVICE_URL: http://marketplace-service:8082
+      BOOKING_SERVICE_URL: http://booking-service:8083
+      PAYMENT_SERVICE_URL: http://payment-service:8084
+    ports:
+      - "127.0.0.1:${GATEWAY_PORT:-8080}:8080"
+    depends_on:
+      identity-service:
+        condition: service_healthy
+      marketplace-service:
+        condition: service_healthy
+      booking-service:
+        condition: service_healthy
+      payment-service:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O /dev/null http://127.0.0.1:8080/actuator/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+      start_period: 60s
+    networks:
+      - backend
+
+  frontend:
+    build:
+      context: ./font-end
+    environment:
+      API_GATEWAY_URL: http://api-gateway:8080
+    ports:
+      - "127.0.0.1:${FRONTEND_PORT:-3000}:3000"
+    depends_on:
+      api-gateway:
+        condition: service_healthy
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - -e
+        - "fetch('http://127.0.0.1:3000').then(response => process.exit(response.ok ? 0 : 1)).catch(() => process.exit(1))"
+      interval: 10s
+      timeout: 5s
+      retries: 20
+      start_period: 60s
+    networks:
+      - backend
+
+volumes:
+  mysql-data:
+
+networks:
+  backend:

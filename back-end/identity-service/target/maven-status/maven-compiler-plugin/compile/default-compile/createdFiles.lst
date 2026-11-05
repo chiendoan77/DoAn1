@@ -1,0 +1,13 @@
+com\doan1\identity\model\Account.class
+com\doan1\identity\config\AdminBootstrapConfiguration.class
+com\doan1\identity\security\JwtTokenService.class
+com\doan1\identity\controller\AuthController.class
+com\doan1\identity\security\JwtTokenService$Principal.class
+com\doan1\identity\exception\IdentityExceptionHandler.class
+com\doan1\identity\repository\AccountRepository.class
+com\doan1\identity\model\Role.class
+com\doan1\identity\dto\LoginResponse.class
+com\doan1\identity\IdentityServiceApplication.class
+com\doan1\identity\dto\AccountResponse.class
+com\doan1\identity\dto\LoginRequest.class
+com\doan1\identity\dto\RegisterRequest.class
