@@ -25,4 +25,4 @@ Public API qua Gateway; provider/Admin routes yêu cầu JWT đúng role. Packag
 
 `price` là VND nguyên số, `providerPhone` bắt buộc. Stale `expectedVersion` trả conflict. Category IDs là string codes, không phải UUID.
 
-Internal package lookup uses the dedicated `BOOKING_CATALOG_API_KEY`; Booking uses this contract when creating a booking and stores package/price snapshots.
+Internal package lookup uses `CATALOG_BOOKING_API_KEY`, which must match Booking's `BOOKING_CATALOG_API_KEY`; Booking uses this contract when creating a booking and stores package/price snapshots.

@@ -159,7 +159,7 @@ services:
       JWT_PUBLIC_KEY_BASE64: ${JWT_PUBLIC_KEY_BASE64:-}
       PROFILE_SERVICE_URL: http://profile-service:8085
       CATALOG_PROFILE_API_KEY: ${CATALOG_PROFILE_API_KEY:-doan1-local-catalog-profile-key-change-me}
-      CATALOG_BOOKING_API_KEY: ${CATALOG_BOOKING_API_KEY:-doan1-local-catalog-booking-key-change-me}
+      CATALOG_BOOKING_API_KEY: ${CATALOG_BOOKING_API_KEY:-doan1-local-booking-catalog-key-change-me}
       RABBITMQ_HOST: rabbitmq
       RABBITMQ_PORT: "5672"
       RABBITMQ_USERNAME: ${RABBITMQ_USERNAME:-doan1}

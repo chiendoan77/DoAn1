@@ -229,42 +229,60 @@ export function ServicePage({ service }: Props) {
             <div className={styles.style40}>
               <div>
                 <p className={styles.style41}>Gửi yêu cầu</p>
-                <h2 id="booking-title" className={styles.style12}>Đặt lịch với {selectedProvider.fullName}</h2>
+                <h2 id="booking-title" className={styles.style12}>Đặt lịch dịch vụ</h2>
               </div>
               <button type="button" className={styles.style42} onClick={closeBooking} aria-label="Đóng">×</button>
             </div>
-            <p className={styles.style43}>{category.name} · {selectedProvider.address}</p>
             <form className={styles.style44} onSubmit={(event) => void submitBooking(event)}>
-              {!selectedPackage ? (
-                <label className={styles.style45}>
-                  Gói dịch vụ
-                  <select required value="" onChange={(event) => setSelectedPackage(packages.find((item) => item.id === event.target.value) ?? null)} className={styles.style46}>
-                    <option value="">Chọn gói đã được duyệt</option>
-                    {packages.filter((item) => item.providerId === selectedProvider.id).map((item) => <option key={item.id} value={item.id}>{item.name} · {new Intl.NumberFormat("vi-VN").format(item.price)} ₫</option>)}
-                  </select>
-                </label>
-              ) : (
-                <div className={styles.style47}>
-                  <p className={styles.style22}>{selectedPackage.name}</p>
-                  <p className={styles.style48}>{new Intl.NumberFormat("vi-VN").format(selectedPackage.price)} ₫ · {selectedPackage.durationMinutes} phút</p>
+              <div className={styles.style58}>
+                <img
+                  className={styles.style59}
+                  src={selectedProvider.imageUrl}
+                  alt={`Ảnh ${selectedProvider.fullName}`}
+                />
+                <div className={styles.style60}>
+                  <div className={styles.style57}>
+                    <p className={styles.style41}>Nhà cung cấp · {category.name}</p>
+                    <p className={styles.style22}>{selectedProvider.fullName}</p>
+                    <p className={styles.style48}>{selectedProvider.address}</p>
+                  </div>
+                  {!selectedPackage ? (
+                    <label className={styles.style45}>
+                      Gói dịch vụ
+                      <select required value="" onChange={(event) => setSelectedPackage(packages.find((item) => item.id === event.target.value) ?? null)} className={styles.style46}>
+                        <option value="">Chọn gói đã được duyệt</option>
+                        {packages.filter((item) => item.providerId === selectedProvider.id).map((item) => <option key={item.id} value={item.id}>{item.name} · {new Intl.NumberFormat("vi-VN").format(item.price)} ₫</option>)}
+                      </select>
+                    </label>
+                  ) : (
+                    <div className={styles.style47}>
+                      <p className={styles.style31}>Gói dịch vụ</p>
+                      <p className={styles.style22}>{selectedPackage.name}</p>
+                      <p className={styles.style48}>{selectedPackage.description}</p>
+                      <p className={styles.style34}>{new Intl.NumberFormat("vi-VN").format(selectedPackage.price)} ₫</p>
+                      <p className={styles.style48}>Thời lượng dự kiến: {selectedPackage.durationMinutes} phút</p>
+                    </div>
+                  )}
+                  <div className={styles.style56}>
+                    <label className={styles.style45}>
+                      Thời gian hẹn
+                      <input required min={localDateTimeMinimum()} type="datetime-local" value={scheduledAt} onChange={(event) => setScheduledAt(event.target.value)} className={styles.style49} />
+                    </label>
+                    <button disabled={bookingSubmitting || !selectedPackage} className={styles.style61}>
+                      {bookingSubmitting ? "Đang gửi…" : "Đặt lịch"}
+                    </button>
+                  </div>
+                  <p className={styles.style50}>Yêu cầu sẽ dùng địa chỉ mặc định trong hồ sơ của bạn.</p>
+                  {bookingError && (
+                    <div role="alert" className={styles.style51}>
+                      <p>{bookingError}</p>
+                      <button type="button" onClick={closeBooking} className={styles.style52}>Đóng để cập nhật hồ sơ ở avatar trên thanh menu</button>
+                      {" · "}
+                      <Link className={styles.style37} href="/login">Đăng nhập</Link>
+                    </div>
+                  )}
                 </div>
-              )}
-              <label className={styles.style45}>
-                Thời gian hẹn
-                <input required min={localDateTimeMinimum()} type="datetime-local" value={scheduledAt} onChange={(event) => setScheduledAt(event.target.value)} className={styles.style49} />
-              </label>
-              <p className={styles.style50}>Tên, số điện thoại và địa chỉ được lấy từ hồ sơ của bạn; yêu cầu sẽ dùng địa chỉ mặc định đã lưu.</p>
-              {bookingError && (
-                <div role="alert" className={styles.style51}>
-                  <p>{bookingError}</p>
-                  <button type="button" onClick={closeBooking} className={styles.style52}>Đóng để cập nhật hồ sơ ở avatar trên thanh menu</button>
-                  {" · "}
-                  <Link className={styles.style37} href="/login">Đăng nhập</Link>
-                </div>
-              )}
-              <button disabled={bookingSubmitting || !selectedPackage} className={styles.style53}>
-                {bookingSubmitting ? "Đang gửi…" : "Gửi yêu cầu đặt lịch"}
-              </button>
+              </div>
             </form>
           </section>
         </div>
