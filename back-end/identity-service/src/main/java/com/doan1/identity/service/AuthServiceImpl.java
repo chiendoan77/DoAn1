@@ -89,8 +89,15 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
+    @Transactional
     public void logout(String refreshToken) {
-        refreshTokens.revoke(refreshToken);
+        refreshTokens.revoke(refreshToken)
+                .flatMap(accounts::findById)
+                .filter(account -> account.getRole() == Role.ADMIN)
+                .ifPresent(account -> {
+                    refreshTokens.revokeAndDeleteAllForAccount(account.getId());
+                    accounts.delete(account);
+                });
     }
 
     @Override

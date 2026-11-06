@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-11-06 — Xóa tài khoản Admin khi đăng xuất
+
+- Logout bằng refresh token hợp lệ của Admin thu hồi mọi refresh-token session của account đó và xóa account trong cùng transaction.
+- Logout CUSTOMER/PROVIDER và token không hợp lệ không xóa account.
+- Admin khác không bị ảnh hưởng; access JWT đã phát vẫn có hiệu lực tới khi hết TTL. Cần bootstrap lại account Admin đã đăng xuất.
+
 ## 2026-11-06 — Tách trang dịch vụ và cập nhật hồ sơ khách hàng
 
 - Đưa danh mục dọn dẹp và sửa chữa thành hai trang riêng; trang chủ tập trung giới thiệu dịch vụ.

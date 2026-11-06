@@ -17,6 +17,7 @@ import java.security.SecureRandom;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Base64;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -64,10 +65,21 @@ public class RefreshTokenService {
     }
 
     @Transactional
-    public void revoke(String rawToken) {
-        if (rawToken == null || rawToken.isBlank()) return;
-        refreshTokens.findByTokenHashForUpdate(hash(rawToken))
-                .ifPresent(token -> refreshTokens.revokeActiveFamily(token.getFamilyId(), Instant.now()));
+    public Optional<UUID> revoke(String rawToken) {
+        if (rawToken == null || rawToken.isBlank()) return Optional.empty();
+        RefreshToken token = refreshTokens.findByTokenHashForUpdate(hash(rawToken)).orElse(null);
+        if (token == null) return Optional.empty();
+
+        Instant now = Instant.now();
+        boolean validSession = !token.isRevoked() && token.getExpiresAt().isAfter(now);
+        refreshTokens.revokeActiveFamily(token.getFamilyId(), now);
+        return validSession ? Optional.of(token.getAccountId()) : Optional.empty();
+    }
+
+    @Transactional
+    public void revokeAndDeleteAllForAccount(UUID accountId) {
+        refreshTokens.revokeActiveForAccount(accountId, Instant.now());
+        refreshTokens.deleteAllForAccount(accountId);
     }
 
     private IssuedToken create(UUID accountId, UUID familyId) {

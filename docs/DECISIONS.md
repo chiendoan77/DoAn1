@@ -89,3 +89,10 @@
 - **Trạng thái:** Booking/package đã triển khai; Payment lifecycle/saga hoãn theo yêu cầu.
 - **Quyết định:** Booking nhận `packageId`, kiểm tra gói APPROVED và provider qua Catalog/Profile, rồi lưu snapshot tên, giá và thời lượng. Booking completion và review submission dùng outbox; không có giao dịch database xuyên service.
 - **Ngoài phạm vi hiện tại:** Payment lifecycle/webhooks/refunds/idempotency, `PaymentSucceeded` và saga đặt lịch-thanh toán-xác nhận.
+
+## DEC-016 — Logout xóa mọi tài khoản Admin
+
+- **Trạng thái:** Đã xác nhận và triển khai.
+- **Quyết định:** Logout bằng refresh token còn hiệu lực của tài khoản `ADMIN` sẽ thu hồi/xóa toàn bộ refresh-token sessions của chính account đó, sau đó xóa account trong cùng transaction. Logout bằng token không hợp lệ không xóa account; logout CUSTOMER/PROVIDER chỉ thu hồi family hiện tại như trước.
+- **Hệ quả:** Admin nào đăng xuất thì account đó bị xóa; Admin khác không bị ảnh hưởng và chỉ bị xóa khi chính họ đăng xuất. Cần bootstrap lại account đã bị xóa. Access JWT đã phát chưa bị denylist và còn hiệu lực tới hết TTL; account deletion không thu hồi tức thời access JWT ở các service chỉ xác minh chữ ký/claims.
+- **Lý do:** Theo yêu cầu xóa tài khoản Admin sau logout. Hành vi này cố ý áp dụng cho tất cả Admin, không chỉ tài khoản bootstrap.

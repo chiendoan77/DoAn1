@@ -2,6 +2,8 @@ package com.doan1.identity;
 
 import com.doan1.identity.repository.AccountRepository;
 import com.doan1.identity.repository.AccountStatusHistoryRepository;
+import com.doan1.identity.entity.Account;
+import com.doan1.identity.enums.Role;
 import com.doan1.security.test.JwtTestKeys;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,6 +13,8 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.UUID;
+import java.util.Base64;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 
@@ -232,6 +236,86 @@ class IdentityServiceApplicationTests {
         mockMvc.perform(post("/api/auth/refresh")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"refreshToken\":\"" + rotatedRefresh + "\"}"))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void logoutDeletesAdminAndInvalidatesAllOfTheirRefreshSessions() throws Exception {
+        String identity = UUID.randomUUID().toString().replace("-", "").substring(0, 12);
+        String email = "admin-" + identity + "@example.com";
+        String password = "StrongPass123";
+        accounts.save(new Account(email, "+8490" + identity.substring(0, 7), "admin_" + identity,
+                "Admin", new BCryptPasswordEncoder().encode(password), Role.ADMIN));
+        String otherAdminIdentity = UUID.randomUUID().toString().replace("-", "").substring(0, 12);
+        Account otherAdmin = accounts.save(new Account("other-admin-" + otherAdminIdentity + "@example.com",
+                "+8490" + otherAdminIdentity.substring(0, 7), "admin_" + otherAdminIdentity,
+                "Other Admin", "unused-hash", Role.ADMIN));
+
+        String firstLogin = mockMvc.perform(post("/api/auth/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"identifier\":\"" + email + "\",\"password\":\"" + password + "\"}"))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+        String firstRefresh = firstLogin.replaceAll("(?s).*\"refreshToken\":\"([^\"]+)\".*", "$1");
+        String secondLogin = mockMvc.perform(post("/api/auth/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"identifier\":\"" + email + "\",\"password\":\"" + password + "\"}"))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+        String secondRefresh = secondLogin.replaceAll("(?s).*\"refreshToken\":\"([^\"]+)\".*", "$1");
+
+        mockMvc.perform(post("/api/auth/logout")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"refreshToken\":\"" + firstRefresh + "\"}"))
+                .andExpect(status().isOk());
+
+        org.junit.jupiter.api.Assertions.assertTrue(accounts.findByEmailIgnoreCase(email).isEmpty());
+        org.junit.jupiter.api.Assertions.assertTrue(accounts.findById(otherAdmin.getId()).isPresent());
+        mockMvc.perform(post("/api/auth/refresh")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"refreshToken\":\"" + secondRefresh + "\"}"))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void logoutWithUnknownRefreshTokenDoesNotDeleteAdmin() throws Exception {
+        String identity = UUID.randomUUID().toString().replace("-", "").substring(0, 12);
+        String email = "admin-" + identity + "@example.com";
+        Account admin = accounts.save(new Account(email, "+8490" + identity.substring(0, 7),
+                "admin_" + identity, "Admin", "unused-hash", Role.ADMIN));
+        String unknownToken = Base64.getUrlEncoder().withoutPadding().encodeToString(new byte[32]);
+
+        mockMvc.perform(post("/api/auth/logout")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"refreshToken\":\"" + unknownToken + "\"}"))
+                .andExpect(status().isOk());
+
+        org.junit.jupiter.api.Assertions.assertTrue(accounts.findById(admin.getId()).isPresent());
+    }
+
+    @Test
+    void logoutRevokesCustomerSessionWithoutDeletingTheAccount() throws Exception {
+        String identity = UUID.randomUUID().toString().replace("-", "").substring(0, 12);
+        String email = "customer-" + identity + "@example.com";
+        String password = "StrongPass123";
+        Account customer = accounts.save(new Account(email, "+8490" + identity.substring(0, 7),
+                "customer_" + identity, "Customer", new BCryptPasswordEncoder().encode(password), Role.CUSTOMER));
+        String login = mockMvc.perform(post("/api/auth/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"identifier\":\"" + email + "\",\"password\":\"" + password + "\"}"))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+        String refreshToken = login.replaceAll("(?s).*\"refreshToken\":\"([^\"]+)\".*", "$1");
+
+        mockMvc.perform(post("/api/auth/logout")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"refreshToken\":\"" + refreshToken + "\"}"))
+                .andExpect(status().isOk());
+
+        org.junit.jupiter.api.Assertions.assertTrue(accounts.findById(customer.getId()).isPresent());
+        mockMvc.perform(post("/api/auth/refresh")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"refreshToken\":\"" + refreshToken + "\"}"))
                 .andExpect(status().isUnauthorized());
     }
 
