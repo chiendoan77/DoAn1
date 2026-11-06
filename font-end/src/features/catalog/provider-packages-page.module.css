@@ -1,0 +1,133 @@
+@reference "../../app/globals.css";
+
+.style1 {
+  @apply min-h-screen bg-[#f7f8f4];
+}
+
+.style2 {
+  @apply mx-auto max-w-6xl px-5 py-10 sm:px-8 sm:py-14;
+}
+
+.style3 {
+  @apply text-sm font-semibold text-[#477352] hover:underline;
+}
+
+.style4 {
+  @apply mt-6 text-xs font-bold uppercase tracking-[0.18em] text-[#719071];
+}
+
+.style5 {
+  @apply mt-2 text-3xl font-semibold text-[#173c33];
+}
+
+.style6 {
+  @apply mt-2 text-sm text-[#6c7971];
+}
+
+.style7 {
+  @apply mt-6 rounded-2xl bg-[#fff1ec] p-4 text-sm text-[#9b3d28];
+}
+
+.style8 {
+  @apply mt-8 rounded-3xl border border-[#dce5dc] bg-white p-5 sm:p-7;
+}
+
+.style9 {
+  @apply text-lg font-semibold text-[#23483a];
+}
+
+.style10 {
+  @apply mt-5 grid gap-4 sm:grid-cols-2;
+}
+
+.style11 {
+  @apply text-sm font-medium text-[#315246];
+}
+
+.style12 {
+  @apply mt-2 w-full rounded-xl border border-[#dce5dc] px-4 py-3;
+}
+
+.style13 {
+  @apply text-sm font-medium text-[#315246] sm:col-span-2;
+}
+
+.style14 {
+  @apply mt-2 w-full resize-y rounded-xl border border-[#dce5dc] px-4 py-3;
+}
+
+.style15 {
+  @apply flex flex-wrap gap-3 sm:col-span-2;
+}
+
+.style16 {
+  @apply rounded-full bg-[#1f594a] px-6 py-3 text-sm font-semibold text-white disabled:opacity-60;
+}
+
+.style17 {
+  @apply rounded-full border border-[#dce5dc] px-6 py-3 text-sm font-semibold text-[#52645e];
+}
+
+.style18 {
+  @apply mt-10;
+}
+
+.style19 {
+  @apply text-xl font-semibold text-[#23483a];
+}
+
+.style20 {
+  @apply mt-5 text-sm text-[#6c7971];
+}
+
+.style21 {
+  @apply mt-5 rounded-2xl border border-dashed border-[#cfdacf] bg-white p-7 text-center text-sm text-[#6c7971];
+}
+
+.style22 {
+  @apply mt-5 space-y-4;
+}
+
+.style23 {
+  @apply rounded-3xl border border-[#e5eae3] bg-white p-5 sm:p-6;
+}
+
+.style24 {
+  @apply flex flex-col justify-between gap-3 sm:flex-row;
+}
+
+.style25 {
+  @apply text-xs font-semibold uppercase tracking-wide text-[#719071];
+}
+
+.style26 {
+  @apply mt-1 text-lg font-semibold text-[#23483a];
+}
+
+.style27 {
+  @apply h-fit rounded-full bg-[#f1f7ef] px-3 py-1.5 text-xs font-semibold text-[#315246];
+}
+
+.style28 {
+  @apply mt-2 text-sm font-semibold text-[#1f594a];
+}
+
+.style29 {
+  @apply mt-3 rounded-xl bg-[#fff1ec] p-3 text-sm text-[#9b3d28];
+}
+
+.style30 {
+  @apply mt-4 flex flex-wrap gap-2;
+}
+
+.style31 {
+  @apply rounded-full border border-[#dce5dc] px-4 py-2 text-sm font-semibold text-[#315246];
+}
+
+.style32 {
+  @apply rounded-full bg-[#1f594a] px-4 py-2 text-sm font-semibold text-white;
+}
+
+.style33 {
+  @apply rounded-full border border-[#ead4cc] px-4 py-2 text-sm font-semibold text-[#9b3d28];
+}

@@ -1,5 +1,7 @@
 "use client";
 
+
+import styles from "./admin-packages-page.module.css";
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Account, PackageApproval, PageResult, ServicePackage, apiRequest } from "@/lib/api";
@@ -100,48 +102,48 @@ export function AdminPackagesPage() {
   }
 
   return (
-    <main className="min-h-screen bg-[#f7f8f4]">
+    <main className={styles.style1}>
       <SiteHeader />
-      <section className="mx-auto max-w-6xl px-5 py-10 sm:px-8 sm:py-14">
-        <p className="text-xs font-bold uppercase tracking-[0.18em] text-[#719071]">Catalog · Admin</p>
-        <h1 className="mt-2 text-3xl font-semibold text-[#173c33]">Kiểm duyệt gói dịch vụ</h1>
-        <p className="mt-2 text-sm text-[#6c7971]">Chỉ gói được duyệt mới hiển thị công khai cho khách hàng.</p>
-        <div className="mt-5 flex gap-2">
-          <button onClick={() => setAllPackages(false)} aria-pressed={!allPackages} className={`rounded-full px-4 py-2 text-sm font-semibold ${!allPackages ? "bg-[#1f594a] text-white" : "border border-[#dce5dc] bg-white text-[#315246]"}`}>Chờ duyệt</button>
-          <button onClick={() => setAllPackages(true)} aria-pressed={allPackages} className={`rounded-full px-4 py-2 text-sm font-semibold ${allPackages ? "bg-[#1f594a] text-white" : "border border-[#dce5dc] bg-white text-[#315246]"}`}>Tất cả</button>
+      <section className={styles.style2}>
+        <p className={styles.style3}>Catalog · Admin</p>
+        <h1 className={styles.style4}>Kiểm duyệt gói dịch vụ</h1>
+        <p className={styles.style5}>Chỉ gói được duyệt mới hiển thị công khai cho khách hàng.</p>
+        <div className={styles.style6}>
+          <button onClick={() => setAllPackages(false)} aria-pressed={!allPackages} className={`${styles.filterButton} ${!allPackages ? styles.filterButtonActive : styles.filterButtonInactive}`}>Chờ duyệt</button>
+          <button onClick={() => setAllPackages(true)} aria-pressed={allPackages} className={`${styles.filterButton} ${allPackages ? styles.filterButtonActive : styles.filterButtonInactive}`}>Tất cả</button>
         </div>
-        {error && <p role="alert" className="mt-5 rounded-2xl bg-[#fff1ec] p-4 text-sm text-[#9b3d28]">{error}</p>}
-        {loading ? <p className="mt-8 text-sm text-[#6c7971]">Đang tải…</p> : packages.length === 0 ? (
-          <p className="mt-8 rounded-3xl border border-dashed border-[#cfdacf] bg-white p-8 text-center text-sm text-[#6c7971]">Không có gói dịch vụ cần hiển thị.</p>
+        {error && <p role="alert" className={styles.style7}>{error}</p>}
+        {loading ? <p className={styles.style8}>Đang tải…</p> : packages.length === 0 ? (
+          <p className={styles.style9}>Không có gói dịch vụ cần hiển thị.</p>
         ) : (
-          <div className="mt-8 space-y-4">
+          <div className={styles.style10}>
             {packages.map((servicePackage) => (
-              <article key={servicePackage.id} className="rounded-3xl border border-[#e5eae3] bg-white p-5 sm:p-6">
-                <div className="flex flex-col justify-between gap-3 sm:flex-row">
+              <article key={servicePackage.id} className={styles.style11}>
+                <div className={styles.style12}>
                   <div>
-                    <p className="text-xs font-semibold uppercase tracking-wide text-[#719071]">{servicePackage.categoryId} · Provider {servicePackage.providerId.slice(0, 8)}</p>
-                    <h2 className="mt-1 text-xl font-semibold text-[#23483a]">{servicePackage.name}</h2>
+                    <p className={styles.style13}>{servicePackage.categoryId} · Provider {servicePackage.providerId.slice(0, 8)}</p>
+                    <h2 className={styles.style14}>{servicePackage.name}</h2>
                   </div>
-                  <span className="h-fit rounded-full bg-[#f1f7ef] px-3 py-1.5 text-xs font-semibold text-[#315246]">{statusLabels[servicePackage.status]}</span>
+                  <span className={styles.style15}>{statusLabels[servicePackage.status]}</span>
                 </div>
-                <p className="mt-3 text-sm leading-6 text-[#6c7971]">{servicePackage.description}</p>
-                <p className="mt-2 text-sm font-semibold text-[#1f594a]">{new Intl.NumberFormat("vi-VN").format(servicePackage.price)} ₫ · {servicePackage.durationMinutes} phút · {servicePackage.providerPhone}</p>
-                <div className="mt-4 flex flex-wrap gap-2">
+                <p className={styles.style16}>{servicePackage.description}</p>
+                <p className={styles.style17}>{new Intl.NumberFormat("vi-VN").format(servicePackage.price)} ₫ · {servicePackage.durationMinutes} phút · {servicePackage.providerPhone}</p>
+                <div className={styles.style18}>
                   {servicePackage.status === "PENDING_APPROVAL" && (
                     <>
-                      <button onClick={() => void approve(servicePackage)} className="rounded-full bg-[#1f594a] px-4 py-2 text-sm font-semibold text-white">Duyệt</button>
-                      <input aria-label={`Lý do từ chối ${servicePackage.name}`} maxLength={500} placeholder="Lý do từ chối" value={reasons[servicePackage.id] ?? ""} onChange={(event) => setReasons((current) => ({ ...current, [servicePackage.id]: event.target.value }))} className="min-w-52 rounded-full border border-[#dce5dc] px-4 py-2 text-sm" />
-                      <button onClick={() => void reject(servicePackage)} className="rounded-full border border-[#ead4cc] px-4 py-2 text-sm font-semibold text-[#9b3d28]">Từ chối</button>
+                      <button onClick={() => void approve(servicePackage)} className={styles.style19}>Duyệt</button>
+                      <input aria-label={`Lý do từ chối ${servicePackage.name}`} maxLength={500} placeholder="Lý do từ chối" value={reasons[servicePackage.id] ?? ""} onChange={(event) => setReasons((current) => ({ ...current, [servicePackage.id]: event.target.value }))} className={styles.style20} />
+                      <button onClick={() => void reject(servicePackage)} className={styles.style21}>Từ chối</button>
                     </>
                   )}
-                  {servicePackage.status === "APPROVED" && <button onClick={() => void deactivate(servicePackage)} className="rounded-full border border-[#ead4cc] px-4 py-2 text-sm font-semibold text-[#9b3d28]">Ngừng hoạt động</button>}
-                  <button onClick={() => void showHistory(servicePackage)} className="rounded-full border border-[#dce5dc] px-4 py-2 text-sm font-semibold text-[#315246]">Lịch sử duyệt</button>
+                  {servicePackage.status === "APPROVED" && <button onClick={() => void deactivate(servicePackage)} className={styles.style21}>Ngừng hoạt động</button>}
+                  <button onClick={() => void showHistory(servicePackage)} className={styles.style22}>Lịch sử duyệt</button>
                 </div>
                 {history[servicePackage.id] && (
-                  <ol className="mt-4 space-y-2 border-l-2 border-[#dce5dc] pl-4">
+                  <ol className={styles.style23}>
                     {history[servicePackage.id].map((item, index) => (
-                      <li key={item.id ?? `${item.createdAt}-${index}`} className="text-xs leading-5 text-[#6c7971]">
-                        <span className="font-semibold text-[#315246]">{item.action}</span> · {item.createdAt} · {item.adminId ?? item.actorId}{item.reason ? ` · ${item.reason}` : ""}
+                      <li key={item.id ?? `${item.createdAt}-${index}`} className={styles.style24}>
+                        <span className={styles.style25}>{item.action}</span> · {item.createdAt} · {item.adminId ?? item.actorId}{item.reason ? ` · ${item.reason}` : ""}
                       </li>
                     ))}
                   </ol>

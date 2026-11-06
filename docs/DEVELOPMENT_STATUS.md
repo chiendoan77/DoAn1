@@ -20,6 +20,7 @@ Ngày đối chiếu source/configuration, full backend tests và frontend check
 - **Review:** service riêng xác minh eligibility qua Booking; lưu review và phát `ReviewSubmitted` qua outbox. Marketplace chỉ còn dữ liệu/API legacy migration.
 - **Notification:** nhận Catalog package events và `BookingCompleted`, lưu inbox idempotent. Email/push/SMS chưa triển khai.
 - **Frontend/BFF:** booking gắn package, customer profile và notification views; token nằm trong HttpOnly cookies. BFF proxy hỗ trợ GET/POST/PUT/PATCH/DELETE.
+- **Customer experience:** trang chủ giới thiệu và dẫn tới hai trang riêng cho dọn dẹp/sửa chữa; khách hàng có thể cập nhật tên hiển thị, số liên hệ, địa chỉ mặc định và avatar HTTPS từ menu tài khoản. Đặt lịch lấy địa chỉ từ hồ sơ và chỉ yêu cầu chọn gói/thời gian; provider menu chỉ xem để tránh tự chuyển hồ sơ về trạng thái chờ duyệt.
 - **Payment:** adapter registry skeleton; payment lifecycle, `PaymentSucceeded`, webhook/refund/idempotency và saga được hoãn theo yêu cầu.
 
 ## Persistence và vận hành
@@ -33,7 +34,7 @@ Ngày đối chiếu source/configuration, full backend tests và frontend check
 ## Kiểm thử và xác minh
 
 - `mvn -DskipTests package`: toàn bộ 12 reactor modules build thành công.
-- Full `mvn test`: 39 tests trên 12 suite, 0 failure, 0 error, 0 skipped. [TEST_CASES.csv](./TEST_CASES.csv) có 52 dòng: 42 `PASS`, 5 `NOT_RUN`, 4 `NOT_IMPLEMENTED`, 1 `DEFERRED`; từng backend test trỏ tới Surefire report.
+- Full `mvn test`: 39 tests trên 12 suite, 0 failure, 0 error, 0 skipped. [TEST_CASES.csv](./TEST_CASES.csv) có 58 dòng: 42 `PASS`, 11 `NOT_RUN`, 4 `NOT_IMPLEMENTED`, 1 `DEFERRED`; từng backend test trỏ tới Surefire report hoặc ghi rõ lệnh kiểm thử tương ứng.
 - Frontend lint/typecheck/production build và `docker compose config -q` pass; frontend checks được chạy lại sau khi bổ sung PUT/DELETE cho BFF.
 - `mvn install` trước đó không hoàn tất do Maven không thể move artifact tạm trong mounted `.m2`; reactor `package` và full tests thành công.
 

@@ -1,5 +1,7 @@
 "use client";
 
+
+import styles from "./notifications-page.module.css";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Account, Notification, apiRequest } from "@/lib/api";
@@ -33,20 +35,20 @@ export function NotificationsPage() {
   }, [router]);
 
   return (
-    <main className="min-h-screen bg-[#f7f8f4]">
+    <main className={styles.style1}>
       <SiteHeader />
-      <section className="mx-auto max-w-4xl px-5 py-10 sm:px-8 sm:py-14">
-        <p className="text-xs font-bold uppercase tracking-[0.18em] text-[#719071]">Tài khoản</p>
-        <h1 className="mt-2 text-3xl font-semibold text-[#173c33]">Thông báo</h1>
-        {error && <p role="alert" className="mt-6 rounded-2xl bg-[#fff1ec] p-4 text-sm text-[#9b3d28]">{error}</p>}
-        {loading ? <p className="mt-8 text-sm text-[#6c7971]">Đang tải…</p> : notifications.length === 0 ? (
-          <p className="mt-8 rounded-3xl border border-dashed border-[#cfdacf] bg-white p-8 text-center text-sm text-[#6c7971]">Bạn chưa có thông báo nào.</p>
+      <section className={styles.style2}>
+        <p className={styles.style3}>Tài khoản</p>
+        <h1 className={styles.style4}>Thông báo</h1>
+        {error && <p role="alert" className={styles.style5}>{error}</p>}
+        {loading ? <p className={styles.style6}>Đang tải…</p> : notifications.length === 0 ? (
+          <p className={styles.style7}>Bạn chưa có thông báo nào.</p>
         ) : (
-          <ol className="mt-8 space-y-3">
+          <ol className={styles.style8}>
             {notifications.map((notification) => (
-              <li key={notification.id} className="rounded-2xl border border-[#e5eae3] bg-white p-5">
-                <p className="text-sm leading-6 text-[#315246]">{notification.message}</p>
-                <p className="mt-2 text-xs text-[#87938c]">
+              <li key={notification.id} className={styles.style9}>
+                <p className={styles.style10}>{notification.message}</p>
+                <p className={styles.style11}>
                   {new Date(notification.createdAt).toLocaleString("vi-VN")}
                   {notification.relatedType === "BOOKING" && notification.relatedId
                     ? ` · Lịch hẹn ${notification.relatedId.slice(0, 8)}`

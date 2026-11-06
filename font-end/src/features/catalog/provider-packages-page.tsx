@@ -1,5 +1,7 @@
 "use client";
 
+
+import styles from "./provider-packages-page.module.css";
 import Link from "next/link";
 import { FormEvent, useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -133,80 +135,80 @@ export function ProviderPackagesPage() {
   }
 
   return (
-    <main className="min-h-screen bg-[#f7f8f4]">
+    <main className={styles.style1}>
       <SiteHeader />
-      <section className="mx-auto max-w-6xl px-5 py-10 sm:px-8 sm:py-14">
-        <Link className="text-sm font-semibold text-[#477352] hover:underline" href="/history">← Quay lại tài khoản</Link>
-        <p className="mt-6 text-xs font-bold uppercase tracking-[0.18em] text-[#719071]">Catalog</p>
-        <h1 className="mt-2 text-3xl font-semibold text-[#173c33]">Gói dịch vụ của tôi</h1>
-        <p className="mt-2 text-sm text-[#6c7971]">Gói mới và mọi thay đổi nội dung cần được Admin duyệt trước khi công khai.</p>
-        {error && <p role="alert" className="mt-6 rounded-2xl bg-[#fff1ec] p-4 text-sm text-[#9b3d28]">{error}</p>}
+      <section className={styles.style2}>
+        <Link className={styles.style3} href="/history">← Quay lại tài khoản</Link>
+        <p className={styles.style4}>Catalog</p>
+        <h1 className={styles.style5}>Gói dịch vụ của tôi</h1>
+        <p className={styles.style6}>Gói mới và mọi thay đổi nội dung cần được Admin duyệt trước khi công khai.</p>
+        {error && <p role="alert" className={styles.style7}>{error}</p>}
 
-        <section className="mt-8 rounded-3xl border border-[#dce5dc] bg-white p-5 sm:p-7">
-          <h2 className="text-lg font-semibold text-[#23483a]">{editing ? "Cập nhật gói" : "Tạo gói mới"}</h2>
-          <form className="mt-5 grid gap-4 sm:grid-cols-2" onSubmit={(event) => void save(event)}>
-            <label className="text-sm font-medium text-[#315246]">
+        <section className={styles.style8}>
+          <h2 className={styles.style9}>{editing ? "Cập nhật gói" : "Tạo gói mới"}</h2>
+          <form className={styles.style10} onSubmit={(event) => void save(event)}>
+            <label className={styles.style11}>
               Danh mục
-              <select required value={form.categoryId} onChange={(event) => setForm({ ...form, categoryId: event.target.value })} className="mt-2 w-full rounded-xl border border-[#dce5dc] px-4 py-3">
+              <select required value={form.categoryId} onChange={(event) => setForm({ ...form, categoryId: event.target.value })} className={styles.style12}>
                 {categories.map((category) => <option key={category.id} value={category.id}>{category.name}</option>)}
               </select>
             </label>
-            <label className="text-sm font-medium text-[#315246]">
+            <label className={styles.style11}>
               Tên gói
-              <input required maxLength={120} value={form.name} onChange={(event) => setForm({ ...form, name: event.target.value })} className="mt-2 w-full rounded-xl border border-[#dce5dc] px-4 py-3" />
+              <input required maxLength={120} value={form.name} onChange={(event) => setForm({ ...form, name: event.target.value })} className={styles.style12} />
             </label>
-            <label className="text-sm font-medium text-[#315246]">
+            <label className={styles.style11}>
               Giá cố định (VND)
-              <input required min="1" step="1" type="number" value={form.price} onChange={(event) => setForm({ ...form, price: event.target.value })} className="mt-2 w-full rounded-xl border border-[#dce5dc] px-4 py-3" />
+              <input required min="1" step="1" type="number" value={form.price} onChange={(event) => setForm({ ...form, price: event.target.value })} className={styles.style12} />
             </label>
-            <label className="text-sm font-medium text-[#315246]">
+            <label className={styles.style11}>
               Thời lượng (phút)
-              <input required min="1" step="1" type="number" value={form.durationMinutes} onChange={(event) => setForm({ ...form, durationMinutes: event.target.value })} className="mt-2 w-full rounded-xl border border-[#dce5dc] px-4 py-3" />
+              <input required min="1" step="1" type="number" value={form.durationMinutes} onChange={(event) => setForm({ ...form, durationMinutes: event.target.value })} className={styles.style12} />
             </label>
-            <label className="text-sm font-medium text-[#315246] sm:col-span-2">
+            <label className={styles.style13}>
               Số điện thoại hiển thị sau khi duyệt
-              <input required maxLength={24} value={form.providerPhone} onChange={(event) => setForm({ ...form, providerPhone: event.target.value })} className="mt-2 w-full rounded-xl border border-[#dce5dc] px-4 py-3" />
+              <input required maxLength={24} value={form.providerPhone} onChange={(event) => setForm({ ...form, providerPhone: event.target.value })} className={styles.style12} />
             </label>
-            <label className="text-sm font-medium text-[#315246] sm:col-span-2">
+            <label className={styles.style13}>
               Mô tả
-              <textarea required maxLength={1000} rows={4} value={form.description} onChange={(event) => setForm({ ...form, description: event.target.value })} className="mt-2 w-full resize-y rounded-xl border border-[#dce5dc] px-4 py-3" />
+              <textarea required maxLength={1000} rows={4} value={form.description} onChange={(event) => setForm({ ...form, description: event.target.value })} className={styles.style14} />
             </label>
-            <div className="flex flex-wrap gap-3 sm:col-span-2">
-              <button disabled={saving || categories.length === 0} className="rounded-full bg-[#1f594a] px-6 py-3 text-sm font-semibold text-white disabled:opacity-60">
+            <div className={styles.style15}>
+              <button disabled={saving || categories.length === 0} className={styles.style16}>
                 {saving ? "Đang lưu…" : editing ? "Lưu thay đổi" : "Tạo bản nháp"}
               </button>
-              {editing && <button type="button" onClick={resetForm} className="rounded-full border border-[#dce5dc] px-6 py-3 text-sm font-semibold text-[#52645e]">Hủy sửa</button>}
+              {editing && <button type="button" onClick={resetForm} className={styles.style17}>Hủy sửa</button>}
             </div>
           </form>
         </section>
 
-        <section className="mt-10">
-          <h2 className="text-xl font-semibold text-[#23483a]">Danh sách gói</h2>
-          {loading ? <p className="mt-5 text-sm text-[#6c7971]">Đang tải…</p> : packages.length === 0 ? (
-            <p className="mt-5 rounded-2xl border border-dashed border-[#cfdacf] bg-white p-7 text-center text-sm text-[#6c7971]">Bạn chưa tạo gói dịch vụ nào.</p>
+        <section className={styles.style18}>
+          <h2 className={styles.style19}>Danh sách gói</h2>
+          {loading ? <p className={styles.style20}>Đang tải…</p> : packages.length === 0 ? (
+            <p className={styles.style21}>Bạn chưa tạo gói dịch vụ nào.</p>
           ) : (
-            <div className="mt-5 space-y-4">
+            <div className={styles.style22}>
               {packages.map((servicePackage) => (
-                <article key={servicePackage.id} className="rounded-3xl border border-[#e5eae3] bg-white p-5 sm:p-6">
-                  <div className="flex flex-col justify-between gap-3 sm:flex-row">
+                <article key={servicePackage.id} className={styles.style23}>
+                  <div className={styles.style24}>
                     <div>
-                      <p className="text-xs font-semibold uppercase tracking-wide text-[#719071]">{categories.find((category) => category.id === servicePackage.categoryId)?.name ?? servicePackage.categoryId}</p>
-                      <h3 className="mt-1 text-lg font-semibold text-[#23483a]">{servicePackage.name}</h3>
+                      <p className={styles.style25}>{categories.find((category) => category.id === servicePackage.categoryId)?.name ?? servicePackage.categoryId}</p>
+                      <h3 className={styles.style26}>{servicePackage.name}</h3>
                     </div>
-                    <span className="h-fit rounded-full bg-[#f1f7ef] px-3 py-1.5 text-xs font-semibold text-[#315246]">{statusLabels[servicePackage.status]}</span>
+                    <span className={styles.style27}>{statusLabels[servicePackage.status]}</span>
                   </div>
-                  <p className="mt-2 text-sm text-[#6c7971]">{servicePackage.description}</p>
-                  <p className="mt-2 text-sm font-semibold text-[#1f594a]">{new Intl.NumberFormat("vi-VN").format(servicePackage.price)} ₫ · {servicePackage.durationMinutes} phút</p>
-                  {servicePackage.status === "REJECTED" && servicePackage.rejectionReason && <p className="mt-3 rounded-xl bg-[#fff1ec] p-3 text-sm text-[#9b3d28]">Lý do từ chối: {servicePackage.rejectionReason}</p>}
-                  <div className="mt-4 flex flex-wrap gap-2">
+                  <p className={styles.style6}>{servicePackage.description}</p>
+                  <p className={styles.style28}>{new Intl.NumberFormat("vi-VN").format(servicePackage.price)} ₫ · {servicePackage.durationMinutes} phút</p>
+                  {servicePackage.status === "REJECTED" && servicePackage.rejectionReason && <p className={styles.style29}>Lý do từ chối: {servicePackage.rejectionReason}</p>}
+                  <div className={styles.style30}>
                     {servicePackage.status !== "PENDING_APPROVAL" && servicePackage.status !== "INACTIVE" && (
-                      <button onClick={() => startEdit(servicePackage)} className="rounded-full border border-[#dce5dc] px-4 py-2 text-sm font-semibold text-[#315246]">Chỉnh sửa</button>
+                      <button onClick={() => startEdit(servicePackage)} className={styles.style31}>Chỉnh sửa</button>
                     )}
                     {(servicePackage.status === "DRAFT" || servicePackage.status === "REJECTED") && (
-                      <button onClick={() => void submitForApproval(servicePackage)} className="rounded-full bg-[#1f594a] px-4 py-2 text-sm font-semibold text-white">Gửi duyệt</button>
+                      <button onClick={() => void submitForApproval(servicePackage)} className={styles.style32}>Gửi duyệt</button>
                     )}
                     {servicePackage.status !== "INACTIVE" && (
-                      <button onClick={() => void archive(servicePackage)} className="rounded-full border border-[#ead4cc] px-4 py-2 text-sm font-semibold text-[#9b3d28]">Ngừng hoạt động</button>
+                      <button onClick={() => void archive(servicePackage)} className={styles.style33}>Ngừng hoạt động</button>
                     )}
                   </div>
                 </article>

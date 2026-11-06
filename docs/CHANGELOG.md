@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-11-06 — Tách trang dịch vụ và cập nhật hồ sơ khách hàng
+
+- Đưa danh mục dọn dẹp và sửa chữa thành hai trang riêng; trang chủ tập trung giới thiệu dịch vụ.
+- Thêm thẻ hồ sơ dạng hóa đơn trong menu avatar cho khách hàng, lưu tên hiển thị, số điện thoại, địa chỉ mặc định và URL avatar HTTPS.
+- Tạo hồ sơ/địa chỉ mặc định khi đăng ký khách hàng; luồng đặt lịch tự dùng địa chỉ đã lưu và chỉ yêu cầu chọn gói/thời gian hẹn.
+- Giữ hồ sơ nhà cung cấp ở chế độ chỉ xem trong menu tài khoản để không làm thay đổi trạng thái duyệt.
+
 ## 2026-11-06 — Security, booking, review and observability follow-up
 
 - Chuyển JWT sang RS256 với refresh-token rotation/revocation; BFF giữ token trong HttpOnly cookies.

@@ -1,0 +1,9 @@
+@reference "./globals.css";
+
+.style1 {
+  @apply h-full antialiased;
+}
+
+.style2 {
+  @apply flex min-h-full flex-col;
+}

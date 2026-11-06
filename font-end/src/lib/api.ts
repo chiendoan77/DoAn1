@@ -97,6 +97,7 @@ export type CustomerProfile = {
   phoneNumber: string;
   defaultAddress: string;
   updatedAt?: string;
+  avatarUrl?: string | null;
 };
 
 export type Review = {

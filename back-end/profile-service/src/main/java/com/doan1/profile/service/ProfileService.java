@@ -54,13 +54,15 @@ public class ProfileService {
         CustomerProfile profile = customerProfiles.findById(accountId)
                 .orElseGet(() -> new CustomerProfile(accountId, input.displayName().trim(),
                         input.phoneNumber().trim(), input.defaultAddress().trim()));
-        profile.update(input.displayName().trim(), input.phoneNumber().trim(), input.defaultAddress().trim());
+        profile.update(input.displayName().trim(), input.phoneNumber().trim(), input.defaultAddress().trim(),
+                input.avatarUrl() == null || input.avatarUrl().isBlank() ? null : input.avatarUrl().trim());
         return customerResponse(customerProfiles.save(profile));
     }
 
     private static com.doan1.profile.dto.response.CustomerProfileResponse customerResponse(CustomerProfile profile) {
         return new com.doan1.profile.dto.response.CustomerProfileResponse(
-                profile.getDisplayName(), profile.getPhoneNumber(), profile.getDefaultAddress(), profile.getUpdatedAt());
+                profile.getDisplayName(), profile.getPhoneNumber(), profile.getDefaultAddress(), profile.getUpdatedAt(),
+                profile.getAvatarUrl());
     }
 
     public List<CategoryResponse> categories() { return CategoryResponse.all(); }

@@ -24,6 +24,9 @@ public class CustomerProfile {
     @Column(name = "default_address", nullable = false, length = 500)
     private String defaultAddress;
 
+    @Column(name = "avatar_url", length = 2048)
+    private String avatarUrl;
+
     @Column(name = "updated_at", nullable = false)
     private Instant updatedAt;
 
@@ -36,9 +39,14 @@ public class CustomerProfile {
     }
 
     public void update(String displayName, String phoneNumber, String defaultAddress) {
+        update(displayName, phoneNumber, defaultAddress, avatarUrl);
+    }
+
+    public void update(String displayName, String phoneNumber, String defaultAddress, String avatarUrl) {
         this.displayName = displayName;
         this.phoneNumber = phoneNumber;
         this.defaultAddress = defaultAddress;
+        this.avatarUrl = avatarUrl;
         this.updatedAt = Instant.now();
     }
 
@@ -46,5 +54,6 @@ public class CustomerProfile {
     public String getDisplayName() { return displayName; }
     public String getPhoneNumber() { return phoneNumber; }
     public String getDefaultAddress() { return defaultAddress; }
+    public String getAvatarUrl() { return avatarUrl; }
     public Instant getUpdatedAt() { return updatedAt; }
 }

@@ -11,7 +11,7 @@ Public API qua Gateway; JWT role/ownership được kiểm tra trong Profile. En
 | GET | `/api/provider/profile` | PROVIDER | Xem hồ sơ của mình. |
 | PUT | `/api/provider/profile` | PROVIDER | Cập nhật hồ sơ; trạng thái về `PENDING`. |
 | GET | `/api/customer/profile` | CUSTOMER | Xem hồ sơ khách hàng. |
-| PUT | `/api/customer/profile` | CUSTOMER | Tạo/cập nhật `{displayName, phoneNumber, defaultAddress}`. |
+| PUT | `/api/customer/profile` | CUSTOMER | Tạo/cập nhật `{displayName, phoneNumber, defaultAddress, avatarUrl}`; avatar là URL HTTPS tùy chọn. |
 | GET | `/api/admin/providers/pending` | ADMIN | Hồ sơ chờ duyệt. |
 | PATCH | `/api/admin/providers/{providerId}/approval` | ADMIN | Approve/reject hồ sơ đang `PENDING`. |
 | PATCH | `/api/admin/providers/{providerId}/suspension` | ADMIN | Suspend/unsuspend provider profile. |

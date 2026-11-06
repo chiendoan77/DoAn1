@@ -1,0 +1,45 @@
+@reference "../../app/globals.css";
+
+.style1 {
+  @apply min-h-screen bg-[#f7f8f4];
+}
+
+.style2 {
+  @apply mx-auto max-w-4xl px-5 py-10 sm:px-8 sm:py-14;
+}
+
+.style3 {
+  @apply text-xs font-bold uppercase tracking-[0.18em] text-[#719071];
+}
+
+.style4 {
+  @apply mt-2 text-3xl font-semibold text-[#173c33];
+}
+
+.style5 {
+  @apply mt-6 rounded-2xl bg-[#fff1ec] p-4 text-sm text-[#9b3d28];
+}
+
+.style6 {
+  @apply mt-8 text-sm text-[#6c7971];
+}
+
+.style7 {
+  @apply mt-8 rounded-3xl border border-dashed border-[#cfdacf] bg-white p-8 text-center text-sm text-[#6c7971];
+}
+
+.style8 {
+  @apply mt-8 space-y-3;
+}
+
+.style9 {
+  @apply rounded-2xl border border-[#e5eae3] bg-white p-5;
+}
+
+.style10 {
+  @apply text-sm leading-6 text-[#315246];
+}
+
+.style11 {
+  @apply mt-2 text-xs text-[#87938c];
+}

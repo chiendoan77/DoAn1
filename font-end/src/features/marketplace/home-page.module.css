@@ -1,0 +1,161 @@
+@reference "../../app/globals.css";
+
+.style1 {
+  @apply min-h-screen;
+}
+
+.style2 {
+  @apply relative overflow-hidden;
+}
+
+.style3 {
+  @apply pointer-events-none absolute -right-36 -top-32 size-[34rem] rounded-full bg-[#e6efe7] blur-3xl;
+}
+
+.style4 {
+  @apply relative mx-auto grid max-w-7xl gap-10 px-5 py-20 sm:px-8 lg:grid-cols-[1.05fr_0.95fr] lg:px-10 lg:py-28;
+}
+
+.style5 {
+  @apply flex flex-col justify-center;
+}
+
+.style6 {
+  @apply mb-5 inline-flex w-fit items-center gap-2 rounded-full border border-[#d9e6da] bg-white/80 px-4 py-2 text-xs font-semibold uppercase tracking-[0.15em] text-[#356a55];
+}
+
+.style7 {
+  @apply size-2 rounded-full bg-[#71a87b];
+}
+
+.style8 {
+  @apply max-w-2xl text-5xl font-semibold leading-[1.08] tracking-[-0.045em] text-[#173c33] sm:text-6xl lg:text-7xl;
+}
+
+.style9 {
+  @apply text-[#65916b];
+}
+
+.style10 {
+  @apply mt-6 max-w-xl text-lg leading-8 text-[#64736b];
+}
+
+.style11 {
+  @apply mt-8 inline-flex w-fit rounded-full bg-[#1f594a] px-7 py-3.5 text-sm font-semibold text-white transition hover:bg-[#18483b];
+}
+
+.style12 {
+  @apply ml-2;
+}
+
+.style13 {
+  @apply grid min-h-72 grid-cols-2 gap-4 rounded-[2rem] bg-[#dce8dc] p-5 sm:p-8;
+}
+
+.style14 {
+  @apply flex flex-col justify-between rounded-3xl bg-[#a9c5a5] p-6 text-[#173c33];
+}
+
+.style15 {
+  @apply text-4xl;
+}
+
+.style16 {
+  @apply text-sm;
+}
+
+.style17 {
+  @apply mt-1 text-xl font-semibold;
+}
+
+.style18 {
+  @apply mt-8 flex flex-col justify-between rounded-3xl bg-[#f0dfbd] p-6 text-[#4e4938];
+}
+
+.style19 {
+  @apply col-span-2 flex items-center gap-4 rounded-2xl bg-[#234c3e] px-5 py-4 text-white;
+}
+
+.style20 {
+  @apply grid size-10 place-items-center rounded-xl bg-white/10;
+}
+
+.style21 {
+  @apply text-sm leading-6;
+}
+
+.style22 {
+  @apply bg-white py-16 sm:py-20;
+}
+
+.style23 {
+  @apply mx-auto max-w-7xl px-5 sm:px-8 lg:px-10;
+}
+
+.style24 {
+  @apply text-xs font-bold uppercase tracking-[0.18em] text-[#719071];
+}
+
+.style25 {
+  @apply mt-3 text-3xl font-semibold tracking-tight text-[#173c33] sm:text-4xl;
+}
+
+.style26 {
+  @apply mt-8 grid gap-5 md:grid-cols-2;
+}
+
+.style27 {
+  @apply rounded-3xl border border-[#e5eae3] bg-[#fbfcfa] p-7 transition hover:-translate-y-1 hover:border-[#a9c5a5] hover:shadow-lg;
+}
+
+.style28 {
+  @apply grid size-14 place-items-center rounded-2xl bg-[#e9f1e7] text-3xl text-[#477352];
+}
+
+.style29 {
+  @apply mt-5 text-2xl font-semibold text-[#23483a];
+}
+
+.style30 {
+  @apply mt-3 max-w-lg text-sm leading-6 text-[#6c7971];
+}
+
+.style31 {
+  @apply mt-6 inline-flex text-sm font-semibold text-[#1f594a];
+}
+
+.style32 {
+  @apply ml-2 transition;
+}
+
+.style27:hover .style32 {
+  @apply translate-x-1;
+}
+
+.style33 {
+  @apply px-5 py-16 sm:px-8 lg:px-10;
+}
+
+.style34 {
+  @apply mx-auto flex max-w-7xl flex-col justify-between gap-6 rounded-[2rem] bg-[#244d3f] px-7 py-9 text-white sm:px-10 lg:flex-row lg:items-center lg:px-14;
+}
+
+.style35 {
+  @apply text-xs font-bold uppercase tracking-[0.18em] text-[#b8d2b5];
+}
+
+.style36 {
+  @apply mt-3 max-w-xl text-2xl font-semibold tracking-tight sm:text-3xl;
+}
+
+.style37 {
+  @apply inline-flex w-fit rounded-full bg-[#e9f0e2] px-6 py-3.5 text-sm font-semibold text-[#234b3c] transition hover:bg-white;
+}
+
+.style38 {
+  @apply border-t border-[#e3e8e1] bg-white;
+}
+
+.style39 {
+  @apply mx-auto flex max-w-7xl flex-col gap-3 px-5 py-7 text-xs text-[#7b8980] sm:flex-row sm:justify-between lg:px-10;
+}

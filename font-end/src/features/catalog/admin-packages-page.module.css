@@ -1,0 +1,113 @@
+@reference "../../app/globals.css";
+
+.filterButton {
+  @apply rounded-full px-4 py-2 text-sm font-semibold;
+}
+
+.filterButtonActive {
+  @apply bg-[#1f594a] text-white;
+}
+
+.filterButtonInactive {
+  @apply border border-[#dce5dc] bg-white text-[#315246];
+}
+
+.style1 {
+  @apply min-h-screen bg-[#f7f8f4];
+}
+
+.style2 {
+  @apply mx-auto max-w-6xl px-5 py-10 sm:px-8 sm:py-14;
+}
+
+.style3 {
+  @apply text-xs font-bold uppercase tracking-[0.18em] text-[#719071];
+}
+
+.style4 {
+  @apply mt-2 text-3xl font-semibold text-[#173c33];
+}
+
+.style5 {
+  @apply mt-2 text-sm text-[#6c7971];
+}
+
+.style6 {
+  @apply mt-5 flex gap-2;
+}
+
+.style7 {
+  @apply mt-5 rounded-2xl bg-[#fff1ec] p-4 text-sm text-[#9b3d28];
+}
+
+.style8 {
+  @apply mt-8 text-sm text-[#6c7971];
+}
+
+.style9 {
+  @apply mt-8 rounded-3xl border border-dashed border-[#cfdacf] bg-white p-8 text-center text-sm text-[#6c7971];
+}
+
+.style10 {
+  @apply mt-8 space-y-4;
+}
+
+.style11 {
+  @apply rounded-3xl border border-[#e5eae3] bg-white p-5 sm:p-6;
+}
+
+.style12 {
+  @apply flex flex-col justify-between gap-3 sm:flex-row;
+}
+
+.style13 {
+  @apply text-xs font-semibold uppercase tracking-wide text-[#719071];
+}
+
+.style14 {
+  @apply mt-1 text-xl font-semibold text-[#23483a];
+}
+
+.style15 {
+  @apply h-fit rounded-full bg-[#f1f7ef] px-3 py-1.5 text-xs font-semibold text-[#315246];
+}
+
+.style16 {
+  @apply mt-3 text-sm leading-6 text-[#6c7971];
+}
+
+.style17 {
+  @apply mt-2 text-sm font-semibold text-[#1f594a];
+}
+
+.style18 {
+  @apply mt-4 flex flex-wrap gap-2;
+}
+
+.style19 {
+  @apply rounded-full bg-[#1f594a] px-4 py-2 text-sm font-semibold text-white;
+}
+
+.style20 {
+  @apply min-w-52 rounded-full border border-[#dce5dc] px-4 py-2 text-sm;
+}
+
+.style21 {
+  @apply rounded-full border border-[#ead4cc] px-4 py-2 text-sm font-semibold text-[#9b3d28];
+}
+
+.style22 {
+  @apply rounded-full border border-[#dce5dc] px-4 py-2 text-sm font-semibold text-[#315246];
+}
+
+.style23 {
+  @apply mt-4 space-y-2 border-l-2 border-[#dce5dc] pl-4;
+}
+
+.style24 {
+  @apply text-xs leading-5 text-[#6c7971];
+}
+
+.style25 {
+  @apply font-semibold text-[#315246];
+}

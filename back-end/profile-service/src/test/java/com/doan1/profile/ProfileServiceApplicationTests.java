@@ -139,15 +139,18 @@ class ProfileServiceApplicationTests {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {"displayName":"Khách hàng","phoneNumber":"0901234567",
-                                 "defaultAddress":"Quận 1, TP. Hồ Chí Minh"}
+                                 "defaultAddress":"Quận 1, TP. Hồ Chí Minh",
+                                 "avatarUrl":"https://example.com/avatar.jpg"}
                                 """))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.displayName", is("Khách hàng")))
-                .andExpect(jsonPath("$.defaultAddress", is("Quận 1, TP. Hồ Chí Minh")));
+                .andExpect(jsonPath("$.defaultAddress", is("Quận 1, TP. Hồ Chí Minh")))
+                .andExpect(jsonPath("$.avatarUrl", is("https://example.com/avatar.jpg")));
 
         mockMvc.perform(get("/api/customer/profile").header("Authorization", authorization))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.phoneNumber", is("0901234567")));
+                .andExpect(jsonPath("$.phoneNumber", is("0901234567")))
+                .andExpect(jsonPath("$.avatarUrl", is("https://example.com/avatar.jpg")));
     }
 
     private static String token(UUID id, String role) {

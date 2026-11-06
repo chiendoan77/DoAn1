@@ -1,3 +1,4 @@
+import styles from "./page.module.css";
 import { AuthForm } from "@/features/auth/auth-form";
 import { Suspense } from "react";
 
@@ -7,7 +8,7 @@ type Props = {
 
 export default function RegisterPage({ searchParams }: Props) {
   return (
-    <Suspense fallback={<p className="p-8 text-center text-sm text-[#6c7971]">Đang tải biểu mẫu đăng ký…</p>}>
+    <Suspense fallback={<p className={styles.style1}>Đang tải biểu mẫu đăng ký…</p>}>
       <RegisterForm searchParams={searchParams} />
     </Suspense>
   );

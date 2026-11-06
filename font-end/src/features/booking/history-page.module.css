@@ -1,0 +1,173 @@
+@reference "../../app/globals.css";
+
+.style1 {
+  @apply min-h-screen bg-[#f7f8f4];
+}
+
+.style2 {
+  @apply mx-auto max-w-5xl px-5 py-10 sm:px-8 sm:py-14;
+}
+
+.style3 {
+  @apply text-xs font-bold uppercase tracking-[0.18em] text-[#719071];
+}
+
+.style4 {
+  @apply mt-2 text-3xl font-semibold text-[#173c33];
+}
+
+.style5 {
+  @apply mt-2 text-sm text-[#6c7971];
+}
+
+.style6 {
+  @apply mt-6 rounded-2xl border border-[#dce5dc] bg-white p-5;
+}
+
+.style7 {
+  @apply text-sm font-semibold text-[#315246];
+}
+
+.style8 {
+  @apply mt-1 text-sm text-[#6c7971];
+}
+
+.style9 {
+  @apply mt-2 text-sm font-medium text-[#477352];
+}
+
+.style10 {
+  @apply mt-6 grid gap-4 rounded-2xl border border-[#dce5dc] bg-white p-5;
+}
+
+.style11 {
+  @apply text-sm font-medium text-[#315246];
+}
+
+.style12 {
+  @apply mt-2 w-full rounded-xl border border-[#dce5dc] px-4 py-3;
+}
+
+.style13 {
+  @apply w-fit rounded-full bg-[#1f594a] px-5 py-2.5 text-sm font-semibold text-white;
+}
+
+.style14 {
+  @apply mt-6 rounded-3xl border border-[#dce5dc] bg-white p-5 sm:p-6;
+}
+
+.style15 {
+  @apply text-lg font-semibold text-[#23483a];
+}
+
+.style16 {
+  @apply mt-4 grid gap-4;
+}
+
+.style17 {
+  @apply mb-2 text-sm font-medium text-[#315246];
+}
+
+.style18 {
+  @apply flex flex-wrap gap-3;
+}
+
+.style19 {
+  @apply flex items-center gap-2 rounded-xl border border-[#dce5dc] px-3 py-2 text-sm;
+}
+
+.style20 {
+  @apply w-fit rounded-full bg-[#1f594a] px-5 py-3 text-sm font-semibold text-white;
+}
+
+.style21 {
+  @apply mt-6 rounded-2xl bg-[#fff1ec] p-4 text-sm text-[#9b3d28];
+}
+
+.style22 {
+  @apply mt-8 text-sm text-[#6c7971];
+}
+
+.style23 {
+  @apply mt-8 rounded-3xl border border-dashed border-[#cfdacf] bg-white p-8 text-center;
+}
+
+.style24 {
+  @apply font-semibold text-[#315246];
+}
+
+.style25 {
+  @apply mt-5 inline-flex rounded-full bg-[#1f594a] px-5 py-3 text-sm font-semibold text-white;
+}
+
+.style26 {
+  @apply mt-8 space-y-4;
+}
+
+.style27 {
+  @apply rounded-3xl border border-[#e5eae3] bg-white p-5 sm:p-6;
+}
+
+.style28 {
+  @apply flex flex-col justify-between gap-4 sm:flex-row sm:items-start;
+}
+
+.style29 {
+  @apply text-xs font-semibold uppercase tracking-wide text-[#719071];
+}
+
+.style30 {
+  @apply mt-1 text-lg font-semibold text-[#23483a];
+}
+
+.style31 {
+  @apply mt-2 text-sm leading-6 text-[#6c7971];
+}
+
+.style32 {
+  @apply w-fit rounded-full bg-[#f1f7ef] px-3 py-1.5 text-xs font-semibold text-[#35684c];
+}
+
+.style33 {
+  @apply mt-4 flex flex-wrap gap-2 border-t border-[#edf0eb] pt-4;
+}
+
+.style34 {
+  @apply rounded-full bg-[#1f594a] px-4 py-2 text-xs font-semibold text-white;
+}
+
+.style35 {
+  @apply rounded-full border border-[#dce5dc] px-4 py-2 text-xs font-semibold text-[#52645e];
+}
+
+.style36 {
+  @apply mt-4 border-t border-[#edf0eb] pt-4;
+}
+
+.style37 {
+  @apply grid gap-3 sm:grid-cols-[120px_1fr_auto];
+}
+
+.style38 {
+  @apply text-xs font-medium text-[#52645e];
+}
+
+.style39 {
+  @apply mt-1 w-full rounded-xl border border-[#dce5dc] bg-white px-3 py-2 text-sm;
+}
+
+.style40 {
+  @apply mt-1 w-full rounded-xl border border-[#dce5dc] px-3 py-2 text-sm;
+}
+
+.style41 {
+  @apply self-end rounded-full bg-[#1f594a] px-4 py-2 text-xs font-semibold text-white;
+}
+
+.style42 {
+  @apply rounded-full border border-[#dce5dc] px-4 py-2 text-xs font-semibold text-[#35684c];
+}
+
+.style43 {
+  @apply mt-4 border-t border-[#edf0eb] pt-4 text-xs font-medium text-[#477352];
+}
