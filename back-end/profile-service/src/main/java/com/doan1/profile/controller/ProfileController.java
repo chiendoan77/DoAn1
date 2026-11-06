@@ -4,6 +4,7 @@ import com.doan1.profile.dto.request.ProviderApplicationRequest;
 import com.doan1.profile.dto.request.ProviderDecisionRequest;
 import com.doan1.profile.dto.request.CustomerProfileRequest;
 import com.doan1.profile.dto.response.CategoryResponse;
+import com.doan1.profile.dto.response.ProviderPageResponse;
 import com.doan1.profile.dto.response.ProviderResponse;
 import com.doan1.profile.security.JwtPrincipalService;
 import com.doan1.profile.service.ProfileService;
@@ -41,6 +42,13 @@ public class ProfileController {
     public List<ProviderResponse> providers(@PathVariable String categoryId,
             @RequestParam(defaultValue = "10") int limit) {
         return profiles.providers(categoryId, limit);
+    }
+
+    @GetMapping("/services/{categoryId}/providers/page")
+    public ProviderPageResponse providerPage(@PathVariable String categoryId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int limit) {
+        return profiles.providerPage(categoryId, page, limit);
     }
 
     @GetMapping("/services/providers/{providerId}")

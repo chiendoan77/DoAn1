@@ -4,7 +4,8 @@ Public API qua Gateway; JWT role/ownership được kiểm tra trong Profile. En
 
 | Method | Path | Quyền | Mục đích |
 |---|---|---|---|
-| GET | `/api/services/{categoryId}/providers?limit=10` | Public | Danh sách provider đã duyệt; limit tối đa 10. |
+| GET | `/api/services/{categoryId}/providers?limit=10` | Public | Danh sách tối đa 10 provider đã duyệt ở trang đầu (tương thích cũ). |
+| GET | `/api/services/{categoryId}/providers/page?page=0&limit=10` | Public | Trang provider đã duyệt, gồm `content`, `totalElements`, `totalPages`, `size`, `number`; limit tối đa 10. |
 | GET | `/api/services/providers/{providerId}` | Public | Chi tiết provider đã duyệt, không bị suspension. |
 | GET | `/api/services/{categoryId}/providers/{providerId}` | Public | Provider đã duyệt thuộc category. |
 | POST | `/api/provider/applications` | PROVIDER | Tạo provider application. |

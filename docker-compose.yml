@@ -4,6 +4,8 @@ services:
     environment:
       MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
       MYSQL_ROOT_HOST: "%"
+    ports:
+      - "127.0.0.1:${MYSQL_PORT:-3306}:3306"
     volumes:
       - mysql-data:/var/lib/mysql
       - ./docker/mysql/init/001-create-schemas.sql:/docker-entrypoint-initdb.d/001-create-schemas.sql:ro

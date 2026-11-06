@@ -118,7 +118,7 @@ Path dưới đây được nối sau base URL. Quyền chi tiết, fields và t
 |---|---|---|
 | Identity | `POST /api/auth/register`, `/api/auth/login`, `/api/auth/refresh`, `/api/auth/logout`; `GET /api/me` | Public trừ `/api/me` cần đăng nhập |
 | Identity | `PATCH /api/admin/users/{accountId}/status` | ADMIN |
-| Profile | `GET /api/services/{categoryId}/providers`, `/api/services/providers/{providerId}`, `/api/services/{categoryId}/providers/{providerId}` | Public |
+| Profile | `GET /api/services/{categoryId}/providers`, `/api/services/{categoryId}/providers/page`, `/api/services/providers/{providerId}`, `/api/services/{categoryId}/providers/{providerId}` | Public |
 | Profile | `POST /api/provider/applications`; `GET/PUT /api/provider/profile` | PROVIDER |
 | Profile | `GET/PUT /api/customer/profile` | CUSTOMER |
 | Profile | `GET /api/admin/providers/pending`; `PATCH /api/admin/providers/{providerId}/approval`, `/suspension` | ADMIN |

@@ -4,7 +4,7 @@
 
 Root `docker-compose.yml` định nghĩa Next.js frontend, API Gateway, Identity, Profile, Catalog, Marketplace, Booking, Review, Payment, Notification, MySQL, RabbitMQ, Prometheus, Grafana và Jaeger. MySQL tạo schema riêng cho các service có persistence; Payment chưa có database nghiệp vụ.
 
-Frontend, Gateway và các service ports được publish vào loopback (`127.0.0.1`) để phát triển/kiểm thử trên máy host. MySQL không publish port; không có port nào được bind trên mọi interface. Frontend là entry point cho UI; Gateway là entry point API.
+Frontend, Gateway, service ports và host port MySQL được publish vào loopback (`127.0.0.1`) để phát triển/kiểm thử trên máy host. MySQL host port cấu hình qua `MYSQL_PORT` trong `.env` (mặc định `3306`); container vẫn dùng port `3306` trên Docker network. Không có port nào được bind trên mọi interface. Frontend là entry point cho UI; Gateway là entry point API.
 
 ## Production
 

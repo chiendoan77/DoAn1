@@ -6,6 +6,7 @@ import com.doan1.profile.dto.request.CustomerProfileRequest;
 import com.doan1.profile.dto.response.CategoryResponse;
 import com.doan1.profile.dto.response.InternalProviderResponse;
 import com.doan1.profile.dto.response.ProviderEligibilityResponse;
+import com.doan1.profile.dto.response.ProviderPageResponse;
 import com.doan1.profile.dto.response.ProviderResponse;
 import com.doan1.profile.client.IdentityAccountClient;
 import com.doan1.profile.entity.ProviderProfile;
@@ -16,6 +17,7 @@ import com.doan1.profile.repository.CustomerProfileRepository;
 import com.doan1.profile.entity.CustomerProfile;
 import com.doan1.profile.repository.ProviderRatingReviewRepository;
 import com.doan1.profile.entity.ProviderRatingReview;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -68,10 +70,20 @@ public class ProfileService {
     public List<CategoryResponse> categories() { return CategoryResponse.all(); }
 
     public List<ProviderResponse> providers(String categoryId, int limit) {
+        return providerPage(categoryId, 0, limit).content();
+    }
+
+    public ProviderPageResponse providerPage(String categoryId, int page, int limit) {
         requireCategory(categoryId);
-        return providers.findPublicByCategory(normalizeCategory(categoryId), ProviderStatus.APPROVED,
-                        PageRequest.of(0, Math.max(1, Math.min(limit, 10))))
-                .stream().map(ProfileMapper::toResponse).toList();
+        Page<ProviderProfile> result = providers.findPublicByCategory(
+                normalizeCategory(categoryId), ProviderStatus.APPROVED,
+                PageRequest.of(Math.max(0, page), Math.max(1, Math.min(limit, 10))));
+        return new ProviderPageResponse(
+                result.getContent().stream().map(ProfileMapper::toResponse).toList(),
+                result.getTotalElements(),
+                result.getTotalPages(),
+                result.getSize(),
+                result.getNumber());
     }
 
     public ProviderResponse provider(UUID providerId) {

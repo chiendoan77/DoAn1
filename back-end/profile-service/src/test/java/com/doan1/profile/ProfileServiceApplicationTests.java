@@ -91,6 +91,28 @@ class ProfileServiceApplicationTests {
     }
 
     @Test
+    void publicProviderPagesIncludeApprovedProfilesBeyondTheFirstTen() throws Exception {
+        for (int index = 0; index < 11; index++) {
+            providers.save(new ProviderProfile(UUID.randomUUID(), "Provider %02d".formatted(index),
+                    Set.of("repair"), "Hà Nội", "https://example.com/image.jpg", "Dịch vụ",
+                    ProviderStatus.APPROVED));
+        }
+
+        mockMvc.perform(get("/api/services/repair/providers/page").param("page", "0"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content.length()", is(10)))
+                .andExpect(jsonPath("$.totalElements", is(11)))
+                .andExpect(jsonPath("$.totalPages", is(2)))
+                .andExpect(jsonPath("$.number", is(0)));
+
+        mockMvc.perform(get("/api/services/repair/providers/page").param("page", "1"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content.length()", is(1)))
+                .andExpect(jsonPath("$.content[0].fullName", is("Provider 10")))
+                .andExpect(jsonPath("$.number", is(1)));
+    }
+
+    @Test
     void catalogEligibilityRequiresActiveAccountAndApprovedProfile() throws Exception {
         UUID owner = UUID.randomUUID();
         ProviderProfile profile = providers.save(new ProviderProfile(owner, "Provider",

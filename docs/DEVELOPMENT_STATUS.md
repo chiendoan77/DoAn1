@@ -14,7 +14,7 @@ Ngày đối chiếu source/configuration, full backend tests và frontend check
 
 - **Identity:** đăng nhập/đăng ký, RS256 JWT, issuer/audience, refresh token opaque đã hash, rotation và revoke theo token family; có account status và Admin audit history. Access JWT còn hiệu lực đến TTL sau logout.
 - **API Gateway:** route domain APIs, xác minh JWT RS256 cho endpoint được bảo vệ; service tiếp tục authorization theo role. Customer profile đã được route và bảo vệ.
-- **Profile:** sở hữu customer/provider profiles, approval/suspension, provider lookup/eligibility và rating projection. `ReviewSubmitted` được áp dụng idempotent theo review ID.
+- **Profile:** sở hữu customer/provider profiles, approval/suspension, provider lookup/eligibility và rating projection. Danh sách nhà cung cấp công khai hỗ trợ phân trang, tối đa 10 hồ sơ/trang. `ReviewSubmitted` được áp dụng idempotent theo review ID.
 - **Catalog:** category/package CRUD, moderation, giá, Flyway và package outbox; Booking đồng bộ package qua API/DTO.
 - **Booking:** tạo từ package APPROVED, xác minh provider qua Profile, lưu package name/price/duration snapshots, lịch sử và provider status transitions. `BookingCompleted` được ghi qua transactional outbox.
 - **Review:** service riêng xác minh eligibility qua Booking; lưu review và phát `ReviewSubmitted` qua outbox. Marketplace chỉ còn dữ liệu/API legacy migration.
@@ -34,8 +34,9 @@ Ngày đối chiếu source/configuration, full backend tests và frontend check
 ## Kiểm thử và xác minh
 
 - `mvn -DskipTests package`: toàn bộ 12 reactor modules build thành công.
-- Full `mvn test`: 39 tests trên 12 suite, 0 failure, 0 error, 0 skipped. [TEST_CASES.csv](./TEST_CASES.csv) có 58 dòng: 42 `PASS`, 11 `NOT_RUN`, 4 `NOT_IMPLEMENTED`, 1 `DEFERRED`; từng backend test trỏ tới Surefire report hoặc ghi rõ lệnh kiểm thử tương ứng.
+- Full `mvn test` gần nhất trước thay đổi phân trang: 39 tests trên 12 suite, 0 failure, 0 error, 0 skipped. Sau thay đổi, Profile suite riêng có 6 tests pass. [TEST_CASES.csv](./TEST_CASES.csv) có 59 dòng: 43 `PASS`, 11 `NOT_RUN`, 4 `NOT_IMPLEMENTED`, 1 `DEFERRED`; từng backend test trỏ tới Surefire report hoặc ghi rõ lệnh kiểm thử tương ứng.
 - Frontend lint/typecheck/production build và `docker compose config -q` pass; frontend checks được chạy lại sau khi bổ sung PUT/DELETE cho BFF.
+- Xác minh phân trang provider: 6 Profile tests pass (bao gồm 11 hồ sơ qua hai trang); frontend lint, typecheck và production build pass.
 - `mvn install` trước đó không hoàn tất do Maven không thể move artifact tạm trong mounted `.m2`; reactor `package` và full tests thành công.
 
 ## Chưa triển khai hoặc chưa xác minh

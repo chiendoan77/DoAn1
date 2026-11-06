@@ -2,6 +2,7 @@ package com.doan1.profile.repository;
 
 import com.doan1.profile.entity.ProviderProfile;
 import com.doan1.profile.enums.ProviderStatus;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -21,7 +22,7 @@ public interface ProviderProfileRepository extends JpaRepository<ProviderProfile
               and provider.suspended = false
             order by provider.rating desc, provider.reviewCount desc, provider.fullName asc
             """)
-    List<ProviderProfile> findPublicByCategory(
+    Page<ProviderProfile> findPublicByCategory(
             @Param("categoryId") String categoryId,
             @Param("status") ProviderStatus status,
             Pageable pageable);

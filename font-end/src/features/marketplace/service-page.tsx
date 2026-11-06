@@ -15,6 +15,13 @@ const serviceDetails = {
 
 type Props = { service: keyof typeof serviceDetails };
 
+type ProviderPageState = {
+  categoryId: string;
+  page: number;
+  result?: PageResult<Provider>;
+  error?: string;
+};
+
 function localDateTimeMinimum() {
   const date = new Date(Date.now() + 60 * 60 * 1000);
   date.setMinutes(date.getMinutes() - date.getTimezoneOffset());
@@ -23,11 +30,10 @@ function localDateTimeMinimum() {
 
 export function ServicePage({ service }: Props) {
   const category = serviceDetails[service];
-  const [providers, setProviders] = useState<Provider[]>([]);
+  const [providerPage, setProviderPage] = useState(0);
+  const [providerPageState, setProviderPageState] = useState<ProviderPageState | null>(null);
   const [packages, setPackages] = useState<ServicePackage[]>([]);
-  const [loadingProviders, setLoadingProviders] = useState(true);
   const [loadingPackages, setLoadingPackages] = useState(true);
-  const [providerError, setProviderError] = useState("");
   const [packageError, setPackageError] = useState("");
   const [selectedProvider, setSelectedProvider] = useState<Provider | null>(null);
   const [selectedPackage, setSelectedPackage] = useState<ServicePackage | null>(null);
@@ -35,12 +41,24 @@ export function ServicePage({ service }: Props) {
   const [bookingError, setBookingError] = useState("");
   const [bookingMessage, setBookingMessage] = useState("");
   const [bookingSubmitting, setBookingSubmitting] = useState(false);
+  const isCurrentProviderPage = providerPageState?.categoryId === category.id
+    && providerPageState.page === providerPage;
+  const providers = isCurrentProviderPage ? providerPageState.result?.content ?? [] : [];
+  const providerError = isCurrentProviderPage ? providerPageState.error ?? "" : "";
+  const providerTotalPages = isCurrentProviderPage ? providerPageState.result?.totalPages ?? 0 : 0;
+  const loadingProviders = !isCurrentProviderPage;
 
   useEffect(() => {
-    apiRequest<Provider[]>(`services/${category.id}/providers?limit=10`)
-      .then(setProviders)
-      .catch((cause: Error) => setProviderError(cause.message))
-      .finally(() => setLoadingProviders(false));
+    apiRequest<PageResult<Provider>>(`services/${category.id}/providers/page?page=${providerPage}&limit=10`)
+      .then((result) => setProviderPageState({ categoryId: category.id, page: providerPage, result }))
+      .catch((cause: Error) => setProviderPageState({
+        categoryId: category.id,
+        page: providerPage,
+        error: cause.message,
+      }));
+  }, [category.id, providerPage]);
+
+  useEffect(() => {
     apiRequest<PageResult<ServicePackage>>(`catalog/packages?categoryId=${encodeURIComponent(category.id)}&page=0&size=20`)
       .then((result) => setPackages(result.content))
       .catch((cause: Error) => setPackageError(cause.message))
@@ -119,7 +137,7 @@ export function ServicePage({ service }: Props) {
             <p className={styles.style6}>Nhà cung cấp</p>
             <h2 className={styles.style12}>{category.name} gần bạn</h2>
           </div>
-          <p className={styles.style13}>Tối đa 10 hồ sơ đã được duyệt, ưu tiên đánh giá cao.</p>
+          <p className={styles.style13}>Hồ sơ đã duyệt, ưu tiên đánh giá cao.</p>
         </div>
         {loadingProviders ? (
           <p className={styles.style14}>Đang tìm nhà cung cấp…</p>
@@ -150,6 +168,27 @@ export function ServicePage({ service }: Props) {
               </article>
             ))}
           </div>
+        )}
+        {providerTotalPages > 1 && (
+          <nav className={styles.style54} aria-label="Phân trang nhà cung cấp">
+            <button
+              type="button"
+              className={styles.style55}
+              disabled={loadingProviders || providerPage === 0}
+              onClick={() => setProviderPage((current) => current - 1)}
+            >
+              Trang trước
+            </button>
+            <span>Trang {providerPage + 1} / {providerTotalPages}</span>
+            <button
+              type="button"
+              className={styles.style55}
+              disabled={loadingProviders || providerPage + 1 >= providerTotalPages}
+              onClick={() => setProviderPage((current) => current + 1)}
+            >
+              Trang sau
+            </button>
+          </nav>
         )}
 
         <div className={styles.style28}>

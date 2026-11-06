@@ -4,7 +4,9 @@
 
 Kịch bản chi tiết và trạng thái gần nhất nằm trong [TEST_CASES.csv](./TEST_CASES.csv). `PASS` chỉ dành cho testcase được chạy và có test report; `NOT_RUN` nghĩa là chưa có bằng chứng thực thi; `NOT_IMPLEMENTED` dùng cho hành vi chưa có implementation. Không coi cấu hình, route, build hoặc test context-load là bằng chứng E2E.
 
-Ngày 2026-11-06 full Maven reactor đã pass: 39 tests/12 suites, không failure/error/skip. CSV hiện có 58 testcase: 42 `PASS`, 11 `NOT_RUN`, 4 `NOT_IMPLEMENTED`, 1 `DEFERRED`. Frontend lint/typecheck/build pass; Compose config cũng đã pass; full runtime Compose, các luồng browser E2E mới, production MySQL migration rehearsal và Pact suite chưa được xác minh. Xem [CSV testcase](./TEST_CASES.csv) để tra trạng thái từng case và bằng chứng.
+Ngày 2026-11-06 full Maven reactor gần nhất trước thay đổi phân trang đã pass: 39 tests/12 suites, không failure/error/skip. CSV hiện có 59 testcase: 43 `PASS`, 11 `NOT_RUN`, 4 `NOT_IMPLEMENTED`, 1 `DEFERRED`. Frontend lint/typecheck/build pass; Compose config cũng đã pass; full runtime Compose, các luồng browser E2E mới, production MySQL migration rehearsal và Pact suite chưa được xác minh. Xem [CSV testcase](./TEST_CASES.csv) để tra trạng thái từng case và bằng chứng.
+
+Sau thay đổi phân trang provider, `ProfileServiceApplicationTests` chạy riêng qua Maven Docker đạt 6 tests, không failure/error/skip; frontend lint, typecheck và production build đều pass. Đây là kiểm thử service/UI build, không thay thế browser E2E.
 
 ## Tầng kiểm thử
 

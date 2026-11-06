@@ -16,7 +16,7 @@ Kiểm tra source và cấu hình repository ngày 2026-11-06:
 |---|---|
 | `back-end/` | Maven reactor có API Gateway và 8 Spring Boot services: Identity, Profile, Catalog, Marketplace, Booking, Review, Payment, Notification. Payment vẫn là adapter-registry skeleton. |
 | `font-end/` | Next.js App Router, React, TypeScript, Tailwind và BFF. Không phải Angular. |
-| `docker/`, `docker-compose.yml` | Compose định nghĩa MySQL, RabbitMQ, Prometheus, Grafana, Jaeger, Gateway, frontend và services; schema riêng cho service có dữ liệu; MySQL không publish port host. |
+| `docker/`, `docker-compose.yml` | Compose định nghĩa MySQL, RabbitMQ, Prometheus, Grafana, Jaeger, Gateway, frontend và services; schema riêng cho service có dữ liệu; MySQL publish loopback host port qua `MYSQL_PORT` trong `.env`. |
 | `docs/` | Tài liệu yêu cầu, kiến trúc, database, API và từng service. [PROJECT_STRUCTURE.md](./PROJECT_STRUCTURE.md) là inventory source hiện tại. |
 
 Repository hiện có source code. Không dùng trạng thái kiểm kê ban đầu ở các tài liệu cũ để mô tả hiện trạng. Các luồng đã có bằng chứng được liệt kê trong [DEVELOPMENT_STATUS.md](./DEVELOPMENT_STATUS.md); đây chưa phải hệ thống production-ready.

@@ -18,6 +18,7 @@ Các host ports bind vào `127.0.0.1`; đây không phải cấu hình public.
 |---|---|
 | Frontend | `http://localhost:3000` |
 | API Gateway (API entry point) | `http://localhost:8080` |
+| MySQL (local development) | `localhost:${MYSQL_PORT:-3306}` |
 | Identity | `http://localhost:8081` |
 | Marketplace legacy | `http://localhost:8082` |
 | Booking | `http://localhost:8083` |
@@ -30,7 +31,9 @@ Các host ports bind vào `127.0.0.1`; đây không phải cấu hình public.
 | Grafana | `http://localhost:3001` |
 | Jaeger UI | `http://localhost:16686` |
 
-Integration client chỉ dùng Gateway. Các service port được publish loopback cho debug local, không được expose trong môi trường public. MySQL/RabbitMQ không publish port host.
+MySQL được publish trên loopback host tại `127.0.0.1:${MYSQL_PORT:-3306}` để truy cập local; đặt `MYSQL_PORT` trong `.env` để đổi host port. Cổng nội bộ MySQL giữa các container vẫn là `3306`. Ví dụ cấu hình nằm trong [.env.example](../.env.example).
+
+Integration client chỉ dùng Gateway. Các service port được publish loopback cho debug local, không được expose trong môi trường public. RabbitMQ không publish port host.
 
 ## Dừng và dữ liệu local
 

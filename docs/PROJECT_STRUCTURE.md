@@ -48,7 +48,7 @@ Mỗi backend module có `src/test/java` riêng. Domain services tách controlle
 | Review | `back-end/review-service/` | Review data, Booking eligibility, `ReviewSubmitted` outbox and legacy import API. |
 | Payment | `back-end/payment-service/` | Adapter registry skeleton; chưa có transaction API/schema. |
 | Notification | `back-end/notification-service/` | Package-event consumer và in-app notification inbox. |
-| MySQL | `docker-compose.yml`, `docker/mysql/init/` | Schema riêng cho các service có dữ liệu; không publish port host. |
+| MySQL | `docker-compose.yml`, `docker/mysql/init/` | Schema riêng cho các service có dữ liệu; host port local cấu hình qua `MYSQL_PORT` trong `.env`. |
 | RabbitMQ | `docker-compose.yml` | Catalog/Booking/Review outboxes; Notification consumes BookingCompleted and package events, Profile consumes ReviewSubmitted. |
 | Observability | `docker-compose.yml`, `docker/prometheus/`, `docker/grafana/` | Prometheus metrics, Grafana and Jaeger OTLP traces; centralized logs not yet integrated. |
 
