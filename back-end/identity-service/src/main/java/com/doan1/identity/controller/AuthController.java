@@ -2,6 +2,7 @@ package com.doan1.identity.controller;
 
 import com.doan1.identity.dto.request.LoginRequest;
 import com.doan1.identity.dto.request.RegisterRequest;
+import com.doan1.identity.dto.request.RefreshTokenRequest;
 import com.doan1.identity.dto.response.AccountResponse;
 import com.doan1.identity.dto.response.LoginResponse;
 import com.doan1.identity.service.AuthService;
@@ -31,6 +32,16 @@ public class AuthController {
     @PostMapping("/auth/login")
     public LoginResponse login(@Valid @RequestBody LoginRequest request) {
         return auth.login(request);
+    }
+
+    @PostMapping("/auth/refresh")
+    public LoginResponse refresh(@Valid @RequestBody RefreshTokenRequest request) {
+        return auth.refresh(request.refreshToken());
+    }
+
+    @PostMapping("/auth/logout")
+    public void logout(@Valid @RequestBody RefreshTokenRequest request) {
+        auth.logout(request.refreshToken());
     }
 
     @GetMapping("/me")

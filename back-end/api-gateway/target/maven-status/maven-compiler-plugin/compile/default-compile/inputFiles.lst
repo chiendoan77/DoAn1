@@ -1,3 +1,4 @@
-C:\Users\CHIEN\Downloads\DoAn1\back-end\api-gateway\src\main\java\com\doan1\gateway\ApiGatewayApplication.java
-C:\Users\CHIEN\Downloads\DoAn1\back-end\api-gateway\src\main\java\com\doan1\gateway\config\GatewayCorsConfiguration.java
-C:\Users\CHIEN\Downloads\DoAn1\back-end\api-gateway\src\main\java\com\doan1\gateway\config\GatewayRoutes.java
+/workspace/api-gateway/src/main/java/com/doan1/gateway/ApiGatewayApplication.java
+/workspace/api-gateway/src/main/java/com/doan1/gateway/config/GatewayCorsConfiguration.java
+/workspace/api-gateway/src/main/java/com/doan1/gateway/config/GatewayRoutes.java
+/workspace/api-gateway/src/main/java/com/doan1/gateway/security/JwtGatewayFilter.java

@@ -1,15 +1,21 @@
 package com.doan1.booking.service;
 
-import com.doan1.booking.client.MarketplaceClient;
+import com.doan1.booking.client.ProfileClient;
+import com.doan1.booking.client.CatalogClient;
 import com.doan1.booking.dto.request.CreateBookingRequest;
 import com.doan1.booking.dto.response.BookingResponse;
 import com.doan1.booking.dto.response.MarketplaceCategoryResponse;
 import com.doan1.booking.dto.response.ProviderDetailsResponse;
+import com.doan1.booking.dto.response.PackageDetailsResponse;
 import com.doan1.booking.dto.response.ReviewEligibilityResponse;
 import com.doan1.booking.entity.Booking;
+import com.doan1.booking.entity.BookingOutboxEvent;
 import com.doan1.booking.enums.BookingStatus;
 import com.doan1.booking.mapper.BookingMapper;
 import com.doan1.booking.repository.BookingRepository;
+import com.doan1.booking.repository.BookingOutboxEventRepository;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -22,21 +28,34 @@ import java.util.UUID;
 @Service
 public class BookingServiceImpl implements BookingService {
     private final BookingRepository bookings;
-    private final MarketplaceClient marketplace;
+    private final ProfileClient profiles;
+    private final CatalogClient catalog;
+    private final BookingOutboxEventRepository outbox;
+    private final ObjectMapper objectMapper;
 
-    public BookingServiceImpl(BookingRepository bookings, MarketplaceClient marketplace) {
+    public BookingServiceImpl(
+            BookingRepository bookings,
+            ProfileClient profiles,
+            CatalogClient catalog,
+            BookingOutboxEventRepository outbox,
+            ObjectMapper objectMapper) {
         this.bookings = bookings;
-        this.marketplace = marketplace;
+        this.profiles = profiles;
+        this.catalog = catalog;
+        this.outbox = outbox;
+        this.objectMapper = objectMapper;
     }
 
     @Override
     public BookingResponse create(UUID customerAccountId, String customerName, CreateBookingRequest input) {
-        ProviderDetailsResponse provider = marketplace.getApprovedProvider(input.categoryId(), input.providerId());
-        if (!provider.categoryIds().contains(input.categoryId()) || !"APPROVED".equals(provider.status())) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Nhà cung cấp không phục vụ danh mục đã chọn.");
+        PackageDetailsResponse servicePackage = catalog.getApprovedPackage(input.packageId());
+        ProviderDetailsResponse provider =
+                profiles.getApprovedProvider(servicePackage.categoryId(), servicePackage.providerId());
+        if (!provider.categoryIds().contains(servicePackage.categoryId()) || !"APPROVED".equals(provider.status())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Nhà cung cấp không phục vụ danh mục của gói.");
         }
         String categoryName = provider.categories().stream()
-                .filter(category -> category.id().equals(input.categoryId()))
+                .filter(category -> category.id().equals(servicePackage.categoryId()))
                 .map(MarketplaceCategoryResponse::name)
                 .findFirst()
                 .orElseThrow(() -> new ResponseStatusException(
@@ -47,8 +66,12 @@ public class BookingServiceImpl implements BookingService {
                 provider.identityAccountId(),
                 customerName,
                 provider.fullName(),
-                input.categoryId(),
+                servicePackage.categoryId(),
                 categoryName,
+                servicePackage.id(),
+                servicePackage.name(),
+                servicePackage.price(),
+                servicePackage.durationMinutes(),
                 input.scheduledAt(),
                 input.address().trim(),
                 input.description().trim()));
@@ -84,7 +107,34 @@ public class BookingServiceImpl implements BookingService {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Không thể chuyển trạng thái lịch hẹn này.");
         }
         booking.setStatus(status);
+        if (status == BookingStatus.COMPLETED) {
+            writeCompletedEvent(booking);
+        }
         return BookingMapper.toResponse(booking);
+    }
+
+    private void writeCompletedEvent(Booking booking) {
+        UUID eventId = UUID.randomUUID();
+        try {
+            String payload = objectMapper.writeValueAsString(new BookingCompletedEvent(
+                    eventId, "BookingCompleted", booking.getId(), booking.getCustomerAccountId(),
+                    booking.getProviderAccountId(), booking.getCustomerName(), booking.getProviderName(),
+                    booking.getPackageName()));
+            outbox.save(new BookingOutboxEvent(eventId, booking.getId(), "BookingCompleted", payload));
+        } catch (JsonProcessingException exception) {
+            throw new IllegalStateException("Could not serialize BookingCompleted event.", exception);
+        }
+    }
+
+    private record BookingCompletedEvent(
+            UUID eventId,
+            String eventType,
+            UUID bookingId,
+            UUID customerAccountId,
+            UUID providerAccountId,
+            String customerName,
+            String providerName,
+            String packageName) {
     }
 
     @Override

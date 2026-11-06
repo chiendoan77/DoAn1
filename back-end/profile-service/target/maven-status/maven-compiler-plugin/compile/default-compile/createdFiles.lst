@@ -1,0 +1,7 @@
+com/doan1/profile/entity/CustomerProfile.class
+com/doan1/profile/event/ReviewSubmittedConsumer.class
+com/doan1/profile/dto/request/CustomerProfileRequest.class
+com/doan1/profile/config/ReviewEventsConfiguration.class
+com/doan1/profile/event/ReviewSubmittedConsumer$ReviewSubmittedEvent.class
+com/doan1/profile/repository/CustomerProfileRepository.class
+com/doan1/profile/dto/response/CustomerProfileResponse.class

@@ -16,6 +16,56 @@ services:
     networks:
       - backend
 
+  rabbitmq:
+    image: rabbitmq:3.13-management-alpine
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USERNAME:-doan1}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD:-doan1-local-only}
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+      start_period: 20s
+    networks:
+      - backend
+
+  jaeger:
+    image: jaegertracing/all-in-one:1.63.0
+    ports:
+      - "127.0.0.1:${JAEGER_UI_PORT:-16686}:16686"
+    networks:
+      - backend
+
+  prometheus:
+    image: prom/prometheus:v2.55.1
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --storage.tsdb.path=/prometheus
+    volumes:
+      - ./docker/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus-data:/prometheus
+    ports:
+      - "127.0.0.1:${PROMETHEUS_PORT:-9090}:9090"
+    networks:
+      - backend
+
+  grafana:
+    image: grafana/grafana:11.4.0
+    environment:
+      GF_SECURITY_ADMIN_USER: ${GRAFANA_ADMIN_USER:-admin}
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:-admin-local-only}
+      GF_USERS_ALLOW_SIGN_UP: "false"
+    volumes:
+      - ./docker/grafana/provisioning/datasources/prometheus.yml:/etc/grafana/provisioning/datasources/prometheus.yml:ro
+      - grafana-data:/var/lib/grafana
+    ports:
+      - "127.0.0.1:${GRAFANA_PORT:-3001}:3000"
+    depends_on:
+      - prometheus
+    networks:
+      - backend
+
   identity-service:
     build:
       context: ./back-end
@@ -23,10 +73,13 @@ services:
         SERVICE_MODULE: identity-service
     environment:
       SERVER_PORT: "8081"
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://jaeger:4318/v1/traces
       IDENTITY_DB_URL: jdbc:mysql://mysql:3306/doan1_identity?serverTimezone=UTC
       DB_USERNAME: root
       DB_PASSWORD: ""
-      JWT_SECRET: ${JWT_SECRET:-doan1-local-only-jwt-secret-not-for-production-2026}
+      JWT_PRIVATE_KEY_BASE64: ${JWT_PRIVATE_KEY_BASE64:-}
+      JWT_PUBLIC_KEY_BASE64: ${JWT_PUBLIC_KEY_BASE64:-}
+      PROFILE_IDENTITY_API_KEY: ${PROFILE_IDENTITY_API_KEY:-doan1-local-profile-identity-key-change-me}
       BOOTSTRAP_ADMIN_ENABLED: ${BOOTSTRAP_ADMIN_ENABLED:-false}
       BOOTSTRAP_ADMIN_EMAIL: ${BOOTSTRAP_ADMIN_EMAIL:-}
       BOOTSTRAP_ADMIN_PHONE: ${BOOTSTRAP_ADMIN_PHONE:-}
@@ -47,6 +100,86 @@ services:
     networks:
       - backend
 
+  profile-service:
+    build:
+      context: ./back-end
+      args:
+        SERVICE_MODULE: profile-service
+    environment:
+      SERVER_PORT: "8085"
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://jaeger:4318/v1/traces
+      PROFILE_DB_URL: jdbc:mysql://mysql:3306/doan1_profile?createDatabaseIfNotExist=true&serverTimezone=UTC
+      DB_USERNAME: root
+      DB_PASSWORD: ""
+      JWT_PUBLIC_KEY_BASE64: ${JWT_PUBLIC_KEY_BASE64:-}
+      IDENTITY_SERVICE_URL: http://identity-service:8081
+      MARKETPLACE_SERVICE_URL: http://marketplace-service:8082
+      PROFILE_IDENTITY_API_KEY: ${PROFILE_IDENTITY_API_KEY:-doan1-local-profile-identity-key-change-me}
+      PROFILE_MIGRATION_API_KEY: ${PROFILE_MIGRATION_API_KEY:-doan1-local-profile-migration-key-change-me}
+      BOOKING_PROFILE_API_KEY: ${BOOKING_PROFILE_API_KEY:-doan1-local-booking-profile-key-change-me}
+      CATALOG_PROFILE_API_KEY: ${CATALOG_PROFILE_API_KEY:-doan1-local-catalog-profile-key-change-me}
+      REVIEW_PROFILE_API_KEY: ${REVIEW_PROFILE_API_KEY:-doan1-local-review-profile-key-change-me}
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_PORT: "5672"
+      RABBITMQ_USERNAME: ${RABBITMQ_USERNAME:-doan1}
+      RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD:-doan1-local-only}
+    ports:
+      - "127.0.0.1:${PROFILE_PORT:-8085}:8085"
+    depends_on:
+      mysql:
+        condition: service_healthy
+      identity-service:
+        condition: service_healthy
+      marketplace-service:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O /dev/null http://127.0.0.1:8085/actuator/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+      start_period: 60s
+    networks:
+      - backend
+
+  catalog-service:
+    build:
+      context: ./back-end
+      args:
+        SERVICE_MODULE: catalog-service
+    environment:
+      SERVER_PORT: "8086"
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://jaeger:4318/v1/traces
+      CATALOG_DB_URL: jdbc:mysql://mysql:3306/doan1_catalog?createDatabaseIfNotExist=true&serverTimezone=UTC
+      DB_USERNAME: root
+      DB_PASSWORD: ""
+      JWT_PUBLIC_KEY_BASE64: ${JWT_PUBLIC_KEY_BASE64:-}
+      PROFILE_SERVICE_URL: http://profile-service:8085
+      CATALOG_PROFILE_API_KEY: ${CATALOG_PROFILE_API_KEY:-doan1-local-catalog-profile-key-change-me}
+      CATALOG_BOOKING_API_KEY: ${CATALOG_BOOKING_API_KEY:-doan1-local-catalog-booking-key-change-me}
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_PORT: "5672"
+      RABBITMQ_USERNAME: ${RABBITMQ_USERNAME:-doan1}
+      RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD:-doan1-local-only}
+    ports:
+      - "127.0.0.1:${CATALOG_PORT:-8086}:8086"
+    depends_on:
+      mysql:
+        condition: service_healthy
+      profile-service:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O /dev/null http://127.0.0.1:8086/actuator/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+      start_period: 60s
+    networks:
+      - backend
+
   marketplace-service:
     build:
       context: ./back-end
@@ -54,11 +187,17 @@ services:
         SERVICE_MODULE: marketplace-service
     environment:
       SERVER_PORT: "8082"
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://jaeger:4318/v1/traces
       MARKETPLACE_DB_URL: jdbc:mysql://mysql:3306/doan1_marketplace?serverTimezone=UTC
       DB_USERNAME: root
       DB_PASSWORD: ""
-      JWT_SECRET: ${JWT_SECRET:-doan1-local-only-jwt-secret-not-for-production-2026}
-      SERVICE_API_KEY: ${SERVICE_API_KEY:-doan1-local-only-service-api-key-not-for-production}
+      JWT_PUBLIC_KEY_BASE64: ${JWT_PUBLIC_KEY_BASE64:-}
+      PROFILE_MIGRATION_API_KEY: ${PROFILE_MIGRATION_API_KEY:-doan1-local-profile-migration-key-change-me}
+      REVIEW_PROFILE_API_KEY: ${REVIEW_PROFILE_API_KEY:-doan1-local-review-profile-key-change-me}
+      REVIEW_MIGRATION_API_KEY: ${REVIEW_MIGRATION_API_KEY:-doan1-local-review-migration-key-change-me}
+      MARKETPLACE_BOOKING_API_KEY: ${MARKETPLACE_BOOKING_API_KEY:-doan1-local-marketplace-booking-key-change-me}
+      BOOKING_MARKETPLACE_API_KEY: ${BOOKING_MARKETPLACE_API_KEY:-doan1-local-booking-marketplace-key-change-me}
+      PROFILE_SERVICE_URL: http://profile-service:8085
       BOOKING_SERVICE_URL: http://booking-service:8083
       SEED_DEMO_PROVIDERS: "true"
     ports:
@@ -82,19 +221,102 @@ services:
         SERVICE_MODULE: booking-service
     environment:
       SERVER_PORT: "8083"
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://jaeger:4318/v1/traces
       BOOKING_DB_URL: jdbc:mysql://mysql:3306/doan1_booking?serverTimezone=UTC
       DB_USERNAME: root
       DB_PASSWORD: ""
-      JWT_SECRET: ${JWT_SECRET:-doan1-local-only-jwt-secret-not-for-production-2026}
-      SERVICE_API_KEY: ${SERVICE_API_KEY:-doan1-local-only-service-api-key-not-for-production}
-      MARKETPLACE_SERVICE_URL: http://marketplace-service:8082
+      JWT_PUBLIC_KEY_BASE64: ${JWT_PUBLIC_KEY_BASE64:-}
+      BOOKING_PROFILE_API_KEY: ${BOOKING_PROFILE_API_KEY:-doan1-local-booking-profile-key-change-me}
+      MARKETPLACE_BOOKING_API_KEY: ${MARKETPLACE_BOOKING_API_KEY:-doan1-local-marketplace-booking-key-change-me}
+      BOOKING_CATALOG_API_KEY: ${BOOKING_CATALOG_API_KEY:-doan1-local-booking-catalog-key-change-me}
+      PROFILE_SERVICE_URL: http://profile-service:8085
+      CATALOG_SERVICE_URL: http://catalog-service:8086
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_PORT: "5672"
+      RABBITMQ_USERNAME: ${RABBITMQ_USERNAME:-doan1}
+      RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD:-doan1-local-only}
     ports:
       - "127.0.0.1:${BOOKING_PORT:-8083}:8083"
     depends_on:
       mysql:
         condition: service_healthy
+      profile-service:
+        condition: service_healthy
+      catalog-service:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
     healthcheck:
       test: ["CMD-SHELL", "wget -q -O /dev/null http://127.0.0.1:8083/actuator/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+      start_period: 60s
+    networks:
+      - backend
+
+  review-service:
+    build:
+      context: ./back-end
+      args:
+        SERVICE_MODULE: review-service
+    environment:
+      SERVER_PORT: "8088"
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://jaeger:4318/v1/traces
+      REVIEW_DB_URL: jdbc:mysql://mysql:3306/doan1_review?createDatabaseIfNotExist=true&serverTimezone=UTC
+      DB_USERNAME: root
+      DB_PASSWORD: ""
+      JWT_PUBLIC_KEY_BASE64: ${JWT_PUBLIC_KEY_BASE64:-}
+      REVIEW_BOOKING_API_KEY: ${REVIEW_BOOKING_API_KEY:-doan1-local-review-booking-key-change-me}
+      REVIEW_MIGRATION_API_KEY: ${REVIEW_MIGRATION_API_KEY:-doan1-local-review-migration-key-change-me}
+      BOOKING_SERVICE_URL: http://booking-service:8083
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_PORT: "5672"
+      RABBITMQ_USERNAME: ${RABBITMQ_USERNAME:-doan1}
+      RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD:-doan1-local-only}
+    ports:
+      - "127.0.0.1:${REVIEW_PORT:-8088}:8088"
+    depends_on:
+      mysql:
+        condition: service_healthy
+      booking-service:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O /dev/null http://127.0.0.1:8088/actuator/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+      start_period: 60s
+    networks:
+      - backend
+
+  notification-service:
+    build:
+      context: ./back-end
+      args:
+        SERVICE_MODULE: notification-service
+    environment:
+      SERVER_PORT: "8087"
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://jaeger:4318/v1/traces
+      NOTIFICATION_DB_URL: jdbc:mysql://mysql:3306/doan1_notification?createDatabaseIfNotExist=true&serverTimezone=UTC
+      DB_USERNAME: root
+      DB_PASSWORD: ""
+      JWT_PUBLIC_KEY_BASE64: ${JWT_PUBLIC_KEY_BASE64:-}
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_PORT: "5672"
+      RABBITMQ_USERNAME: ${RABBITMQ_USERNAME:-doan1}
+      RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD:-doan1-local-only}
+    ports:
+      - "127.0.0.1:${NOTIFICATION_PORT:-8087}:8087"
+    depends_on:
+      mysql:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O /dev/null http://127.0.0.1:8087/actuator/health || exit 1"]
       interval: 10s
       timeout: 5s
       retries: 20
@@ -109,6 +331,7 @@ services:
         SERVICE_MODULE: payment-service
     environment:
       SERVER_PORT: "8084"
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://jaeger:4318/v1/traces
     ports:
       - "127.0.0.1:${PAYMENT_PORT:-8084}:8084"
     healthcheck:
@@ -127,20 +350,34 @@ services:
         SERVICE_MODULE: api-gateway
     environment:
       SERVER_PORT: "8080"
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://jaeger:4318/v1/traces
+      JWT_PUBLIC_KEY_BASE64: ${JWT_PUBLIC_KEY_BASE64:-}
       IDENTITY_SERVICE_URL: http://identity-service:8081
+      PROFILE_SERVICE_URL: http://profile-service:8085
+      CATALOG_SERVICE_URL: http://catalog-service:8086
       MARKETPLACE_SERVICE_URL: http://marketplace-service:8082
       BOOKING_SERVICE_URL: http://booking-service:8083
       PAYMENT_SERVICE_URL: http://payment-service:8084
+      NOTIFICATION_SERVICE_URL: http://notification-service:8087
+      REVIEW_SERVICE_URL: http://review-service:8088
     ports:
       - "127.0.0.1:${GATEWAY_PORT:-8080}:8080"
     depends_on:
       identity-service:
         condition: service_healthy
+      profile-service:
+        condition: service_healthy
+      catalog-service:
+        condition: service_healthy
       marketplace-service:
         condition: service_healthy
       booking-service:
         condition: service_healthy
+      review-service:
+        condition: service_healthy
       payment-service:
+        condition: service_healthy
+      notification-service:
         condition: service_healthy
     healthcheck:
       test: ["CMD-SHELL", "wget -q -O /dev/null http://127.0.0.1:8080/actuator/health || exit 1"]
@@ -176,6 +413,8 @@ services:
 
 volumes:
   mysql-data:
+  prometheus-data:
+  grafana-data:
 
 networks:
   backend:

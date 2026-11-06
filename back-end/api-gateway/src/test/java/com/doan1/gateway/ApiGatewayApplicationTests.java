@@ -1,11 +1,14 @@
 package com.doan1.gateway;
 
+import com.doan1.security.test.JwtTestKeys;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.test.web.reactive.server.WebTestClient;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
 
 import static org.springframework.http.HttpHeaders.ACCESS_CONTROL_ALLOW_HEADERS;
 import static org.springframework.http.HttpHeaders.ACCESS_CONTROL_ALLOW_METHODS;
@@ -15,10 +18,16 @@ import static org.springframework.http.HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD
 import static org.springframework.http.HttpHeaders.ORIGIN;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
+        properties = {})
 @AutoConfigureWebTestClient
 class ApiGatewayApplicationTests {
     private static final String ANGULAR_ORIGIN = "http://localhost:4200";
+
+    @DynamicPropertySource
+    static void jwtKeys(DynamicPropertyRegistry registry) {
+        JwtTestKeys.registerPublicKey(registry);
+    }
 
     @Autowired
     private WebTestClient webTestClient;
@@ -57,5 +66,30 @@ class ApiGatewayApplicationTests {
                 .header(ACCESS_CONTROL_REQUEST_METHOD, "POST")
                 .exchange()
                 .expectStatus().isForbidden();
+    }
+
+    @Test
+    void rejectsProtectedRequestsWithoutJwt() {
+        webTestClient.get()
+                .uri("http://localhost:" + port + "/api/me")
+                .exchange()
+                .expectStatus().isUnauthorized();
+    }
+
+    @Test
+    void protectsCustomerProfileWithoutJwt() {
+        webTestClient.get()
+                .uri("http://localhost:" + port + "/api/customer/profile")
+                .exchange()
+                .expectStatus().isUnauthorized();
+    }
+
+    @Test
+    void rejectsMalformedJwtBeforeRouting() {
+        webTestClient.get()
+                .uri("http://localhost:" + port + "/api/admin/packages/pending")
+                .header("Authorization", "Bearer invalid")
+                .exchange()
+                .expectStatus().isUnauthorized();
     }
 }

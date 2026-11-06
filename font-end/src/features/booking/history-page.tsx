@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Account, Booking, Provider, Review, ServiceCategory, apiRequest } from "@/lib/api";
+import { Account, Booking, CustomerProfile, Provider, Review, ServiceCategory, apiRequest } from "@/lib/api";
 import { SiteHeader } from "@/shared/components/site-header";
 
 const statusLabels: Record<Booking["status"], string> = {
@@ -26,6 +26,7 @@ export function HistoryPage() {
   const [account, setAccount] = useState<Account | null>(null);
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [profile, setProfile] = useState<Provider | null>(null);
+  const [customerProfile, setCustomerProfile] = useState<CustomerProfile | null>(null);
   const [needsProviderProfile, setNeedsProviderProfile] = useState(false);
   const [application, setApplication] = useState({
     categoryIds: ["cleaning"],
@@ -52,6 +53,21 @@ export function HistoryPage() {
       const results = await apiRequest<Booking[]>("bookings/mine");
       setBookings(results);
       setReviews(await apiRequest<Review[]>("reviews/mine"));
+      if (current.role === "CUSTOMER") {
+        try {
+          setCustomerProfile(await apiRequest<CustomerProfile>("customer/profile"));
+        } catch (cause) {
+          if (cause instanceof Error && cause.message.includes("Hồ sơ khách hàng")) {
+            setCustomerProfile({
+              displayName: current.fullName,
+              phoneNumber: current.phoneNumber,
+              defaultAddress: "",
+            });
+          } else {
+            throw cause;
+          }
+        }
+      }
       if (current.role === "PROVIDER") {
         try {
           setProfile(await apiRequest<Provider>("provider/profile"));
@@ -121,6 +137,19 @@ export function HistoryPage() {
     }
   }
 
+  async function submitCustomerProfile() {
+    if (!customerProfile) return;
+    setError("");
+    try {
+      setCustomerProfile(await apiRequest<CustomerProfile>("customer/profile", {
+        method: "PUT",
+        body: JSON.stringify(customerProfile),
+      }));
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : "Không cập nhật được hồ sơ khách hàng.");
+    }
+  }
+
   return (
     <main className="min-h-screen bg-[#f7f8f4]">
       <SiteHeader />
@@ -137,6 +166,38 @@ export function HistoryPage() {
               {profile.status === "PENDING" ? "Đang chờ Admin duyệt" : profile.status === "APPROVED" ? "Đã được duyệt" : "Hồ sơ chưa được duyệt"}
             </p>
           </div>
+        )}
+        {account?.role === "CUSTOMER" && customerProfile && (
+          <form
+            className="mt-6 grid gap-4 rounded-2xl border border-[#dce5dc] bg-white p-5"
+            onSubmit={(event) => {
+              event.preventDefault();
+              void submitCustomerProfile();
+            }}
+          >
+            <h2 className="text-sm font-semibold text-[#315246]">Hồ sơ khách hàng</h2>
+            <label className="text-sm font-medium text-[#315246]">
+              Tên hiển thị
+              <input required maxLength={120} value={customerProfile.displayName}
+                onChange={(event) => setCustomerProfile({ ...customerProfile, displayName: event.target.value })}
+                className="mt-2 w-full rounded-xl border border-[#dce5dc] px-4 py-3" />
+            </label>
+            <label className="text-sm font-medium text-[#315246]">
+              Số điện thoại
+              <input required type="tel" value={customerProfile.phoneNumber}
+                onChange={(event) => setCustomerProfile({ ...customerProfile, phoneNumber: event.target.value })}
+                className="mt-2 w-full rounded-xl border border-[#dce5dc] px-4 py-3" />
+            </label>
+            <label className="text-sm font-medium text-[#315246]">
+              Địa chỉ mặc định
+              <input required maxLength={500} value={customerProfile.defaultAddress}
+                onChange={(event) => setCustomerProfile({ ...customerProfile, defaultAddress: event.target.value })}
+                className="mt-2 w-full rounded-xl border border-[#dce5dc] px-4 py-3" />
+            </label>
+            <button className="w-fit rounded-full bg-[#1f594a] px-5 py-2.5 text-sm font-semibold text-white">
+              Lưu hồ sơ
+            </button>
+          </form>
         )}
         {account?.role === "PROVIDER" && needsProviderProfile && (
           <section className="mt-6 rounded-3xl border border-[#dce5dc] bg-white p-5 sm:p-6">

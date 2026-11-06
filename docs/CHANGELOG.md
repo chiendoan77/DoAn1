@@ -1,5 +1,28 @@
 # Changelog
 
+## 2026-11-06 — Security, booking, review and observability follow-up
+
+- Chuyển JWT sang RS256 với refresh-token rotation/revocation; BFF giữ token trong HttpOnly cookies.
+- Thêm customer profile; Booking tạo từ Catalog package và lưu giá/tên/thời lượng snapshot.
+- Tách Review API/data ownership khỏi Marketplace; thêm BookingCompleted/ReviewSubmitted outboxes và consumers.
+- Thêm Flyway baseline/migrations cho Marketplace và Booking, Review schema riêng, và Notification BOOKING linkage.
+- Cấu hình Prometheus/Grafana/Jaeger metrics/traces; centralized logs và Payment lifecycle/saga vẫn chưa triển khai.
+- Sửa thiếu import validation trong `CreateBookingRequest`.
+- Mở rộng Next.js BFF proxy để chuyển tiếp PUT/DELETE, khớp API profile/package và thao tác archive.
+- Viết lại README ngoài thành hướng dẫn repository; tạo API external integration guide và CSV testcase kèm trạng thái/bằng chứng.
+- Rà soát/cập nhật API, architecture, data ownership, service, testing, deployment và project status docs để khớp source hiện tại.
+- Xác minh toàn reactor `mvn -DskipTests package` và `mvn test`: 39 tests/12 suites pass, 0 failure/error/skip. Frontend lint/typecheck/build pass sau thay đổi BFF; Compose config pass.
+
+## 2026-11-06 — Profile, Catalog and Notification services
+
+- Tách provider profile sang Profile; Identity có account status và Admin audit endpoint.
+- Thêm Catalog package workflow, VND price validation, moderation history, optimistic versioning và Flyway.
+- Thêm transactional outbox publisher/confirm cho Catalog → RabbitMQ → Notification inbox.
+- Thêm frontend provider/admin package pages và in-app notification list.
+- Tại giai đoạn đó Gateway dùng JWT HS256; cấu hình này sau đó được thay bằng RS256 ở mục cập nhật phía trên. Thêm API keys riêng theo integration.
+- Cập nhật service/API/database/architecture docs; ghi rõ Review service, RS256, refresh/revoke, Booking/Payment events, saga và runtime Compose còn thiếu.
+- Xác minh Maven reactor: 32 tests/10 suites pass; frontend lint/typecheck/build và Compose config pass.
+
 ## 2026-11-06 — Sắp xếp source theo feature/domain
 
 - Tách request/response DTO, entity, enum, mapper và lớp nghiệp vụ trong Identity, Marketplace, Booking.

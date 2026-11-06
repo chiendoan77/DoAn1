@@ -1,6 +1,7 @@
 package com.doan1.identity.entity;
 
 import com.doan1.identity.enums.Role;
+import com.doan1.identity.enums.AccountStatus;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -36,6 +37,10 @@ public class Account {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 16)
     private Role role;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status", nullable = false, length = 16, columnDefinition = "varchar(16) default 'ACTIVE'")
+    private AccountStatus status = AccountStatus.ACTIVE;
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
@@ -80,6 +85,14 @@ public class Account {
 
     public Role getRole() {
         return role;
+    }
+
+    public AccountStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(AccountStatus status) {
+        this.status = status;
     }
 
     public Instant getCreatedAt() {

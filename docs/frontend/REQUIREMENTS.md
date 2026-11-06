@@ -12,4 +12,4 @@ Các portal/page dưới đây phản ánh luồng MVP được chọn; page chi
 
 Routes, design system, accessibility target và nội dung tiếng Việt/đa ngôn ngữ cần chốt.
 
-Hiện đã triển khai public landing/provider browse, auth, customer booking/history/review, provider application/history/status actions và Admin provider approval qua BFF. Chưa có provider offering management/Admin offering approval UI; Admin user/booking, payment, search/filter nâng cao và booking repeat/slot workflows cũng chưa triển khai.
+Hiện đã triển khai public landing/provider/package browse, auth/refresh, customer profile, booking từ package/history/review, provider application/history/status actions và Admin provider/package moderation qua BFF. Admin user/booking, payment, search/filter nâng cao và booking repeat/slot workflows chưa triển khai.

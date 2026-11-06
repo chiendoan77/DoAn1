@@ -1,4 +1,4 @@
 -------------------------------------------------------------------------------
 Test set: com.doan1.gateway.ApiGatewayApplicationTests
 -------------------------------------------------------------------------------
-Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 4.346 s -- in com.doan1.gateway.ApiGatewayApplicationTests
+Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 48.58 s -- in com.doan1.gateway.ApiGatewayApplicationTests

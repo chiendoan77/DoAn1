@@ -1,0 +1,4 @@
+-------------------------------------------------------------------------------
+Test set: com.doan1.catalog.CatalogServiceIntegrationTests
+-------------------------------------------------------------------------------
+Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 103.5 s -- in com.doan1.catalog.CatalogServiceIntegrationTests

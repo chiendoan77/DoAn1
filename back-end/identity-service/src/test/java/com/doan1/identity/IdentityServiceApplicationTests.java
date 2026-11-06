@@ -1,13 +1,18 @@
 package com.doan1.identity;
 
 import com.doan1.identity.repository.AccountRepository;
-
+import com.doan1.identity.repository.AccountStatusHistoryRepository;
+import com.doan1.security.test.JwtTestKeys;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+
+import java.util.UUID;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
 
 import static org.hamcrest.Matchers.is;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -21,15 +26,24 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
         "spring.datasource.username=sa",
         "spring.datasource.password=",
         "spring.jpa.hibernate.ddl-auto=create-drop",
-        "security.jwt.secret=0123456789abcdef0123456789abcdef"
+        "spring.flyway.enabled=false",
+        "service.api-keys.profile=profile-internal-key-for-identity-tests"
 })
 @AutoConfigureMockMvc
 class IdentityServiceApplicationTests {
+    @DynamicPropertySource
+    static void jwtKeys(DynamicPropertyRegistry registry) {
+        JwtTestKeys.registerKeyPair(registry);
+    }
+
     @Autowired
     private MockMvc mockMvc;
 
     @Autowired
     private AccountRepository accounts;
+
+    @Autowired
+    private AccountStatusHistoryRepository statusHistory;
 
     @Test
     void registersAndAuthenticatesWithEmailAndPhoneWithoutReturningPasswordHash() throws Exception {
@@ -150,5 +164,78 @@ class IdentityServiceApplicationTests {
                         .content(request))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.detail", is("Mật khẩu không được vượt quá 72 byte.")));
+    }
+
+    @Test
+    void adminCanSuspendAccountWithAuditAndInternalStatusIsProtected() throws Exception {
+        mockMvc.perform(post("/api/auth/register")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"email":"suspend@example.com","phoneNumber":"+84902223344",
+                                 "username":"suspend_user","fullName":"Suspended","password":"StrongPass123",
+                                 "role":"PROVIDER"}
+                                """))
+                .andExpect(status().isOk());
+        var account = accounts.findByEmailIgnoreCase("suspend@example.com").orElseThrow();
+
+        mockMvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch(
+                        "/api/admin/users/" + account.getId() + "/status")
+                        .header("Authorization", "Bearer " + token(UUID.randomUUID(), "ADMIN"))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"status":"SUSPENDED","reason":"Yêu cầu kiểm tra tài khoản"}
+                                """))
+                .andExpect(status().isOk());
+        org.junit.jupiter.api.Assertions.assertEquals(1, statusHistory.count());
+
+        mockMvc.perform(get("/internal/accounts/" + account.getId() + "/status")
+                        .header("X-Service-Api-Key", "profile-internal-key-for-identity-tests"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status", is("SUSPENDED")));
+
+        mockMvc.perform(get("/internal/accounts/" + account.getId() + "/status"))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void rotatesRefreshTokensAndRevokesTheEntireFamilyWhenAnOldTokenIsReused() throws Exception {
+        mockMvc.perform(post("/api/auth/register")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"email":"rotation@example.com","phoneNumber":"+84902223355",
+                                 "username":"rotation_user","fullName":"Rotation","password":"StrongPass123",
+                                 "role":"CUSTOMER"}
+                                """))
+                .andExpect(status().isOk());
+
+        String login = mockMvc.perform(post("/api/auth/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"identifier":"rotation@example.com","password":"StrongPass123"}
+                                """))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.refreshToken").isNotEmpty())
+                .andReturn().getResponse().getContentAsString();
+        String originalRefresh = login.replaceAll("(?s).*\"refreshToken\":\"([^\"]+)\".*", "$1");
+
+        String rotation = mockMvc.perform(post("/api/auth/refresh")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"refreshToken\":\"" + originalRefresh + "\"}"))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+        String rotatedRefresh = rotation.replaceAll("(?s).*\"refreshToken\":\"([^\"]+)\".*", "$1");
+
+        mockMvc.perform(post("/api/auth/refresh")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"refreshToken\":\"" + originalRefresh + "\"}"))
+                .andExpect(status().isUnauthorized());
+        mockMvc.perform(post("/api/auth/refresh")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"refreshToken\":\"" + rotatedRefresh + "\"}"))
+                .andExpect(status().isUnauthorized());
+    }
+
+    private static String token(UUID id, String role) {
+        return JwtTestKeys.token(id, role, "Admin");
     }
 }

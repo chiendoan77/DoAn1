@@ -2,36 +2,35 @@ package com.doan1.identity.security;
 
 import com.doan1.identity.entity.Account;
 import com.doan1.identity.enums.Role;
+import com.doan1.security.RsaJwtKeyLoader;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.security.Keys;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
-import javax.crypto.SecretKey;
-import java.nio.charset.StandardCharsets;
+import java.security.PrivateKey;
+import java.security.PublicKey;
 import java.time.Instant;
 import java.util.Date;
 import java.util.UUID;
 
 @Service
 public class JwtTokenService {
-    private final SecretKey signingKey;
+    private final PrivateKey signingKey;
+    private final PublicKey verificationKey;
     private final long ttlSeconds;
 
     public JwtTokenService(
-            @Value("${security.jwt.secret}") String secret,
+            @Value("${security.jwt.private-key-base64}") String privateKey,
+            @Value("${security.jwt.public-key-base64}") String publicKey,
             @Value("${security.jwt.ttl-seconds:3600}") long ttlSeconds) {
-        byte[] keyBytes = secret.getBytes(StandardCharsets.UTF_8);
-        if (keyBytes.length < 32) {
-            throw new IllegalArgumentException("JWT_SECRET must be at least 32 bytes.");
-        }
-        this.signingKey = Keys.hmacShaKeyFor(keyBytes);
+        this.signingKey = RsaJwtKeyLoader.privateKey(privateKey);
+        this.verificationKey = RsaJwtKeyLoader.publicKey(publicKey);
         this.ttlSeconds = ttlSeconds;
     }
 
@@ -39,11 +38,13 @@ public class JwtTokenService {
         Instant now = Instant.now();
         return Jwts.builder()
                 .subject(account.getId().toString())
+                .issuer("doan1-identity")
+                .audience().add("doan1-platform").and()
                 .claim("role", account.getRole().name())
                 .claim("name", account.getFullName())
                 .issuedAt(Date.from(now))
                 .expiration(Date.from(now.plusSeconds(ttlSeconds)))
-                .signWith(signingKey)
+                .signWith(signingKey, Jwts.SIG.RS256)
                 .compact();
     }
 
@@ -57,7 +58,10 @@ public class JwtTokenService {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Vui lòng đăng nhập.");
         }
         try {
-            Claims claims = Jwts.parser().verifyWith(signingKey).build()
+            Claims claims = Jwts.parser().verifyWith(verificationKey)
+                    .requireIssuer("doan1-identity")
+                    .requireAudience("doan1-platform")
+                    .build()
                     .parseSignedClaims(header.substring(7)).getPayload();
             return new Principal(
                     UUID.fromString(claims.getSubject()),

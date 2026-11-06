@@ -1,10 +1,8 @@
 package com.doan1.marketplace.service;
 
 import com.doan1.marketplace.dto.response.ReviewEligibility;
-import com.doan1.marketplace.entity.ProviderProfile;
 import com.doan1.marketplace.entity.ProviderReview;
-import com.doan1.marketplace.enums.ProviderStatus;
-import com.doan1.marketplace.repository.ProviderProfileRepository;
+import com.doan1.marketplace.client.ProfileRatingClient;
 import com.doan1.marketplace.repository.ProviderReviewRepository;
 
 import org.springframework.http.HttpStatus;
@@ -16,12 +14,12 @@ import java.util.UUID;
 
 @Service
 public class ProviderReviewService {
-    private final ProviderProfileRepository providers;
     private final ProviderReviewRepository reviews;
+    private final ProfileRatingClient profiles;
 
-    public ProviderReviewService(ProviderProfileRepository providers, ProviderReviewRepository reviews) {
-        this.providers = providers;
+    public ProviderReviewService(ProviderReviewRepository reviews, ProfileRatingClient profiles) {
         this.reviews = reviews;
+        this.profiles = profiles;
     }
 
     @Transactional
@@ -35,13 +33,6 @@ public class ProviderReviewService {
         if (reviews.existsByBookingIdAndReviewerAccountId(bookingId, reviewerAccountId)) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Bạn đã gửi đánh giá cho booking này.");
         }
-        if ("PROVIDER".equals(eligibility.targetRole())) {
-            ProviderProfile provider = providers.findByIdForUpdate(eligibility.targetId())
-                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.CONFLICT, "Không tìm thấy hồ sơ nhà cung cấp."));
-            if (provider.getStatus() != ProviderStatus.APPROVED) {
-                throw new ResponseStatusException(HttpStatus.CONFLICT, "Không thể đánh giá hồ sơ chưa được duyệt.");
-            }
-        }
         ProviderReview review = reviews.save(new ProviderReview(
                 bookingId,
                 reviewerAccountId,
@@ -52,11 +43,7 @@ public class ProviderReviewService {
                 comment == null ? "" : comment.trim()));
         reviews.flush();
         if ("PROVIDER".equals(eligibility.targetRole())) {
-            Object[] summary = reviews.ratingSummary(eligibility.targetId()).get(0);
-            double average = summary[0] == null ? 0 : ((Number) summary[0]).doubleValue();
-            int count = ((Number) summary[1]).intValue();
-            providers.findByIdForUpdate(eligibility.targetId()).orElseThrow()
-                    .setRatingAndReviewCount(average, count);
+            profiles.addReviewRating(review.getId(), eligibility.targetId(), rating);
         }
         return review;
     }

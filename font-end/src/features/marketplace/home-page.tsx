@@ -3,7 +3,7 @@
 /* eslint-disable @next/next/no-img-element */
 import Link from "next/link";
 import { FormEvent, useEffect, useState } from "react";
-import { Booking, Provider, ServiceCategory, apiRequest } from "@/lib/api";
+import { Booking, PageResult, Provider, ServiceCategory, ServicePackage, apiRequest } from "@/lib/api";
 import { SiteHeader } from "@/shared/components/site-header";
 
 function localDateTimeMinimum() {
@@ -16,10 +16,14 @@ export function HomePage() {
   const [categories, setCategories] = useState<ServiceCategory[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<ServiceCategory | null>(null);
   const [providers, setProviders] = useState<Provider[]>([]);
+  const [packages, setPackages] = useState<ServicePackage[]>([]);
   const [loadingCategories, setLoadingCategories] = useState(true);
   const [loadingProviders, setLoadingProviders] = useState(false);
+  const [loadingPackages, setLoadingPackages] = useState(false);
+  const [packageError, setPackageError] = useState("");
   const [error, setError] = useState("");
   const [selectedProvider, setSelectedProvider] = useState<Provider | null>(null);
+  const [selectedPackage, setSelectedPackage] = useState<ServicePackage | null>(null);
   const [bookingError, setBookingError] = useState("");
   const [bookingMessage, setBookingMessage] = useState("");
   const [bookingSubmitting, setBookingSubmitting] = useState(false);
@@ -35,28 +39,33 @@ export function HomePage() {
   async function chooseCategory(category: ServiceCategory) {
     setSelectedCategory(category);
     setProviders([]);
+    setPackages([]);
     setError("");
+    setPackageError("");
     setLoadingProviders(true);
-    try {
-      setProviders(await apiRequest<Provider[]>(`services/${category.id}/providers?limit=10`));
-    } catch (cause) {
-      setError(cause instanceof Error ? cause.message : "Không tải được nhà cung cấp.");
-    } finally {
-      setLoadingProviders(false);
-    }
+    setLoadingPackages(true);
+    const [providerResult, packageResult] = await Promise.allSettled([
+      apiRequest<Provider[]>(`services/${category.id}/providers?limit=10`),
+      apiRequest<PageResult<ServicePackage>>(`catalog/packages?categoryId=${encodeURIComponent(category.id)}&page=0&size=20`),
+    ]);
+    if (providerResult.status === "fulfilled") setProviders(providerResult.value);
+    else setError(providerResult.reason instanceof Error ? providerResult.reason.message : "Không tải được nhà cung cấp.");
+    if (packageResult.status === "fulfilled") setPackages(packageResult.value.content);
+    else setPackageError(packageResult.reason instanceof Error ? packageResult.reason.message : "Không tải được gói dịch vụ.");
+    setLoadingProviders(false);
+    setLoadingPackages(false);
   }
 
   async function submitBooking(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (!selectedProvider || !selectedCategory) return;
+    if (!selectedProvider || !selectedCategory || !selectedPackage) return;
     setBookingError("");
     setBookingSubmitting(true);
     try {
       const booking = await apiRequest<Booking>("bookings", {
         method: "POST",
         body: JSON.stringify({
-          providerId: selectedProvider.id,
-          categoryId: selectedCategory.id,
+          packageId: selectedPackage.id,
           scheduledAt: new Date(bookingForm.scheduledAt).toISOString(),
           address: bookingForm.address,
           description: bookingForm.description,
@@ -64,11 +73,25 @@ export function HomePage() {
       });
       setBookingMessage(`Đã gửi yêu cầu ${booking.id.slice(0, 8)} cho ${booking.providerName}.`);
       setSelectedProvider(null);
+      setSelectedPackage(null);
       setBookingForm({ scheduledAt: "", address: "", description: "" });
     } catch (cause) {
       setBookingError(cause instanceof Error ? cause.message : "Không gửi được yêu cầu đặt lịch.");
     } finally {
       setBookingSubmitting(false);
+    }
+  }
+
+  async function choosePackage(servicePackage: ServicePackage) {
+    setBookingError("");
+    setBookingMessage("");
+    try {
+      const provider = providers.find((item) => item.id === servicePackage.providerId)
+        ?? await apiRequest<Provider>(`services/providers/${servicePackage.providerId}`);
+      setSelectedProvider(provider);
+      setSelectedPackage(servicePackage);
+    } catch (cause) {
+      setBookingError(cause instanceof Error ? cause.message : "Không tải được nhà cung cấp của gói.");
     }
   }
 
@@ -176,7 +199,12 @@ export function HomePage() {
                         <button
                           type="button"
                           className="mt-4 w-full rounded-full bg-[#1f594a] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[#18483b]"
-                          onClick={() => { setSelectedProvider(provider); setBookingError(""); setBookingMessage(""); }}
+                          onClick={() => {
+                            setSelectedProvider(provider);
+                            setSelectedPackage(null);
+                            setBookingError("");
+                            setBookingMessage("");
+                          }}
                         >
                           Chọn nhà cung cấp
                         </button>
@@ -184,6 +212,44 @@ export function HomePage() {
                     </article>
                   ))}
                 </div>
+              )}
+              {selectedCategory && (
+                <section className="mt-14" aria-labelledby="packages-heading">
+                  <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-end">
+                    <div>
+                      <p className="text-xs font-bold uppercase tracking-[0.18em] text-[#719071]">Gói dịch vụ đã duyệt</p>
+                      <h3 id="packages-heading" className="mt-2 text-2xl font-semibold text-[#173c33]">{selectedCategory.name} theo gói</h3>
+                    </div>
+                    <p className="text-sm text-[#718078]">Chỉ gói đang hoạt động và đã được Admin duyệt mới xuất hiện.</p>
+                  </div>
+                  {loadingPackages ? (
+                    <p className="mt-6 text-sm text-[#64736b]">Đang tải gói dịch vụ…</p>
+                  ) : packageError ? (
+                    <p role="alert" className="mt-6 rounded-2xl bg-[#fff1ec] p-4 text-sm text-[#9b3d28]">{packageError}</p>
+                  ) : packages.length === 0 ? (
+                    <p className="mt-6 rounded-2xl bg-[#f5f8f3] p-5 text-sm text-[#64736b]">Chưa có gói dịch vụ được duyệt trong danh mục này.</p>
+                  ) : (
+                    <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                      {packages.map((servicePackage) => (
+                        <article key={servicePackage.id} className="rounded-3xl border border-[#e5eae3] bg-white p-5 shadow-sm">
+                          <p className="text-xs font-semibold uppercase tracking-wide text-[#719071]">{selectedCategory.name}</p>
+                          <h4 className="mt-2 text-lg font-semibold text-[#23483a]">{servicePackage.name}</h4>
+                          <p className="mt-2 min-h-12 text-sm leading-6 text-[#6c7971]">{servicePackage.description}</p>
+                          <p className="mt-4 text-xl font-bold text-[#1f594a]">{new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND" }).format(servicePackage.price)}</p>
+                          <p className="mt-1 text-xs text-[#87938c]">Thời lượng dự kiến: {servicePackage.durationMinutes} phút</p>
+                          <p className="mt-3 text-sm text-[#52645e]">Nhà cung cấp: {servicePackage.providerPhone}</p>
+                          <button
+                            type="button"
+                            onClick={() => void choosePackage(servicePackage)}
+                            className="mt-4 w-full rounded-full bg-[#1f594a] px-4 py-2.5 text-sm font-semibold text-white hover:bg-[#18483b]"
+                          >
+                            Đặt gói này
+                          </button>
+                        </article>
+                      ))}
+                    </div>
+                  )}
+                </section>
               )}
             </div>
           )}
@@ -225,6 +291,29 @@ export function HomePage() {
             <p className="mt-2 text-sm text-[#6c7971]">{selectedCategory?.name} · {selectedProvider.address}</p>
             <form className="mt-6 space-y-4" onSubmit={(event) => void submitBooking(event)}>
               <label className="block text-sm font-medium text-[#315246]">
+                Gói dịch vụ
+                <select
+                  required
+                  value={selectedPackage?.id ?? ""}
+                  onChange={(event) => setSelectedPackage(
+                    packages.find((item) => item.id === event.target.value) ?? null,
+                  )}
+                  className="mt-2 w-full rounded-xl border border-[#dce5dc] px-4 py-3 text-[#173c33]"
+                >
+                  <option value="">Chọn gói đã được duyệt</option>
+                  {packages.filter((item) => item.providerId === selectedProvider.id).map((item) => (
+                    <option key={item.id} value={item.id}>
+                      {item.name} · {new Intl.NumberFormat("vi-VN").format(item.price)} ₫
+                    </option>
+                  ))}
+                </select>
+                {selectedPackage && (
+                  <span className="mt-1 block text-xs text-[#718078]">
+                    Giá chốt tại thời điểm đặt: {new Intl.NumberFormat("vi-VN").format(selectedPackage.price)} ₫ · {selectedPackage.durationMinutes} phút
+                  </span>
+                )}
+              </label>
+              <label className="block text-sm font-medium text-[#315246]">
                 Thời gian mong muốn
                 <input required min={localDateTimeMinimum()} type="datetime-local" value={bookingForm.scheduledAt} onChange={(event) => setBookingForm({ ...bookingForm, scheduledAt: event.target.value })} className="mt-2 w-full rounded-xl border border-[#dce5dc] px-4 py-3 text-[#173c33] outline-none focus:border-[#4b7c58]" />
               </label>
@@ -237,7 +326,7 @@ export function HomePage() {
                 <textarea required maxLength={1000} rows={3} value={bookingForm.description} onChange={(event) => setBookingForm({ ...bookingForm, description: event.target.value })} className="mt-2 w-full resize-y rounded-xl border border-[#dce5dc] px-4 py-3 text-[#173c33] outline-none focus:border-[#4b7c58]" placeholder="Chia sẻ các thông tin cần thiết…" />
               </label>
               {bookingError && <p role="alert" className="rounded-xl bg-[#fff1ec] p-3 text-sm text-[#9b3d28]">{bookingError} {bookingError.includes("đăng nhập") && <Link className="font-semibold underline" href="/login">Đăng nhập</Link>}</p>}
-              <button disabled={bookingSubmitting} className="w-full rounded-full bg-[#1f594a] px-6 py-3.5 text-sm font-semibold text-white hover:bg-[#18483b] disabled:opacity-60">
+              <button disabled={bookingSubmitting || !selectedPackage} className="w-full rounded-full bg-[#1f594a] px-6 py-3.5 text-sm font-semibold text-white hover:bg-[#18483b] disabled:opacity-60">
                 {bookingSubmitting ? "Đang gửi…" : "Gửi yêu cầu đặt lịch"}
               </button>
               <p className="text-xs leading-5 text-[#87938c]">Yêu cầu được ghi vào lịch sử; nhà cung cấp sẽ xác nhận lịch hẹn.</p>

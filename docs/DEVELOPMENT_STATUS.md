@@ -1,58 +1,47 @@
 # Trạng thái phát triển
 
-Ngày đối chiếu source/configuration: 2026-11-06.
+Ngày đối chiếu source/configuration, full backend tests và frontend checks: 2026-11-06.
 
 ## Kiến trúc và inventory
 
-- Backend là Maven reactor gồm API Gateway và bốn Spring Boot apps: Identity, Marketplace, Booking, Payment.
-- Frontend là Next.js App Router/React/TypeScript trong `font-end/`; không phải Angular.
-- MySQL local nằm trong Docker Compose, tạo ba schema `doan1_identity`, `doan1_marketplace`, `doan1_booking`; không publish cổng MySQL ra host.
-- Admin là role/portal, không có `admin-service`. Review thuộc Marketplace; Booking xác minh review qua API nội bộ.
-- Cây source được ghi tại [PROJECT_STRUCTURE.md](./PROJECT_STRUCTURE.md).
+- Backend Maven reactor gồm API Gateway, security modules và 8 Spring Boot services: Identity, Profile, Catalog, Marketplace, Booking, Review, Payment và Notification.
+- Frontend là Next.js App Router/React/TypeScript trong `font-end/`; browser đi qua BFF và API Gateway.
+- Các service có dữ liệu sở hữu schema riêng. Payment lifecycle/database chưa triển khai.
+- Admin là role/portal, không có `admin-service`; Review có service và database riêng. Marketplace giữ dữ liệu/API legacy phục vụ migration.
+- Inventory source nằm trong [PROJECT_STRUCTURE.md](./PROJECT_STRUCTURE.md).
 
-## Đã triển khai trong source hiện tại
+## Đã triển khai
 
-- **Identity:** đăng ký CUSTOMER/PROVIDER, đăng nhập email/phone, BCrypt, JWT, `/api/me`, bootstrap Admin tùy chọn.
-- **Marketplace:** danh mục cố định `cleaning`/`repair`, provider application/profile/update, Admin duyệt provider, public provider list/detail, review hai chiều và tổng hợp rating. Provider cập nhật hồ sơ của mình sẽ đưa hồ sơ về `PENDING`.
-- **Booking:** tạo booking theo provider/category, lịch sử riêng customer/provider, provider accept/reject/complete với kiểm tra ownership và transition.
-- **Tích hợp nội bộ:** Booking xác minh provider qua Marketplace; Marketplace xác minh booking/participant/completion qua Booking. Hai endpoint dùng `SERVICE_API_KEY`, không route qua Gateway.
-- **API Gateway:** routing tới các services và cấu hình CORS.
-- **Frontend:** Next.js BFF giữ JWT trong cookie HttpOnly; có luồng auth, browse provider, booking, history/review và Admin duyệt provider.
-- **Tổ chức source:** Identity, Marketplace và Booking phân lớp controller/request-response DTO/entity/enum/mapper/service; màn hình frontend đặt theo feature auth/admin/booking/marketplace, header ở shared.
-- **Payment:** app skeleton và adapter registry, chưa có API thanh toán.
-- **Persistence:** Identity, Marketplace và Booking có cấu hình MySQL; Payment chưa có schema nghiệp vụ. Tests dùng H2. Schema local được Hibernate cập nhật bằng `ddl-auto: update`.
+- **Identity:** đăng nhập/đăng ký, RS256 JWT, issuer/audience, refresh token opaque đã hash, rotation và revoke theo token family; có account status và Admin audit history. Access JWT còn hiệu lực đến TTL sau logout.
+- **API Gateway:** route domain APIs, xác minh JWT RS256 cho endpoint được bảo vệ; service tiếp tục authorization theo role. Customer profile đã được route và bảo vệ.
+- **Profile:** sở hữu customer/provider profiles, approval/suspension, provider lookup/eligibility và rating projection. `ReviewSubmitted` được áp dụng idempotent theo review ID.
+- **Catalog:** category/package CRUD, moderation, giá, Flyway và package outbox; Booking đồng bộ package qua API/DTO.
+- **Booking:** tạo từ package APPROVED, xác minh provider qua Profile, lưu package name/price/duration snapshots, lịch sử và provider status transitions. `BookingCompleted` được ghi qua transactional outbox.
+- **Review:** service riêng xác minh eligibility qua Booking; lưu review và phát `ReviewSubmitted` qua outbox. Marketplace chỉ còn dữ liệu/API legacy migration.
+- **Notification:** nhận Catalog package events và `BookingCompleted`, lưu inbox idempotent. Email/push/SMS chưa triển khai.
+- **Frontend/BFF:** booking gắn package, customer profile và notification views; token nằm trong HttpOnly cookies. BFF proxy hỗ trợ GET/POST/PUT/PATCH/DELETE.
+- **Payment:** adapter registry skeleton; payment lifecycle, `PaymentSucceeded`, webhook/refund/idempotency và saga được hoãn theo yêu cầu.
 
-## Yêu cầu đã nêu nhưng chưa thấy implementation
+## Persistence và vận hành
 
-- **Provider service offerings/gói và giá:** chưa có `ServiceOffering`, bảng `service_offerings`, controller endpoints tạo/sửa/archive, public listing, Admin offering approval hoặc UI tương ứng trong source hiện tại. Các API `/api/provider/services`, `/api/admin/offerings/**` và `/api/services/{categoryId}/offerings` trong một số tài liệu cũ không được xác nhận bởi code hiện có.
-- **Offering-to-booking:** API booking hiện nhận `providerId` và `categoryId`, không nhận `offeringId` hoặc price snapshot. Việc nối booking với offering chưa được xác nhận.
-- **Booking:** slot overlap, quota booking lặp/Admin review, admin booking APIs, cancellation/reschedule, status history.
-- **Identity:** Admin user management, xác minh email/phone, khôi phục mật khẩu, refresh/revoke token, rate limiting.
-- **Marketplace:** catalog CRUD, tìm kiếm nâng cao, upload ảnh, audit/moderation history.
-- **Payment:** transaction schema/API, cổng thanh toán, webhook/callback.
-- **Infrastructure:** migration scripts, production deployment/CI, browser E2E.
-- **Các domain chưa được xác nhận:** complaint workflow và notification service.
+- Identity, Profile, Catalog, Marketplace, Booking, Review và Notification dùng Flyway với Hibernate `ddl-auto: validate`; Payment chưa có schema nghiệp vụ.
+- Marketplace/Booking có baseline/versioned migrations; chưa dry-run nâng cấp trên bản sao MySQL hiện hữu.
+- Booking/Review/Catalog outbox events được dùng cho luồng đã triển khai; không có transaction xuyên service. Payment event/saga chưa làm.
+- Compose định nghĩa RabbitMQ, Prometheus, Grafana và Jaeger. Metrics/tracing đã cấu hình nhưng chưa xác minh runtime; centralized log collection chưa tích hợp.
+- API keys riêng bảo vệ một số giao tiếp nội bộ; production mTLS/secret management chưa xác minh.
 
-## Kiểm thử
+## Kiểm thử và xác minh
 
-- Sau khi sắp xếp source: Maven reactor test pass (16 tests); frontend lint, typecheck và production build pass.
-- Không có browser E2E tự động được ghi nhận.
+- `mvn -DskipTests package`: toàn bộ 12 reactor modules build thành công.
+- Full `mvn test`: 39 tests trên 12 suite, 0 failure, 0 error, 0 skipped. [TEST_CASES.csv](./TEST_CASES.csv) có 52 dòng: 42 `PASS`, 5 `NOT_RUN`, 4 `NOT_IMPLEMENTED`, 1 `DEFERRED`; từng backend test trỏ tới Surefire report.
+- Frontend lint/typecheck/production build và `docker compose config -q` pass; frontend checks được chạy lại sau khi bổ sung PUT/DELETE cho BFF.
+- `mvn install` trước đó không hoàn tất do Maven không thể move artifact tạm trong mounted `.m2`; reactor `package` và full tests thành công.
 
-## Còn cần xác nhận
+## Chưa triển khai hoặc chưa xác minh
 
-- Định nghĩa trạng thái booking “đang mở”, timezone/biên slot và hành vi Admin review cho booking lặp.
-- Quy tắc giá cuối cùng/fees, cancellation/refund và provider thanh toán.
-- Review edit/delete/moderation.
-- Chính sách migration và môi trường CI/deployment.
+- Slot overlap, repeat-booking quota/Admin review, booking cancel/reschedule, status history và Booking admin endpoints.
+- Payment lifecycle/saga (được hoãn), email/push/SMS và centralized logs.
+- Pact suite; `CatalogClientContractTests` là focused client contract test, không phải Pact. Browser E2E chưa có.
+- Full runtime Compose, MySQL migration rehearsal, production deployment, và runtime Prometheus/Grafana/Jaeger chưa được xác minh.
 
-## Môi trường và giới hạn
-
-- Backend target Java 21; cấu hình local Compose dùng MySQL với schema riêng, volume persistent. Cổng ứng dụng được bind `127.0.0.1`; cổng MySQL không publish.
-- JWT/API key và mật khẩu MySQL mặc định trong Compose chỉ dành cho local development; không dùng defaults trong production.
-- Tên thư mục hiện có là `back-end/` và `font-end/`; không đổi tên trong lần cập nhật tài liệu.
-
-## Việc tiếp theo
-
-1. Nếu tiếp tục yêu cầu quản lý gói provider, triển khai Marketplace API/schema/UI và Admin approval; đồng bộ API/database docs cùng tests khi implementation được làm.
-2. Chốt có cần booking tham chiếu offering và lưu price snapshot hay không trước khi nối hai domain.
-3. Chốt các policy booking/payment còn mở trước khi mở rộng flows.
+Không xem cấu hình, route hoặc skeleton là bằng chứng feature đã hoàn tất; các policy booking còn mở vẫn cần chốt/triển khai riêng.

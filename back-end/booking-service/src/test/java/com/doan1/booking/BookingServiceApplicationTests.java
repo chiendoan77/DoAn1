@@ -1,13 +1,14 @@
 package com.doan1.booking;
 
-import com.doan1.booking.client.MarketplaceClient;
+import com.doan1.booking.client.ProfileClient;
+import com.doan1.booking.client.CatalogClient;
 import com.doan1.booking.dto.response.MarketplaceCategoryResponse;
+import com.doan1.booking.dto.response.PackageDetailsResponse;
 import com.doan1.booking.dto.response.ProviderDetailsResponse;
 import com.doan1.booking.entity.Booking;
 import com.doan1.booking.repository.BookingRepository;
-
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.security.Keys;
+import com.doan1.booking.repository.BookingOutboxEventRepository;
+import com.doan1.security.test.JwtTestKeys;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,11 +17,11 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
 
-import java.nio.charset.StandardCharsets;
-import java.time.Instant;
 import java.time.OffsetDateTime;
-import java.util.Date;
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
 
@@ -39,13 +40,19 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
         "spring.datasource.username=sa",
         "spring.datasource.password=sa",
         "spring.jpa.hibernate.ddl-auto=create-drop",
-        "security.jwt.secret=0123456789abcdef0123456789abcdef",
-        "service.api-key=internal-service-api-key-for-tests"
+        "spring.flyway.enabled=false",
+        "app.outbox.enabled=false",
+        "service.api-keys.profile=test-booking-profile-key",
+        "service.api-keys.marketplace=internal-marketplace-booking-api-key-for-tests"
 })
 @AutoConfigureMockMvc
 class BookingServiceApplicationTests {
-    private static final String JWT_SECRET = "0123456789abcdef0123456789abcdef";
-    private static final String SERVICE_API_KEY = "internal-service-api-key-for-tests";
+    private static final String MARKETPLACE_BOOKING_API_KEY = "internal-marketplace-booking-api-key-for-tests";
+
+    @DynamicPropertySource
+    static void jwtKeys(DynamicPropertyRegistry registry) {
+        JwtTestKeys.registerPublicKey(registry);
+    }
 
     @Autowired
     private MockMvc mockMvc;
@@ -53,12 +60,19 @@ class BookingServiceApplicationTests {
     @Autowired
     private BookingRepository bookings;
 
+    @Autowired
+    private BookingOutboxEventRepository outboxEvents;
+
     @MockBean
-    private MarketplaceClient marketplace;
+    private ProfileClient profiles;
+
+    @MockBean
+    private CatalogClient catalog;
 
     @BeforeEach
     void resetState() {
         bookings.deleteAll();
+        outboxEvents.deleteAll();
     }
 
     @Test
@@ -66,7 +80,12 @@ class BookingServiceApplicationTests {
         UUID customerId = UUID.randomUUID();
         UUID providerAccountId = UUID.randomUUID();
         UUID providerProfileId = UUID.randomUUID();
-        when(marketplace.getApprovedProvider("cleaning", providerProfileId))
+        UUID packageId = UUID.randomUUID();
+        when(catalog.getApprovedPackage(packageId))
+                .thenReturn(new PackageDetailsResponse(
+                        packageId, providerProfileId, "cleaning", "Gói tổng vệ sinh",
+                        new BigDecimal("125000"), 90, "APPROVED"));
+        when(profiles.getApprovedProvider("cleaning", providerProfileId))
                 .thenReturn(new ProviderDetailsResponse(
                         providerProfileId,
                         providerAccountId,
@@ -81,16 +100,17 @@ class BookingServiceApplicationTests {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {
-                                  "providerId": "%s",
-                                  "categoryId": "cleaning",
+                                  "packageId": "%s",
                                   "scheduledAt": "%s",
                                   "address": "Quận 1, TP. Hồ Chí Minh",
                                   "description": "Dọn dẹp căn hộ."
                                 }
-                                """.formatted(providerProfileId, scheduledAt)))
+                                """.formatted(packageId, scheduledAt)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.status", is("REQUESTED")))
                 .andExpect(jsonPath("$.providerName", is("Nhà cung cấp")))
+                .andExpect(jsonPath("$.packageName", is("Gói tổng vệ sinh")))
+                .andExpect(jsonPath("$.packagePrice", is(125000)))
                 .andReturn().getResponse().getContentAsString();
         String bookingId = result.replaceAll("(?s).*\"id\":\"([^\"]+)\".*", "$1");
 
@@ -116,7 +136,7 @@ class BookingServiceApplicationTests {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.status", is("ACCEPTED")));
         mockMvc.perform(get("/internal/bookings/" + bookingId + "/review-eligibility")
-                        .header("X-Service-Api-Key", SERVICE_API_KEY)
+                        .header("X-Service-Api-Key", MARKETPLACE_BOOKING_API_KEY)
                         .param("reviewerAccountId", customerId.toString())
                         .param("reviewerRole", "CUSTOMER"))
                 .andExpect(status().isOk())
@@ -129,16 +149,17 @@ class BookingServiceApplicationTests {
                                 """))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.status", is("COMPLETED")));
+        org.junit.jupiter.api.Assertions.assertEquals(1, outboxEvents.count());
 
         mockMvc.perform(get("/internal/bookings/" + bookingId + "/review-eligibility")
-                        .header("X-Service-Api-Key", SERVICE_API_KEY)
+                        .header("X-Service-Api-Key", MARKETPLACE_BOOKING_API_KEY)
                         .param("reviewerAccountId", customerId.toString())
                         .param("reviewerRole", "CUSTOMER"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.eligible", is(true)))
                 .andExpect(jsonPath("$.targetRole", is("PROVIDER")));
         mockMvc.perform(get("/internal/bookings/" + bookingId + "/review-eligibility")
-                        .header("X-Service-Api-Key", SERVICE_API_KEY)
+                        .header("X-Service-Api-Key", MARKETPLACE_BOOKING_API_KEY)
                         .param("reviewerAccountId", providerAccountId.toString())
                         .param("reviewerRole", "PROVIDER"))
                 .andExpect(status().isOk())
@@ -147,14 +168,6 @@ class BookingServiceApplicationTests {
     }
 
     private static String token(UUID id, String role) {
-        Instant now = Instant.now();
-        return Jwts.builder()
-                .subject(id.toString())
-                .claim("role", role)
-                .claim("name", "Test User")
-                .issuedAt(Date.from(now))
-                .expiration(Date.from(now.plusSeconds(600)))
-                .signWith(Keys.hmacShaKeyFor(JWT_SECRET.getBytes(StandardCharsets.UTF_8)))
-                .compact();
+        return JwtTestKeys.token(id, role, "Test User");
     }
 }

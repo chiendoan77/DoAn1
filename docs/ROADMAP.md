@@ -1,41 +1,25 @@
 # Roadmap
 
-## Phase 0 — Domain/MVP
+This roadmap reflects implementation status as of 2026-11-06. It is not approval to implement unresolved policies.
 
-Đã chốt architecture bốn business services + Gateway, MVP core, Admin auth, review hai chiều, slot overlap và giới hạn repeat booking ở mức high-level. Các semantics còn mở nằm trong `requirements/open-questions.md`.
+## Completed slices
 
-## Phase 1 — Skeleton và local environment (đang thực hiện)
+- Identity RS256 auth, refresh/revoke, account status/audit and API Gateway public-key validation.
+- Profile customer/provider ownership, rating projection and legacy import path.
+- Catalog provider packages, moderation/history, Flyway and RabbitMQ transactional outbox.
+- Booking package/price snapshots, Flyway and BookingCompleted outbox.
+- Review service, Booking eligibility check and ReviewSubmitted outbox.
+- Notification in-app inbox for package and BookingCompleted events.
+- Frontend provider/admin package workflows and notification list.
+- Prometheus/Grafana/Jaeger Compose configuration and Flyway migrations for Marketplace/Booking.
 
-- Tạo API Gateway, Identity & Access, Marketplace, Booking, Payment và Next.js frontend.
-- Tạo health endpoints, cấu hình môi trường và build/test/lint commands tối thiểu.
-- **Đã xác minh:** Maven reactor build/test; frontend lint/typecheck/build; local frontend page render và không tràn ngang ở viewport 390px.
-- **Còn lại:** runtime health/routing integration test, Java 21 runtime validation, Docker Compose/local service orchestration.
+## Next, subject to acceptance criteria
 
-## Phase 2 — Identity & access
+1. **Data transition:** rehearse Marketplace/Booking Flyway baseline/migrations against a backup and validate data preservation.
+2. **Tests:** finish cross-service Pact contracts and browser E2E for package → booking → completion → review/notification.
+3. **Operations:** verify Compose runtime, Prometheus scraping and Jaeger traces; add centralized logs, CI/staging and production secrets.
+4. **Booking:** confirm interval/timezone, overlap/quota rules, Admin booking workflow and cancel/reschedule behavior, then implement/test.
+5. **Payment (deferred):** only resume when explicitly requested; then define provider transaction/refund/webhook lifecycle, idempotency, signature verification, retries and saga.
+6. **Notification:** add outbound channel adapters and preferences only after consent, templates and delivery requirements are approved.
 
-- Signup/login, role và authorization.
-- **Acceptance:** auth tests, role/ownership tests, Admin Portal dùng JWT + ADMIN; server API keys không expose cho browser.
-
-## Phase 3 — Marketplace
-
-- Provider profile, service category/offering, giá và Admin/provider onboarding.
-- **Acceptance:** provider ownership, approval visibility, Admin privileges được test.
-
-## Phase 4 — Booking
-
-- Create/view/process booking, slot overlap, repeat booking warning/Admin review/quota, two-way reviews.
-- **Acceptance:** state machine, concurrency, ownership, third-open-booking block và review eligibility có test; các policy còn mở phải được xác nhận.
-
-## Phase 5 — Payment
-
-- Payment service/provider abstraction, transaction lifecycle, webhooks/idempotency.
-- **Acceptance:** nhiều adapters có thể đồng thời bật; lỗi adapter không ảnh hưởng adapter khác; callback xác minh được.
-
-## Phase 6 — Integration/demo/deployment
-
-- API Gateway routing, frontend integration, Docker/Compose phù hợp, seed/test data và smoke/E2E.
-- **Acceptance:** setup từ môi trường sạch theo tài liệu; database/service internal không public ngoài ý muốn.
-
-## Thứ tự bắt đầu
-
-Bắt đầu Phase 1 với skeleton và health/build checks; không chờ các policy booking/payment chưa cần cho skeleton. Không viết feature logic dựa trên các câu hỏi còn mở.
+Payment methods, booking policies, production infrastructure, notification channels and complaint scope remain open. See [DEVELOPMENT_STATUS](./DEVELOPMENT_STATUS.md) and [open questions](./requirements/open-questions.md).

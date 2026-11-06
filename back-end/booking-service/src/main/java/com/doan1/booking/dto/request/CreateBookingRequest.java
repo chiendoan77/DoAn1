@@ -9,8 +9,7 @@ import java.time.OffsetDateTime;
 import java.util.UUID;
 
 public record CreateBookingRequest(
-        @NotNull UUID providerId,
-        @NotBlank @Size(max = 32) String categoryId,
+        @NotNull UUID packageId,
         @NotNull @Future OffsetDateTime scheduledAt,
         @NotBlank @Size(max = 500) String address,
         @NotBlank @Size(max = 1000) String description) {

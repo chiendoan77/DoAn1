@@ -1,5 +1,7 @@
 # Marketplace architecture
 
-Spring Boot application on development port 8082. Currently owns provider profiles, fixed category IDs, reviews and provider ratings. Provider service offerings and their VND prices/approval state are approved requirements but are not present in the current source/schema.
+Marketplace is retained as a legacy data and migration source. Provider/profile/category/package and new review workflows are owned by Profile, Catalog and Review respectively. API Gateway routes public requests to those owners, not to legacy Marketplace controllers.
 
-Public queries expose only approved providers. Provider/Admin writes check role and ownership in backend. Booking consumes Marketplace DTO/API, including a service-key-protected internal lookup, never Marketplace database. Marketplace asks Booking to verify review eligibility before storing a review. Offering CRUD, offering moderation, and booking price snapshot are not implemented.
+Marketplace keeps legacy provider/review tables and authenticated export operations so destination services can import data through internal APIs. It does not own new review writes or rating projection. Migrations do not query another service's database.
+
+Flyway manages the legacy Marketplace schema with a baseline; rehearse the baseline and upgrades against a database backup before rollout. Internal export APIs are not public integration endpoints.

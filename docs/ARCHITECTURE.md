@@ -2,7 +2,7 @@
 
 ## Trạng thái
 
-Người dùng chọn microservices với bốn business services: Identity & Access, Marketplace, Booking, Payment. API Gateway là edge component. Identity, Marketplace và Booking có các luồng MVP được triển khai; Payment hiện chỉ có adapter registry skeleton.
+Kiến trúc hiện tại có Identity & Access, Profile, Catalog, Marketplace (legacy migration source), Booking, Review, Payment và Notification; API Gateway là edge component. Review có deployable riêng. Payment hiện chỉ có adapter registry skeleton; lifecycle/payment saga đang được hoãn.
 
 ## Nguyên tắc
 
@@ -11,20 +11,25 @@ Người dùng chọn microservices với bốn business services: Identity & Ac
 - API key chỉ dành cho tích hợp server-to-server, không nhúng vào browser.
 - Mỗi service sở hữu database/schema riêng; service khác chỉ dùng API/DTO.
 - Payment có provider adapter độc lập, nhiều phương thức/provider có thể chạy đồng thời; thêm adapter không tắt toàn bộ Payment module.
-- Không thêm broker, Redis hay distributed transaction trước khi có use case và failure semantics cụ thể.
+- Dùng REST cho quyết định cần kết quả ngay; domain events được ghi bằng transactional outbox và phát qua RabbitMQ. Không dùng transaction xuyên service.
+- Saga Payment và Payment lifecycle chưa triển khai theo phạm vi đã chốt; không tạo `PaymentSucceeded` giả.
 
 ## Thành phần và mức triển khai
 
-1. **Identity & Access** — tài khoản, credential, xác thực, role; đăng ký/đăng nhập và `/api/me` đã triển khai.
-2. **Marketplace** — provider profile, category code cố định, duyệt provider, review/rating đã triển khai. Gói dịch vụ và giá thuộc phạm vi nghiệp vụ đã nêu nhưng chưa có model/API trong source hiện tại.
-3. **Booking** — tạo/lịch sử booking và chuyển trạng thái cơ bản đã triển khai. Slot conflict và repeat booking policy đã chọn nhưng chưa triển khai. Việc nối booking với offering chưa được xác nhận.
-4. **Payment** — adapter abstraction được chọn; hiện chỉ có app skeleton/registry, chưa có giao dịch/database/provider thật.
-5. **API Gateway** — public entry, routing và edge policy; không sở hữu nghiệp vụ.
-6. **Next.js frontend** — public/customer/provider/Admin flows một phần; mọi API qua Gateway qua BFF.
+1. **Identity & Access** — tài khoản, credential, role, account status/audit; RS256, refresh-token rotation/revocation và Admin status API đã triển khai.
+2. **Profile** — customer/provider profiles, approval/suspension, public lookup, eligibility và idempotent rating projection.
+3. **Catalog** — categories, provider packages/prices, Admin moderation/history, Flyway và package outbox.
+4. **Marketplace** — giữ bảng/API legacy làm nguồn di trú; dùng Flyway và không nhận review mới qua Gateway.
+5. **Booking** — package validation, price/name/duration snapshots, state transitions và `BookingCompleted` outbox. Slot conflict/repeat policy chưa triển khai.
+6. **Review** — API riêng, Booking eligibility check, review storage và `ReviewSubmitted` outbox.
+7. **Payment** — adapter abstraction; chưa có giao dịch/database/provider thật.
+8. **Notification** — tiêu thụ package và `BookingCompleted` events, lưu inbox in-app; chưa có email/push/SMS.
+9. **API Gateway** — public entry, routing và JWT RS256 validation cho route cần auth; backend services tiếp tục kiểm tra role.
+10. **Next.js frontend** — public/customer/provider/Admin flows một phần; mọi API qua Gateway qua BFF.
 
-Review hai chiều nằm trong Marketplace; Booking là source of truth cho booking status/participants, Marketplace hỏi endpoint nội bộ để xác minh eligibility. Complaint workflow đầy đủ, notification service và broker chưa được chốt.
+Booking là source of truth cho booking status/participants; Review hỏi endpoint nội bộ để xác minh eligibility. Booking/Review/Catalog events được ghi bằng outbox; Notification tiêu thụ `BookingCompleted`, Profile tiêu thụ `ReviewSubmitted`. Legacy review import/export có internal API nhưng cần thao tác migration/đối soát thủ công. `PaymentSucceeded`, Payment saga và complaint workflow chưa triển khai.
 
-Identity, Marketplace và Booking có API/DTO riêng, schema tách biệt và kiểm thử H2. Tích hợp nội bộ giữa Booking–Marketplace dùng `SERVICE_API_KEY`; Gateway không route `/internal/**`. Compose hiện tạo schema MySQL cho Identity, Marketplace, Booking; Payment chưa có schema. Chi tiết cây source và phân biệt giữa hiện trạng/đề xuất ở [PROJECT_STRUCTURE.md](./PROJECT_STRUCTURE.md).
+Các service có API/DTO và schema riêng. Identity/Profile/Catalog/Marketplace/Booking/Review/Notification dùng Flyway; Marketplace/Booking migration baseline chưa được dry-run trên bản MySQL hiện hữu. Tích hợp nội bộ dùng API keys riêng; Gateway không route `/internal/**`. Compose định nghĩa MySQL, RabbitMQ, Prometheus, Grafana và Jaeger. Metrics/traces có cấu hình; central log collection chưa được nối. Chi tiết ở [PROJECT_STRUCTURE.md](./PROJECT_STRUCTURE.md).
 
 ## Luồng và tài liệu chi tiết
 

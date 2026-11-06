@@ -1,0 +1,2 @@
+/workspace/catalog-service/src/test/java/com/doan1/catalog/CatalogServiceIntegrationTests.java
+/workspace/catalog-service/src/test/java/com/doan1/catalog/service/OutboxPublisherTests.java

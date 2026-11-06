@@ -1,29 +1,32 @@
 # Thiết kế hệ thống
 
-## Thành phần logic
+## Luồng thành phần
 
 ```text
-Browser (Next.js)
-        |
-        v
-API Gateway (public API entry)
-   |          |          |          |
-Identity  Marketplace  Booking    Payment
-   |          |          |          |
- DB/schema  DB/schema  DB/schema  DB/schema
-```
+Browser → Next.js BFF → API Gateway
+                           ├─ Identity
+                           ├─ Profile ←→ Identity (REST)
+                           ├─ Catalog → Profile (REST)
+                           ├─ Booking → Catalog/Profile (REST)
+                           │      └─ BookingCompleted → RabbitMQ → Notification
+                           ├─ Review → Booking eligibility (REST)
+                           │      └─ ReviewSubmitted → RabbitMQ → Profile rating projection
+                           ├─ Marketplace (legacy migration only)
+                           └─ Payment (adapter skeleton; no transaction API)
 
-Kiến trúc bốn business service đã được chọn. Identity, Marketplace và Booking có các luồng auth, provider, booking và review cơ bản cùng persistence và frontend BFF; Payment vẫn là adapter registry skeleton. MySQL thật và deployment chưa được xác minh.
+Identity/Profile/Catalog/Marketplace/Booking/Review/Notification
+    └─ independent MySQL schemas; no cross-service foreign keys
+```
 
 ## Quy tắc liên service
 
-- Dùng REST/DTO và timeout rõ ràng cho request đồng bộ.
-- Không chia sẻ repository/entity/database, không có transaction xuyên service.
-- Domain service là nguồn chân lý cho dữ liệu của nó; Gateway không sở hữu nghiệp vụ.
-- Payment adapter tách theo provider/capability; lỗi một adapter không được làm tắt các adapter khác.
-- Dùng API/DTO để kiểm tra provider và booking review eligibility; không query DB domain khác.
-- Broker/Saga/Outbox chỉ thêm khi có use case, yêu cầu phục hồi và test phù hợp.
+- REST/DTO is used when the caller needs an immediate domain decision; no shared repositories/entities or cross-service database access.
+- Booking validates package and provider using Catalog/Profile, then stores immutable snapshots.
+- Review calls Booking to verify completed-booking eligibility before saving a review.
+- Catalog/Booking/Review persist events to transactional outboxes and publish through RabbitMQ. Profile and Notification consumers must handle duplicate delivery idempotently.
+- No distributed database transaction. Payment lifecycle, `PaymentSucceeded`, and payment saga are deferred.
+- API Gateway is the client entry point and validates RS256 JWT signature, issuer, and audience; domain services enforce role/ownership.
 
-## Luồng liên quan
+## Trạng thái
 
-Đăng ký/đăng nhập xem [authentication flow](./architecture/authentication-flow.md). Booking/slot/repeat policy xem [booking flow](./architecture/booking-flow.md). API dự kiến tại [API_DOCUMENTATION.md](./API_DOCUMENTATION.md).
+Implemented flows and tests are summarized in [DEVELOPMENT_STATUS.md](./DEVELOPMENT_STATUS.md). API client connection is documented in [API_INTEGRATION_GUIDE.md](./API_INTEGRATION_GUIDE.md). Full Compose runtime, MySQL migration rehearsal and production deployment have not been verified.

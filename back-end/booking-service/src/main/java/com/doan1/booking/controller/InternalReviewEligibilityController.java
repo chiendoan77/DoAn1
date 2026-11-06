@@ -25,7 +25,7 @@ public class InternalReviewEligibilityController {
 
     public InternalReviewEligibilityController(
             BookingService bookings,
-            @Value("${service.api-key:}") String serviceApiKey) {
+            @Value("${service.api-keys.marketplace:}") String serviceApiKey) {
         this.bookings = bookings;
         this.serviceApiKey = serviceApiKey.getBytes(StandardCharsets.UTF_8);
     }

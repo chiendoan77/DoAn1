@@ -1,0 +1,10 @@
+CREATE TABLE IF NOT EXISTS accounts (
+    id BINARY(16) NOT NULL PRIMARY KEY,
+    email VARCHAR(320) NOT NULL UNIQUE,
+    phone_number VARCHAR(24) NOT NULL UNIQUE,
+    username VARCHAR(40) NOT NULL UNIQUE,
+    full_name VARCHAR(120) NOT NULL,
+    password_hash VARCHAR(100) NOT NULL,
+    role VARCHAR(16) NOT NULL,
+    created_at TIMESTAMP(6) NOT NULL
+);

@@ -1,11 +1,7 @@
-# Payment API (dự kiến)
+# Payment API status
 
-Contract chưa được duyệt; mọi endpoint cần DTO validation, authorization và idempotency policy.
+**Hiện chưa có public Payment API contract.** Payment service chỉ có adapter registry skeleton; không có transaction schema, payment lifecycle, webhook, refund hay `PaymentSucceeded` event. Dù Gateway có route prefix `/api/payments/**`, client không được xem route đó là endpoint đã hỗ trợ.
 
-| Method | Path | Actor | Mục tiêu |
-|---|---|---|---|
-| POST | `/api/payments` | Customer | Tạo transaction cho booking |
-| GET | `/api/payments/{paymentId}` | Customer/Admin | Tra cứu trạng thái theo quyền |
-| POST | `/api/payments/webhooks/{provider}` | Provider | Callback đã xác minh chữ ký |
+Contract/payment saga được hoãn. Khi được yêu cầu lại, cần chốt request/response, ownership/authorization, idempotency, callback signature verification và lifecycle trước khi public endpoint.
 
-Không tin payment success từ client redirect. Không nhận raw card fields. Provider-specific payloads được chuẩn hóa trong adapter; public API không lộ internal provider secrets.
+Không gửi thẻ/raw payment credentials hoặc coi redirect phía client là bằng chứng thanh toán.

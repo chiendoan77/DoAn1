@@ -11,6 +11,7 @@ import jakarta.persistence.Table;
 
 import java.time.Instant;
 import java.time.OffsetDateTime;
+import java.math.BigDecimal;
 import java.util.UUID;
 
 @Entity
@@ -40,6 +41,18 @@ public class Booking {
     @Column(name = "category_name", nullable = false, length = 80)
     private String categoryName;
 
+    @Column(name = "package_id")
+    private UUID packageId;
+
+    @Column(name = "package_name", length = 160)
+    private String packageName;
+
+    @Column(name = "package_price", precision = 10, scale = 0)
+    private BigDecimal packagePrice;
+
+    @Column(name = "package_duration_minutes")
+    private Integer packageDurationMinutes;
+
     @Column(name = "scheduled_at", nullable = false)
     private OffsetDateTime scheduledAt;
 
@@ -67,6 +80,10 @@ public class Booking {
             String providerName,
             String categoryId,
             String categoryName,
+            UUID packageId,
+            String packageName,
+            BigDecimal packagePrice,
+            int packageDurationMinutes,
             OffsetDateTime scheduledAt,
             String address,
             String description) {
@@ -78,6 +95,10 @@ public class Booking {
         this.providerName = providerName;
         this.categoryId = categoryId;
         this.categoryName = categoryName;
+        this.packageId = packageId;
+        this.packageName = packageName;
+        this.packagePrice = packagePrice;
+        this.packageDurationMinutes = packageDurationMinutes;
         this.scheduledAt = scheduledAt;
         this.address = address;
         this.description = description;
@@ -116,6 +137,11 @@ public class Booking {
     public String getCategoryName() {
         return categoryName;
     }
+
+    public UUID getPackageId() { return packageId; }
+    public String getPackageName() { return packageName; }
+    public BigDecimal getPackagePrice() { return packagePrice; }
+    public Integer getPackageDurationMinutes() { return packageDurationMinutes; }
 
     public OffsetDateTime getScheduledAt() {
         return scheduledAt;

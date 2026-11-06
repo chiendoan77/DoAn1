@@ -4,12 +4,17 @@ import com.doan1.booking.enums.BookingStatus;
 
 import java.time.Instant;
 import java.time.OffsetDateTime;
+import java.math.BigDecimal;
 import java.util.UUID;
 
 public record BookingResponse(
         UUID id,
         String categoryId,
         String categoryName,
+        UUID packageId,
+        String packageName,
+        BigDecimal packagePrice,
+        Integer packageDurationMinutes,
         UUID providerProfileId,
         String providerName,
         String customerName,

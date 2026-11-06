@@ -1,30 +1,55 @@
 # Hướng dẫn phát triển
 
-## Trạng thái hiện tại
+## Yêu cầu công cụ
 
-Repository ban đầu chưa có mã ứng dụng hay manifest dependency. Hiện có luồng nghiệp vụ MVP một phần; không implement logic phụ thuộc policy còn mở nếu chưa cập nhật requirements/DECISIONS.
+- Backend: JDK 21, Maven 3.9+ (hoặc Docker để chạy Maven image).
+- Frontend: Node.js 22+ và npm.
+- Full local stack: Docker Desktop.
+- Tạo khóa RS256 và local environment theo [SECURITY.md](./SECURITY.md).
 
-## Current commands
+## Backend
 
-- Backend: from repository root, `mvn -f back-end/pom.xml test` (requires Maven 3.9+ and JDK 21).
-- Frontend: `cd font-end`; run `npm run lint`, `npm run typecheck`, `npm run build`.
-- Frontend dev server: `npm run dev`.
+Từ repository root với Maven đã cài:
 
-The current backend reactor tests were executed using Maven 3.9.16 from the local cache under JDK 25 with Java release target 21; verify again with JDK 21 in the intended environment.
+```powershell
+mvn -f back-end/pom.xml test
+mvn -f back-end/pom.xml -DskipTests package
+```
 
-## Quy trình cho mỗi thay đổi
+Chạy một service riêng:
 
-1. Đọc `AGENTS.md` và tài liệu liên quan trong `docs/`.
-2. Xác định requirement ID, domain/service sở hữu, API/DB/Frontend phụ thuộc và acceptance test.
-3. Nếu requirement/architecture còn ở trạng thái đề xuất hoặc mở, làm rõ và cập nhật tài liệu trước khi implement.
-4. Thực hiện thay đổi nhỏ trong đúng domain; dùng DTO cho API, validate input và giữ business logic ngoài controller.
-5. Viết unit/integration/API tests cho hành vi mới.
-6. Chạy validation phù hợp; ghi kết quả và cập nhật `DEVELOPMENT_STATUS.md`, API/DB docs khi liên quan.
-7. Không đánh dấu done nếu chưa có bằng chứng kiểm tra.
+```powershell
+mvn -f back-end/pom.xml -pl identity-service spring-boot:run
+```
 
-## Quy ước kiến trúc
+Không có Maven cục bộ thì dùng Maven 3.9.9/JDK 21 Docker image và mount `back-end` vào container. Một ví dụ hiện hành nằm trong [trạng thái kiểm thử](./DEVELOPMENT_STATUS.md). Test reports ở `back-end/<module>/target/surefire-reports/`.
 
-- Không tạo service theo vai trò, UI portal hoặc CRUD list.
-- Admin dùng các API của domain service sở hữu nghiệp vụ.
-- Không truy cập DB của domain/service khác.
-- Không thêm dependency hoặc middleware hạ tầng nếu không có use case.
+## Frontend
+
+Từ `font-end/`:
+
+```powershell
+npm ci
+npm run dev
+npm run lint
+npm run typecheck
+npm run build
+```
+
+Ứng dụng frontend-only cần `API_GATEWAY_URL` trỏ tới Gateway. Trong Compose, BFF dùng `http://api-gateway:8080`; browser không gọi service port trực tiếp.
+
+## Full stack và API
+
+Khởi động/xem log/dừng stack theo [Hướng dẫn triển khai](./DEPLOYMENT_GUIDE.md). Public API base URL local là `http://localhost:8080`. Tích hợp ngoài cần theo [API Integration Guide](./API_INTEGRATION_GUIDE.md); reference endpoint nằm trong [API_DOCUMENTATION.md](./API_DOCUMENTATION.md).
+
+## Quy trình thay đổi
+
+1. Đọc `AGENTS.md`, yêu cầu, architecture/decision và docs của service bị ảnh hưởng.
+2. Xác định requirement ID, owner của business rule/data, API/DB/frontend dependencies và acceptance tests.
+3. Nếu yêu cầu/kiến trúc đang mở, làm rõ và cập nhật trạng thái trước khi implement.
+4. Thay đổi đúng owner/service; dùng DTO cho API, validate input, không chia sẻ DB/entity.
+5. Thêm test cho business logic mới và cập nhật API/database/service documentation.
+6. Chạy test/lint/build phù hợp; ghi trạng thái và bằng chứng trong [DEVELOPMENT_STATUS.md](./DEVELOPMENT_STATUS.md) và [TEST_CASES.csv](./TEST_CASES.csv).
+7. Không đánh dấu PASS nếu thiếu test report hoặc runtime evidence tương ứng.
+
+Không thêm service theo role/UI, không public internal ports, không đưa secret vào code hoặc browser. Payment lifecycle/saga hiện được hoãn; các policy booking chưa triển khai xem [open questions](./requirements/open-questions.md).

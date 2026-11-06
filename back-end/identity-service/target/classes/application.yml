@@ -10,13 +10,23 @@ spring:
     password: ${DB_PASSWORD}
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: validate
     open-in-view: false
+  flyway:
+    enabled: true
+    baseline-on-migrate: true
+    baseline-version: 0
+
+service:
+  api-keys:
+    profile: ${PROFILE_IDENTITY_API_KEY:}
 
 security:
   jwt:
-    secret: ${JWT_SECRET}
-    ttl-seconds: ${JWT_TTL_SECONDS:3600}
+    private-key-base64: ${JWT_PRIVATE_KEY_BASE64}
+    public-key-base64: ${JWT_PUBLIC_KEY_BASE64}
+    ttl-seconds: ${JWT_TTL_SECONDS:900}
+    refresh-ttl-days: ${JWT_REFRESH_TTL_DAYS:30}
 
 app:
   bootstrap-admin:
@@ -28,10 +38,16 @@ app:
     full-name: ${BOOTSTRAP_ADMIN_FULL_NAME:Quản trị Nhà Tốt}
 
 management:
+  tracing:
+    sampling:
+      probability: ${TRACING_SAMPLING_PROBABILITY:0.1}
+  otlp:
+    tracing:
+      endpoint: ${OTEL_EXPORTER_OTLP_ENDPOINT:http://localhost:4318/v1/traces}
   endpoints:
     web:
       exposure:
-        include: health,info
+        include: health,info,prometheus
   endpoint:
     health:
       probes:

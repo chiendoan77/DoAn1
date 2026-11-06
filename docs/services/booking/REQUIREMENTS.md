@@ -1,6 +1,6 @@
 # Requirements — Booking
 
-> Ranh giới/core rules đã được người dùng chọn. Booking CRUD cơ bản, participant history, state transitions và API eligibility review đã triển khai; các policy còn mở không được suy diễn. Chưa có quyết định yêu cầu Booking tham chiếu offering hoặc lưu price snapshot.
+> Ranh giới/core rules đã được người dùng chọn. Booking CRUD cơ bản, participant history, state transitions, package lookup/snapshots và BookingCompleted outbox đã triển khai; các policy còn mở không được suy diễn.
 
 ## 1. Giới thiệu
 
@@ -15,11 +15,11 @@ Cho khách tạo/tra cứu booking; provider xử lý booking được gán; Adm
 - Sở hữu booking; schedule allocation và status history chưa triển khai.
 - Kiểm tra state transition và provider/customer ownership; slot conflict chưa triển khai.
 - Repeat-category booking limit/Admin review là yêu cầu đã duyệt, chưa triển khai.
-- Booking là source of truth cho trạng thái/participants và xác minh review eligibility; Marketplace lưu review.
+- Booking là source of truth cho trạng thái/participants và xác minh Review eligibility; Review service lưu review.
 
 ## 4. Chức năng thuộc phạm vi
 
-Đã triển khai tạo booking, customer/provider history và provider accept/reject/complete. Slot conflict và repeat booking warning/review/quota chưa triển khai. Hủy/đổi chưa có; Marketplace sở hữu review sau eligibility check từ Booking.
+Đã triển khai tạo booking từ package, customer/provider history, provider accept/reject/complete, package snapshots và BookingCompleted outbox. Slot conflict và repeat booking warning/review/quota chưa triển khai. Hủy/đổi chưa có; Review service sở hữu review records sau eligibility check từ Booking.
 
 ## 5. Chức năng ngoài phạm vi
 
@@ -27,16 +27,16 @@ Credential, provider profile/catalog/price source of truth, Payment ledger và D
 
 ## 6. Actors
 
-Khách hàng, provider được phân công, Admin; Marketplace/Identity/Payment qua API/DTO.
+Khách hàng, provider được phân công, Admin; Profile/Identity/Marketplace qua API/DTO.
 
 ## 7. Functional Requirements
 
-- `BOOK-FR-001` (Đã xác nhận): khách hàng tạo booking với provider, ngày/khung giờ, địa chỉ và mô tả.
+- `BOOK-FR-001` (Đã xác nhận): khách hàng tạo booking từ package đã duyệt, ngày/giờ, địa chỉ và mô tả; giá/tên/thời lượng được snapshot.
 - `BOOK-FR-002` (Đã xác nhận): provider xử lý booking được phân công qua state transition hợp lệ.
 - `BOOK-FR-003` (Đã xác nhận): khách/provider xem booking thuộc phạm vi quyền; Admin tra cứu/xử lý.
 - `BOOK-FR-004` (Đã xác nhận): chỉ slot overlap mới gây provider schedule conflict.
 - `BOOK-FR-005` (Đã xác nhận): tối đa hai booking đang mở cùng category/customer; lần hai cảnh báo + Admin review dựa trên complaint context lần trước; lần ba bị chặn.
-- `BOOK-FR-006` (Đã xác nhận): customer/provider có thể review nhau sau booking completed, tối đa một review mỗi bên/booking; Booking xác minh eligibility, Marketplace lưu review.
+- `BOOK-FR-006` (Đã xác nhận): customer/provider có thể review nhau sau booking completed, tối đa một review mỗi bên/booking; Booking xác minh eligibility, Review lưu review.
 - `BOOK-FR-007` (Đề xuất): đổi/hủy booking theo policy được xác nhận.
 
 ## 8. Non-functional Requirements
@@ -45,7 +45,7 @@ Không nhận status tùy ý từ client; validate request; tránh lộ booking/
 
 ## 9. Business Rules
 
-- Booking hiện xác minh provider/category qua Marketplace API/DTO. Quan hệ tới offering chưa được chốt.
+- Booking xác minh package APPROVED qua Catalog và provider/category qua Profile API/DTO; lưu snapshots mà không truy cập DB service khác.
 - Provider chỉ bận ở các interval bị overlap; booking interval/timezone/boundaries cần chốt.
 - Tối đa hai booking “đang mở” cùng category/customer; định nghĩa open state/terminal state cần chốt.
 - Lần hai báo khách và đưa Admin xem complaint context của booking trước; lần ba bị từ chối nếu quota còn đủ điều kiện đếm.
@@ -58,23 +58,23 @@ Không nhận status tùy ý từ client; validate request; tránh lộ booking/
 - `BOOK-UC-03`: customer/provider/Admin xem booking theo quyền.
 - `BOOK-UC-04`: phát hiện slot overlap.
 - `BOOK-UC-05`: repeat booking cùng category được cảnh báo và chuyển Admin review.
-- `BOOK-UC-06`: Booking xác minh điều kiện; hai bên gửi review qua Marketplace sau completed.
+- `BOOK-UC-06`: Booking xác minh điều kiện; hai bên gửi review qua Review service sau completed.
 
 ## 11. Input / Output
 
-API hiện tại nhận providerId, categoryId, scheduledAt, address và description. Response gồm booking ID, snapshot category/provider, thời gian/địa chỉ/mô tả và status. Có cần bổ sung offering ID/price snapshot hay không chưa được xác nhận. Warning/review-required result cho booking lặp chưa được triển khai.
+API hiện tại nhận packageId, scheduledAt, address và description. Response gồm booking ID, package ID/name/price/duration snapshots, category/provider/customer snapshots, thời gian/địa chỉ/mô tả và status. Warning/review-required result cho booking lặp chưa được triển khai.
 
 ## 12. API endpoints dự kiến
 
 - `POST /api/bookings`
 - `GET /api/bookings/mine`
 - `PATCH /api/provider/bookings/{bookingId}/status`
-- `GET /internal/bookings/{bookingId}/review-eligibility` (API key; Marketplace gọi)
+- `GET /internal/bookings/{bookingId}/review-eligibility` (API key; Review gọi)
 - Admin query/review actions theo quyền.
 
 ## 13. Request / Response
 
-Request hiện dùng `providerId`, `categoryId`, `scheduledAt`, `address`, `description`; status ban đầu là `REQUESTED`. Các policy quota, warning, Admin hold và complaint context chưa có contract/implementation.
+Request dùng `packageId`, `scheduledAt`, `address`, `description`; status ban đầu là `REQUESTED`. Các policy quota, warning, Admin hold và complaint context chưa có contract/implementation.
 
 ## 14. Xác thực và phân quyền
 
@@ -82,7 +82,7 @@ Tạo booking yêu cầu CUSTOMER; provider actions yêu cầu provider được
 
 ## 15. Dữ liệu service sở hữu
 
-Booking ID, customer/provider/category references, scheduledAt, address/request snapshot và current status. Không lưu review/admin-review reference trong schema hiện tại.
+Booking ID, customer/provider/category/package references, package/participant snapshots, scheduledAt, address/request snapshot, current status và outbox events.
 
 ## 16. Database schema dự kiến
 
@@ -90,15 +90,15 @@ Entity hiện tại: `Booking` trong bảng `bookings`. `BookingStatusHistory`/`
 
 ## 17. Quan hệ với service khác
 
-Identity cung cấp claims; Marketplace xác thực provider/category. Offering verification và Payment integration chưa có implementation. Không có FK/join trực tiếp sang DB khác.
+Identity cung cấp claims; Catalog xác thực package và Profile xác thực provider/category. Payment integration chưa có implementation. Không có FK/join trực tiếp sang DB khác.
 
 ## 18. Cách giao tiếp
 
-REST/DTO đồng bộ với Marketplace để xác minh provider và kiểm tra review eligibility; không transaction xuyên service. Gateway là public entry, internal endpoints không qua Gateway. Payment integration và broker chưa có.
+REST/DTO đồng bộ với Catalog để xác minh package, Profile để xác minh provider; Review gọi internal eligibility endpoint. `BookingCompleted` được ghi bằng outbox; không transaction xuyên service. Gateway là public entry, internal endpoints không qua Gateway. Payment integration chưa có.
 
 ## 19. Events phát ra/nhận vào
 
-Chưa dùng broker. Booking state events có thể thêm khi Notifications/Payment integration yêu cầu và có idempotency/retry contract.
+Booking phát `BookingCompleted` qua RabbitMQ outbox để Notification. Payment events/saga chưa làm.
 
 ## 20. Lỗi và ngoại lệ
 
@@ -110,7 +110,7 @@ Validation error, unauthenticated, forbidden, not found, invalid transition, slo
 - Overlap slot bị xử lý conflict; slot không trùng không bị khóa toàn provider.
 - Booking category lần hai cảnh báo và chuyển Admin review; lần ba bị chặn theo open-state policy đã duyệt.
 - Chuyển status trái phép không thay đổi state.
-- Review eligibility chỉ trả true sau completion cho đúng customer/provider participant; Marketplace giới hạn một review mỗi reviewer/booking.
+- Review eligibility chỉ trả true sau completion cho đúng customer/provider participant; Review giới hạn một review mỗi reviewer/booking.
 
 ## 22. Test Cases
 
@@ -125,4 +125,4 @@ Provider selection/assignment; open/terminal statuses; slot duration/timezone/bo
 
 ## 24. Chức năng chưa triển khai
 
-Đã triển khai: tạo booking sau khi Marketplace xác minh provider; lịch sử theo customer/provider; provider status transitions có kiểm tra ownership; endpoint eligibility review yêu cầu API key, COMPLETED và participant; persistence/tests. Chưa triển khai: slot conflict, repeat-category quota/Admin review, admin booking APIs, cancel/reschedule, status history và migration scripts.
+Đã triển khai: tạo booking sau khi Catalog xác minh package và Profile xác minh provider; lưu package snapshots; lịch sử customer/provider; provider status transitions có kiểm tra ownership; endpoint eligibility yêu cầu API key, COMPLETED và participant; `BookingCompleted` transactional outbox; Flyway migrations và tests. Chưa triển khai: slot conflict, repeat-category quota/Admin review, admin booking APIs, cancel/reschedule và status history.

@@ -1,29 +1,24 @@
 package com.doan1.marketplace.security;
 
+import com.doan1.security.RsaJwtKeyLoader;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.security.Keys;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
-import javax.crypto.SecretKey;
-import java.nio.charset.StandardCharsets;
+import java.security.PublicKey;
 import java.util.UUID;
 
 @Service
 public class JwtPrincipalService {
-    private final SecretKey signingKey;
+    private final PublicKey verificationKey;
 
-    public JwtPrincipalService(@Value("${security.jwt.secret}") String secret) {
-        byte[] keyBytes = secret.getBytes(StandardCharsets.UTF_8);
-        if (keyBytes.length < 32) {
-            throw new IllegalArgumentException("JWT_SECRET must be at least 32 bytes.");
-        }
-        this.signingKey = Keys.hmacShaKeyFor(keyBytes);
+    public JwtPrincipalService(@Value("${security.jwt.public-key-base64}") String publicKey) {
+        this.verificationKey = RsaJwtKeyLoader.publicKey(publicKey);
     }
 
     public Principal requireRole(HttpServletRequest request, String expectedRole) {
@@ -40,7 +35,10 @@ public class JwtPrincipalService {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Vui lòng đăng nhập.");
         }
         try {
-            Claims claims = Jwts.parser().verifyWith(signingKey).build()
+            Claims claims = Jwts.parser().verifyWith(verificationKey)
+                    .requireIssuer("doan1-identity")
+                    .requireAudience("doan1-platform")
+                    .build()
                     .parseSignedClaims(header.substring(7)).getPayload();
             return new Principal(
                     UUID.fromString(claims.getSubject()),

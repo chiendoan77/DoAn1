@@ -1,17 +1,32 @@
 # Chiến lược kiểm thử
 
-Backend Maven và frontend npm manifests đã được tạo. Hiện có API/integration tests cho auth, Marketplace provider/review, Booking ownership/status/review eligibility, Gateway context và Payment adapter registry. Frontend hiện được xác minh bằng lint, typecheck và production build; chưa có frontend unit hoặc full E2E tests.
+## Trạng thái
 
-## Mức kiểm thử đề xuất
+Kịch bản chi tiết và trạng thái gần nhất nằm trong [TEST_CASES.csv](./TEST_CASES.csv). `PASS` chỉ dành cho testcase được chạy và có test report; `NOT_RUN` nghĩa là chưa có bằng chứng thực thi; `NOT_IMPLEMENTED` dùng cho hành vi chưa có implementation. Không coi cấu hình, route, build hoặc test context-load là bằng chứng E2E.
 
-- Unit tests cho domain rules, validation và chuyển trạng thái booking.
-- Integration tests cho persistence và authorization/API boundary.
-- API/contract tests cho DTO, status code và quyền truy cập.
-- Frontend tests cho form, role-gated navigation và loading/error/empty states.
-- E2E tests cho MVP flows sau khi endpoints, test data và environment được tạo.
+Ngày 2026-11-06 full Maven reactor đã pass: 39 tests/12 suites, không failure/error/skip. CSV hiện có 52 testcase: 42 `PASS`, 5 `NOT_RUN`, 4 `NOT_IMPLEMENTED`, 1 `DEFERRED`. Frontend lint/typecheck/build và Compose config cũng đã pass; full runtime Compose, browser E2E, production MySQL migration rehearsal và Pact suite chưa được xác minh. Xem [CSV testcase](./TEST_CASES.csv) để tra trạng thái từng case và bằng chứng.
 
-## Luồng tối thiểu cần kiểm chứng
+## Tầng kiểm thử
 
-Đăng ký/đăng nhập; quyền từng role; duyệt dịch vụ; tạo booking; slot overlap concurrency; repeat category quota (lần hai warning/Admin review, lần ba block); provider hoàn tất; hai chiều review; payment adapter/callback isolation; lỗi/booking không thuộc người dùng.
+1. **Unit:** validators, state transitions, mapping và outbox publisher/consumer behavior.
+2. **Service integration:** Spring context, H2 persistence, API authorization/ownership, schema startup.
+3. **Contract-style:** DTO/client interaction ở ranh giới service. `CatalogClientContractTests` là test hợp đồng nội bộ, không phải Pact provider/consumer suite.
+4. **Frontend checks:** lint, TypeScript typecheck và production build; chưa có frontend unit/component test suite.
+5. **E2E/runtime:** Compose/MySQL thật, Gateway xuyên services, browser flows; hiện chưa có bằng chứng E2E mới.
 
-Maven reactor tests dùng H2; MySQL schema/constraints và cross-service behavior chưa được xác minh với database thật. Mỗi requirement ID phải có ít nhất một test hoặc kiểm chứng chấp nhận được. Không tuyên bố coverage/ngưỡng hiệu năng chưa được đo.
+## Chạy kiểm thử
+
+Các lệnh và prerequisites nằm trong [Hướng dẫn phát triển](./DEVELOPMENT_GUIDE.md). Backend tests chạy qua Maven reactor với H2; test report được lưu dưới `back-end/<module>/target/surefire-reports/`. Frontend gates là npm lint/typecheck/build. Container build cần Docker Desktop; không dùng `install` thay cho `test` để khẳng định testcase pass.
+
+## Coverage cần có
+
+- Identity: register/login/validation, role, refresh rotation, revoke/replay.
+- Gateway: JWT edge validation, protected paths, CORS allow/deny.
+- Profile/Catalog: ownership, approval visibility, account/provider eligibility, input validation, idempotent rating projection.
+- Booking: package verification/snapshot, history privacy, assigned provider transitions, review eligibility.
+- Review/Notification: eligibility, duplicate prevention, outbox publishing/consumer idempotency.
+- Payment: adapter registry smoke test; lifecycle/webhook/saga tests chưa áp dụng vì Payment lifecycle được hoãn.
+- Database/infrastructure: Flyway upgrades trên MySQL backup, RabbitMQ runtime delivery, Compose health, OTEL/Prometheus/Grafana runtime.
+- Client integration: API contract regression và browser flow package → booking → completion → review/notification.
+
+Slot-overlap concurrency, repeat-booking quota/Admin review, Payment, Pact, browser E2E và production observability phải giữ `NOT_IMPLEMENTED` hoặc `NOT_RUN` trong CSV cho đến khi có implementation/test evidence phù hợp.

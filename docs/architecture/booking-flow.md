@@ -2,14 +2,15 @@
 
 ## Luồng đã triển khai
 
-1. CUSTOMER gửi `providerId`, `categoryId`, `scheduledAt`, `address`, `description` tới `POST /api/bookings`.
-2. Booking xác thực role và hỏi Marketplace qua API nội bộ để xác minh provider/category; không đọc database Marketplace.
-3. Booking lưu yêu cầu với trạng thái `REQUESTED`.
-4. Provider được gán xem lịch sử của mình và chuyển trạng thái qua `ACCEPTED`, `REJECTED` hoặc `COMPLETED` theo transition/ownership checks.
-5. Customer/provider xem lịch sử booking của mình.
+1. CUSTOMER gửi `packageId`, `scheduledAt`, `address`, `description` tới `POST /api/bookings`.
+2. Booking đồng bộ lấy package APPROVED và snapshot giá/tên/thời lượng từ Catalog; xác minh provider/category qua Profile.
+3. Booking lưu yêu cầu với trạng thái `REQUESTED` cùng snapshots, không có foreign key xuyên service.
+4. Provider được gán xem lịch sử và chuyển trạng thái qua `ACCEPTED`, `REJECTED` hoặc `COMPLETED` theo transition/ownership checks.
+5. Khi hoàn tất, Booking ghi `BookingCompleted` trong outbox; Notification phát inbox cho customer/provider.
+6. Review xác minh eligibility qua Booking; khi submit review, `ReviewSubmitted` cập nhật rating projection ở Profile.
 
-Booking request hiện không nhận offering ID, không lưu price snapshot và không kiểm tra slot overlap.
+Slot overlap, repeat booking policy, cancellation/reschedule và Payment saga chưa triển khai.
 
 ## Luồng mục tiêu chưa triển khai
 
-Yêu cầu đã xác nhận gồm slot conflict và giới hạn booking lặp theo category. Việc bắt đầu booking từ một gói dịch vụ và lưu giá tại thời điểm đặt chưa được xác nhận. Trạng thái “đang mở”, timezone/slot boundaries, Admin review behavior và cancellation/refund cũng cần chốt trước khi implementation. Các mục tiêu này không mô tả API đang chạy.
+Yêu cầu đã xác nhận gồm slot conflict và giới hạn booking lặp theo category; trạng thái “đang mở”, timezone/slot boundaries, Admin review behavior và cancellation/refund còn cần chốt. Payment lifecycle/saga đang được hoãn. Các mục tiêu chưa hoàn tất không mô tả API đang chạy.

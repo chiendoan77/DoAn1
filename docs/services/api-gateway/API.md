@@ -1,16 +1,21 @@
 # Gateway routes
 
-Gateway định tuyến public API; các URL đích cấu hình qua environment variables. Quyền và ownership được xác thực tại service domain.
+API Gateway local chạy ở `http://localhost:8080`. Đây là public entry point cho client; môi trường public cần domain HTTPS/reverse proxy tới Gateway. Upstream service URLs cấu hình qua environment variables.
 
-| Prefix | Destination |
-|---|---|
-| `/api/auth/**`, `/api/me/**`, `/api/admin/users/**` | Identity & Access |
-| `/api/services/**`, `/api/reviews/**`, `/api/provider/**`, `/api/admin/providers/**`, `/api/admin/categories/**` | Marketplace |
-| `/api/bookings/**`, `/api/provider/bookings/**`, `/api/admin/bookings/**` | Booking |
-| `/api/payments/**`, `/api/admin/payments/**` | Payment |
+| Path | Service đích | Ghi chú |
+|---|---|---|
+| `/api/auth/**`, `/api/me/**`, `/api/admin/users/**` | Identity | Đăng ký/đăng nhập, session, user status. |
+| `/api/services/*/providers/**`, `/api/services/providers/**`, `/api/provider/profile/**`, `/api/provider/applications/**`, `/api/admin/providers/**`, `/api/customer/profile/**` | Profile | Hồ sơ và provider lookup. |
+| `/api/services/categories`, `/api/catalog/**`, `/api/provider/packages/**`, `/api/admin/packages/**`, `/api/admin/categories/**` | Catalog | Danh mục/gói và moderation; từng endpoint cần đối chiếu controller tương ứng. |
+| `/api/reviews/**` | Review | Review service riêng. |
+| `/api/bookings/**`, `/api/provider/bookings/**`, `/api/admin/bookings/**` | Booking | Admin prefix được route nhưng chưa có workflow API được xác nhận. |
+| `/api/notifications/**` | Notification | In-app inbox. |
+| `/api/payments/**`, `/api/admin/payments/**` | Payment | Route cấu hình nhưng chưa có transaction API. |
 
-Các endpoint `/internal/**` không có route Gateway; service-to-service traffic dùng API key. Gateway route không đồng nghĩa endpoint downstream đã tồn tại: admin users/bookings, payments và một số catalog route hiện chưa được triển khai.
+Gateway xác minh JWT RS256, issuer `doan1-identity` và audience `doan1-platform` cho protected prefixes; endpoint public tiếp tục cho phép anonymous. Domain service vẫn kiểm tra role và ownership. Route tồn tại không xác nhận endpoint/business workflow tồn tại.
 
-## CORS cho frontend local
+Không có route `/internal/**`; internal HTTP và RabbitMQ chỉ hoạt động trong backend network, xác thực bằng API key/credentials riêng. Không công bố port service ra Internet.
 
-Gateway cho phép browser origin `http://localhost:4200` gọi API qua Gateway. Preflight hỗ trợ `GET`, `POST`, `PUT`, `PATCH`, `DELETE`, `OPTIONS` và headers `Content-Type`, `Authorization`. Origin khác bị từ chối; cấu hình này không thay thế xác thực hoặc phân quyền. Khi triển khai frontend ở origin khác, cập nhật allowlist theo origin cụ thể đó; không dùng wildcard cho credentials.
+## CORS
+
+Gateway CORS hiện cho phép dev origin `http://localhost:4200`, các method API và headers `Content-Type`/`Authorization`. Next.js frontend mặc định chạy ở `http://localhost:3000` và gọi Gateway server-side qua BFF; browser-origin khác cần được thêm rõ ràng trước khi gọi Gateway trực tiếp. CORS không thay thế JWT/role/ownership checks.

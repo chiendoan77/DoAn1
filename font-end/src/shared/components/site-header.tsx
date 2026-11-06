@@ -33,7 +33,10 @@ export function SiteHeader() {
           {account ? (
             <>
               <Link className="transition hover:text-[#1f594a]" href="/history">Lịch sử</Link>
+              <Link className="hidden transition hover:text-[#1f594a] sm:inline" href="/notifications">Thông báo</Link>
+              {account.role === "PROVIDER" && <Link className="hidden transition hover:text-[#1f594a] sm:inline" href="/provider/packages">Gói dịch vụ</Link>}
               {account.role === "ADMIN" && <Link className="hidden transition hover:text-[#1f594a] sm:inline" href="/admin/providers">Duyệt hồ sơ</Link>}
+              {account.role === "ADMIN" && <Link className="hidden transition hover:text-[#1f594a] sm:inline" href="/admin/packages">Duyệt gói</Link>}
               <button className="rounded-full border border-[#d6ded7] px-4 py-2 text-sm font-semibold text-[#214d40] hover:bg-white" onClick={signOut}>
                 Đăng xuất
               </button>

@@ -13,6 +13,53 @@ export type ServiceCategory = {
   description: string;
 };
 
+export type PackageStatus = "DRAFT" | "PENDING_APPROVAL" | "APPROVED" | "REJECTED" | "INACTIVE";
+
+export type ServicePackage = {
+  id: string;
+  providerId: string;
+  categoryId: string;
+  name: string;
+  description: string;
+  price: number;
+  durationMinutes: number;
+  providerPhone: string;
+  status: PackageStatus;
+  rejectionReason: string | null;
+  version: number;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type PageResult<T> = {
+  content: T[];
+  totalElements: number;
+  totalPages: number;
+  size: number;
+  number: number;
+};
+
+export type PackageApproval = {
+  id: string;
+  packageId: string;
+  actorId: string;
+  adminId: string | null;
+  action: string;
+  reason: string | null;
+  packageVersion: number;
+  createdAt: string;
+};
+
+export type Notification = {
+  id: string;
+  eventType: string;
+  packageId: string | null;
+  relatedId: string | null;
+  relatedType: "PACKAGE" | "BOOKING" | null;
+  message: string;
+  createdAt: string;
+};
+
 export type Provider = {
   id: string;
   fullName: string;
@@ -31,6 +78,10 @@ export type Booking = {
   id: string;
   categoryId: string;
   categoryName: string;
+  packageId: string | null;
+  packageName: string | null;
+  packagePrice: number | null;
+  packageDurationMinutes: number | null;
   providerProfileId: string;
   providerName: string;
   customerName: string;
@@ -39,6 +90,13 @@ export type Booking = {
   description: string;
   status: "REQUESTED" | "ACCEPTED" | "REJECTED" | "COMPLETED";
   createdAt: string;
+};
+
+export type CustomerProfile = {
+  displayName: string;
+  phoneNumber: string;
+  defaultAddress: string;
+  updatedAt?: string;
 };
 
 export type Review = {

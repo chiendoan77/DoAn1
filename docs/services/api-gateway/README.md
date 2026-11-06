@@ -1,6 +1,6 @@
 # API Gateway
 
-Edge application duy nhất dự kiến được public. Gateway định tuyến tới bốn business services; không chứa domain logic hoặc database nghiệp vụ.
+Edge application duy nhất dự kiến được public. Gateway định tuyến tới business services và xác minh JWT RS256 bằng public key cho API cần đăng nhập; không chứa domain logic hoặc database nghiệp vụ. Authorization theo role/ownership vẫn nằm trong service sở hữu workflow.
 
 ## Java package layout
 

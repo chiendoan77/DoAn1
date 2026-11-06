@@ -1,4 +1,4 @@
 -------------------------------------------------------------------------------
 Test set: com.doan1.marketplace.MarketplaceServiceApplicationTests
 -------------------------------------------------------------------------------
-Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 7.920 s -- in com.doan1.marketplace.MarketplaceServiceApplicationTests
+Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 119.3 s -- in com.doan1.marketplace.MarketplaceServiceApplicationTests

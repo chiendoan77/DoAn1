@@ -1,14 +1,14 @@
 package com.doan1.marketplace;
 
 import com.doan1.marketplace.client.BookingReviewEligibilityClient;
+import com.doan1.marketplace.client.ProfileRatingClient;
 import com.doan1.marketplace.dto.response.ReviewEligibility;
 import com.doan1.marketplace.entity.ProviderProfile;
 import com.doan1.marketplace.enums.ProviderStatus;
 import com.doan1.marketplace.repository.ProviderProfileRepository;
 import com.doan1.marketplace.repository.ProviderReviewRepository;
+import com.doan1.security.test.JwtTestKeys;
 
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.security.Keys;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,15 +17,18 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
 
-import java.nio.charset.StandardCharsets;
-import java.time.Instant;
-import java.util.Date;
 import java.util.Set;
 import java.util.UUID;
 
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
@@ -40,14 +43,18 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
         "spring.datasource.username=sa",
         "spring.datasource.password=sa",
         "spring.jpa.hibernate.ddl-auto=create-drop",
-        "security.jwt.secret=0123456789abcdef0123456789abcdef",
-        "service.api-key=internal-service-api-key-for-tests",
+        "service.api-keys.booking=internal-marketplace-booking-api-key-for-tests",
+        "service.api-keys.legacy-booking=legacy-booking-marketplace-key-for-tests",
         "app.seed-demo-providers=false"
 })
 @AutoConfigureMockMvc
 class MarketplaceServiceApplicationTests {
-    private static final String JWT_SECRET = "0123456789abcdef0123456789abcdef";
-    private static final String SERVICE_API_KEY = "internal-service-api-key-for-tests";
+    private static final String LEGACY_BOOKING_API_KEY = "legacy-booking-marketplace-key-for-tests";
+
+    @DynamicPropertySource
+    static void jwtKeys(DynamicPropertyRegistry registry) {
+        JwtTestKeys.registerPublicKey(registry);
+    }
 
     @Autowired
     private MockMvc mockMvc;
@@ -60,6 +67,9 @@ class MarketplaceServiceApplicationTests {
 
     @MockBean
     private BookingReviewEligibilityClient bookingEligibility;
+
+    @MockBean
+    private ProfileRatingClient profileRating;
 
     @BeforeEach
     void clearProviders() {
@@ -228,11 +238,11 @@ class MarketplaceServiceApplicationTests {
                         .param("categoryId", "cleaning"))
                 .andExpect(status().isUnauthorized());
         mockMvc.perform(get("/internal/providers/" + profile.getId())
-                        .header("X-Service-Api-Key", SERVICE_API_KEY)
+                        .header("X-Service-Api-Key", LEGACY_BOOKING_API_KEY)
                         .param("categoryId", "repair"))
                 .andExpect(status().isNotFound());
         mockMvc.perform(get("/internal/providers/" + profile.getId())
-                        .header("X-Service-Api-Key", SERVICE_API_KEY)
+                        .header("X-Service-Api-Key", LEGACY_BOOKING_API_KEY)
                         .param("categoryId", "cleaning"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.identityAccountId", is(profile.getIdentityAccountId().toString())))
@@ -245,7 +255,6 @@ class MarketplaceServiceApplicationTests {
     @Test
     void completedBookingReviewUpdatesProviderRatingAndCanOnlyBeSubmittedOnce() throws Exception {
         UUID providerAccountId = UUID.randomUUID();
-        UUID providerProfileId = UUID.randomUUID();
         UUID reviewerId = UUID.randomUUID();
         UUID bookingId = UUID.randomUUID();
         providers.save(new ProviderProfile(
@@ -280,21 +289,11 @@ class MarketplaceServiceApplicationTests {
                                 {"bookingId":"%s","rating":5,"comment":"Đánh giá lần hai"}
                                 """.formatted(bookingId)))
                 .andExpect(status().isConflict());
-        mockMvc.perform(get("/api/services/cleaning/providers"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].rating", is(4.0)))
-                .andExpect(jsonPath("$[0].reviewCount", is(1)));
+        verify(profileRating, times(1)).addReviewRating(any(UUID.class), eq(provider.getId()), eq(4));
+        org.junit.jupiter.api.Assertions.assertEquals(1, reviews.count());
     }
 
     private static String token(UUID id, String role) {
-        Instant now = Instant.now();
-        return Jwts.builder()
-                .subject(id.toString())
-                .claim("role", role)
-                .claim("name", "Test User")
-                .issuedAt(Date.from(now))
-                .expiration(Date.from(now.plusSeconds(600)))
-                .signWith(Keys.hmacShaKeyFor(JWT_SECRET.getBytes(StandardCharsets.UTF_8)))
-                .compact();
+        return JwtTestKeys.token(id, role, "Test User");
     }
 }

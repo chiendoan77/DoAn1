@@ -14,23 +14,23 @@ Kiểm tra source và cấu hình repository ngày 2026-11-06:
 
 | Thành phần | Hiện trạng |
 |---|---|
-| `back-end/` | Maven reactor có API Gateway và 4 Spring Boot apps. Identity, Marketplace, Booking có API và persistence; Payment là adapter-registry skeleton. |
+| `back-end/` | Maven reactor có API Gateway và 8 Spring Boot services: Identity, Profile, Catalog, Marketplace, Booking, Review, Payment, Notification. Payment vẫn là adapter-registry skeleton. |
 | `font-end/` | Next.js App Router, React, TypeScript, Tailwind và BFF. Không phải Angular. |
-| `docker/`, `docker-compose.yml` | Compose chạy MySQL, Gateway, frontend và bốn business apps; ba schema MySQL cho Identity, Marketplace, Booking; MySQL không publish port host. |
+| `docker/`, `docker-compose.yml` | Compose định nghĩa MySQL, RabbitMQ, Prometheus, Grafana, Jaeger, Gateway, frontend và services; schema riêng cho service có dữ liệu; MySQL không publish port host. |
 | `docs/` | Tài liệu yêu cầu, kiến trúc, database, API và từng service. [PROJECT_STRUCTURE.md](./PROJECT_STRUCTURE.md) là inventory source hiện tại. |
 
 Repository hiện có source code. Không dùng trạng thái kiểm kê ban đầu ở các tài liệu cũ để mô tả hiện trạng. Các luồng đã có bằng chứng được liệt kê trong [DEVELOPMENT_STATUS.md](./DEVELOPMENT_STATUS.md); đây chưa phải hệ thống production-ready.
 
 ## Khởi tạo và nghiệp vụ MVP
 
-Đã triển khai đăng ký/đăng nhập JWT, hồ sơ/duyệt provider, danh mục và danh sách provider, booking cơ bản, history hai phía và review hai chiều sau completed. Frontend nối các luồng này qua Next.js BFF với cookie HttpOnly. Admin là role; thao tác duyệt provider nằm trong Marketplace, không có `admin-service`. Quản lý gói dịch vụ/provider offerings là yêu cầu đã nêu nhưng chưa tìm thấy implementation tương ứng trong source hiện tại.
+Đã triển khai RS256 + refresh/revoke, customer/provider profiles, Catalog packages, Booking gắn package và snapshot giá, Review riêng, outbox events và in-app booking/package notifications. Frontend nối các luồng qua Next.js BFF với HttpOnly cookies. Admin là role; không có `admin-service`.
 
-Hồ sơ kiểm thử trước đây ghi nhận backend tests, frontend lint/typecheck/build và Docker Compose với MySQL local đã pass; các lệnh này không được chạy lại trong lần cập nhật tài liệu này. Browser E2E và production deployment chưa được xác minh. Máy dùng JDK 25 với Java target 21; Maven chạy từ cache do không có trên PATH.
+Full backend Maven reactor: 39 tests trên 12 suites, không failure/error/skip; frontend lint/typecheck/build và Compose configuration validation đã pass. Browser E2E, full Compose runtime và production deployment chưa được xác minh. Payment lifecycle/saga được hoãn.
 
 ## Định hướng kỹ thuật được nêu
 
-Stack có trong manifests: Java 21, Spring Boot 3.5.0, Spring Cloud 2025.0.0, Next.js 16.4.5, React, TypeScript, MySQL và Docker Compose. Schema hiện được Hibernate cập nhật bằng `ddl-auto: update`; chưa có migrations. Broker/Redis/payment gateway thật chưa được thêm. Cấu trúc đề xuất trong README không thay thế inventory thực tế.
+Stack có trong manifests: Java 21, Spring Boot 3.5.0, Spring Cloud 2025.0.0, Next.js 16.4.5, React, TypeScript, MySQL, RabbitMQ, Prometheus, Grafana, Jaeger và Docker Compose. Các schema dùng Flyway; Marketplace/Booking baseline vẫn cần dry-run trên bản sao DB hiện hữu. Payment gateway thật chưa được thêm.
 
 ## Trạng thái phê duyệt
 
-Người dùng đã chọn bốn business services (Identity & Access, Marketplace, Booking, Payment) cùng API Gateway; đã xác nhận MVP gồm xác thực/phân quyền, marketplace/provider approval, booking, các thao tác Admin liên quan, review hai chiều và Payment service có khả năng mở rộng adapter. Cấu trúc repository triển khai là microservices, không phải Angular + modular monolith như một số sơ đồ tham khảo. Quy tắc chi tiết về giờ, giá, nhà cung cấp thanh toán, và xử lý booking lặp còn mở. Xem [open-questions.md](./requirements/open-questions.md) và [DEVELOPMENT_STATUS.md](./DEVELOPMENT_STATUS.md).
+Người dùng đã chốt Profile, Catalog, Review và Notification boundaries; RS256, refresh/revoke, customer profile, Booking/Review events và Booking-package snapshot đã triển khai. Payment lifecycle/saga, Pact/browser E2E, centralized logs và production integrations còn thiếu hoặc được hoãn. Xem [open-questions.md](./requirements/open-questions.md) và [DEVELOPMENT_STATUS.md](./DEVELOPMENT_STATUS.md).

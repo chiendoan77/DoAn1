@@ -1,50 +1,56 @@
-# Hướng dẫn chạy bằng Docker
+# Chạy local và triển khai
 
-## Yêu cầu
+## Mục đích và prerequisites
 
-- Docker Desktop đang chạy.
-- Cổng local `3000`, `8080`–`8084` chưa được ứng dụng khác sử dụng.
+Docker Compose hiện phục vụ local development, không phải production deployment. Cần Docker Desktop đang chạy; tạo RSA keypair local theo [SECURITY.md](./SECURITY.md) trước khi bật stack. Dùng secret/key riêng cho mỗi môi trường, không commit `.env`.
 
-## Khởi động toàn bộ dự án
+## Khởi động và theo dõi
 
-Chạy tại thư mục gốc repository:
+Từ repository root, chạy `docker compose up --build` để build frontend, Gateway và các service, khởi tạo MySQL/RabbitMQ, và chờ health checks. Dùng `docker compose up --build -d` để chạy detached.
 
-```powershell
-docker compose up --build
-```
+Kiểm tra container với `docker compose ps`; xem log bằng `docker compose logs -f <service-name>` hoặc `docker compose logs -f`. Lệnh cụ thể và workflow phát triển được liên kết tại [DEVELOPMENT_GUIDE.md](./DEVELOPMENT_GUIDE.md).
 
-Compose tự build frontend và năm ứng dụng Java, khởi tạo MySQL cùng ba schema riêng, chờ các health check và kết nối các service bằng tên DNS nội bộ. Marketplace tự nạp provider demo trên database mới. Muốn để ứng dụng chạy nền, dùng `docker compose up --build -d`.
+## Local ports
 
-| Thành phần | URL từ máy host |
+Các host ports bind vào `127.0.0.1`; đây không phải cấu hình public.
+
+| Thành phần | URL/port mặc định |
 |---|---|
 | Frontend | `http://localhost:3000` |
-| API Gateway | `http://localhost:8080` |
+| API Gateway (API entry point) | `http://localhost:8080` |
 | Identity | `http://localhost:8081` |
-| Marketplace | `http://localhost:8082` |
+| Marketplace legacy | `http://localhost:8082` |
 | Booking | `http://localhost:8083` |
-| Payment | `http://localhost:8084` |
+| Payment skeleton | `http://localhost:8084` |
+| Profile | `http://localhost:8085` |
+| Catalog | `http://localhost:8086` |
+| Notification | `http://localhost:8087` |
+| Review | `http://localhost:8088` |
+| Prometheus | `http://localhost:9090` |
+| Grafana | `http://localhost:3001` |
+| Jaeger UI | `http://localhost:16686` |
 
-Database không publish port ra máy host. Các port ứng dụng được bind vào `127.0.0.1`, chỉ truy cập từ máy đang chạy Docker; frontend gọi Gateway qua network nội bộ.
+Integration client chỉ dùng Gateway. Các service port được publish loopback cho debug local, không được expose trong môi trường public. MySQL/RabbitMQ không publish port host.
 
-Kiểm tra tình trạng và log:
+## Dừng và dữ liệu local
 
-```powershell
-docker compose ps
-docker compose logs -f
-```
+Dừng stack foreground bằng `Ctrl+C`; chạy detached thì dùng `docker compose down`. Volume MySQL được giữ lại sau khi dừng. `docker compose down --volumes` xóa volume dữ liệu local; chỉ dùng khi chủ ý reset data, không chạy trên dữ liệu cần giữ.
 
-Dừng stack bằng `Ctrl+C` nếu chạy foreground, hoặc:
+Các port có thể override qua biến trong `.env`; xem `docker-compose.yml` để biết tên chính xác. Không sửa `API_GATEWAY_URL` của frontend thành một service URL.
 
-```powershell
-docker compose down
-```
+## Database và migrations
 
-Mặc định volume `mysql-data` được giữ lại sau khi dừng. Chỉ khi muốn xóa toàn bộ dữ liệu local và tạo database mới, chạy `docker compose down --volumes`.
+Identity, Profile, Catalog, Marketplace, Booking, Review và Notification dùng Flyway; Payment chưa có schema nghiệp vụ. Marketplace/Booking baseline migrations chưa được rehearsal trên backup MySQL hiện hữu. Trước khi nâng cấp database có dữ liệu: backup, phục hồi vào môi trường riêng, chạy migration, đối chiếu số lượng/constraint và xác nhận rollback/restore.
 
-Có thể đổi port host bằng biến môi trường trước khi chạy, ví dụ `$env:FRONTEND_PORT = "3100"` hoặc `$env:GATEWAY_PORT = "8090"`. Các biến dùng cho port khác là `IDENTITY_PORT`, `MARKETPLACE_PORT`, `BOOKING_PORT` và `PAYMENT_PORT`.
+## Production — chưa được chứng nhận
 
-Các giá trị JWT/API key mặc định chỉ dành cho local development. Không dùng cấu hình mặc định, MySQL không mật khẩu, hoặc port mapping này cho môi trường public/production. Muốn bootstrap Admin, đặt `BOOTSTRAP_ADMIN_ENABLED=true` và cung cấp các biến `BOOTSTRAP_ADMIN_EMAIL`, `BOOTSTRAP_ADMIN_PHONE`, `BOOTSTRAP_ADMIN_USERNAME`, `BOOTSTRAP_ADMIN_PASSWORD` trước khi khởi động.
+Repository chưa cung cấp production domain, TLS termination, secrets manager, network policy, rate limiting, backup/restore runbook, log aggregation hoặc CI/CD. Trước khi public:
 
-## Production
+1. Chỉ expose reverse proxy/API Gateway bằng HTTPS; không expose MySQL, RabbitMQ hoặc từng service port.
+2. Thay mọi credential local và dùng RSA private key/API key/RabbitMQ/DB secrets được quản lý an toàn.
+3. Cấu hình allowlisted CORS origins, firewall/network policy và rate limiting.
+4. Thiết lập backup/restore và migration rehearsal.
+5. Xác minh health checks, outbox/broker recovery, metrics/traces, central logs và alerting.
+6. Chạy contract/E2E/security tests trong staging trước rollout.
 
-Môi trường triển khai, domain, TLS, backup/restore, log retention, quản lý secret và quy trình phát hành chưa được xác định. Compose hiện tại chỉ dành cho local development; production cần cấu hình credentials/secret riêng và không public database hoặc internal service ports.
+Do các mục này chưa được xác minh, Compose chỉ được dùng cho môi trường phát triển cá nhân.

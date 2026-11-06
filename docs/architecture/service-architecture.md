@@ -1,13 +1,17 @@
 # Service architecture (ứng viên)
 
-| Deployable/domain | Trách nhiệm | Dữ liệu sở hữu dự kiến | Admin liên quan | Tách riêng khi |
+| Deployable/domain | Trách nhiệm hiện tại | Dữ liệu sở hữu | Admin liên quan | Trạng thái |
 |---|---|---|---|---|
-| Identity & Access | Tài khoản, credential, role/authorization | Account, credentials, role assignments | Khóa/tra cứu user theo quyền | Có domain identity rõ và microservices được yêu cầu |
-| Marketplace | Provider profile, service offering/catalog, giá, duyệt đối tác | Provider, category, offering, moderation state | Duyệt provider/danh mục | Ownership, thay đổi hoặc vận hành độc lập |
-| Booking | Tạo/điều phối booking và state machine công việc | Booking, status history, schedule allocation | Tra cứu/xử lý booking | Booking cần scale/ownership/deploy độc lập |
-| Payment | Payment transaction, provider adapters, callback/status handling | Payment transaction/attempt, provider references | Tra cứu giao dịch theo permission | Đã chọn service riêng để tích hợp nhiều provider |
-| API Gateway | Routing và cross-cutting edge policy | Không sở hữu dữ liệu nghiệp vụ | Không phải admin backend | Khi có nhiều backend service và cần edge routing |
+| Identity & Access | Account, credential, role, account status | Account, status audit, hashed refresh tokens | Suspend/activate account | RS256 and refresh rotation/revoke implemented |
+| Profile | Customer/provider profile, approval/suspension, rating projection | Customer/provider profiles, rating projection | Duyệt/suspend provider | Implemented |
+| Catalog | Category, provider packages/prices, package moderation | Categories, packages, history, outbox | Approve/reject/deactivate package | Đã có Flyway và package workflow |
+| Marketplace | Legacy profile/review migration exports | Legacy migration sources | Không còn domain ops mới | Flyway baseline |
+| Booking | Booking lifecycle, Catalog package snapshots, completion event | Booking, outbox | Booking admin workflow chưa đủ | Package snapshot and BookingCompleted outbox implemented |
+| Review | Review workflow and Booking eligibility | Reviews, outbox | Review moderation chưa có | Separate deployable implemented |
+| Payment | Provider adapters, transaction/callback lifecycle | Payment transaction/attempt | Payment operations | Hiện chỉ adapter skeleton |
+| Notification | Consume package and booking events, in-app inbox | Notification inbox | Không có admin portal riêng | BookingCompleted and package events |
+| API Gateway | Routing, JWT RS256 validation, edge policy | Không sở hữu dữ liệu nghiệp vụ | Không phải admin backend | Routes Review and Profile |
 
-Các dòng trên là domain responsibility đã chọn, không đồng nghĩa mọi chức năng đã triển khai. Trong source hiện tại Marketplace có provider profiles/categories/reviews nhưng chưa có offering catalog/giá; Booking có luồng cơ bản; Payment mới là skeleton. Admin là role, review thuộc Marketplace, không có các deployable riêng `admin`, `review`, `user` hoặc `notification`. Cây thực tế xem [PROJECT_STRUCTURE.md](../PROJECT_STRUCTURE.md).
+Admin là role/portal, không phải service. Review là deployable riêng; Marketplace còn legacy tables để migration. Xem [PROJECT_STRUCTURE.md](../PROJECT_STRUCTURE.md) và [DEVELOPMENT_STATUS.md](../DEVELOPMENT_STATUS.md).
 
-Review hai chiều đã vào scope nhưng chưa có service riêng; complaint workflow và notification chưa được chốt. Payment service đã được chọn; provider/method cụ thể và payment lifecycle còn mở.
+Catalog/Booking/Review events dùng transactional outbox → RabbitMQ; Notification consumes BookingCompleted, Profile consumes ReviewSubmitted. Payment events/saga và complaint workflow chưa triển khai.

@@ -6,6 +6,7 @@ import com.doan1.identity.dto.response.AccountResponse;
 import com.doan1.identity.dto.response.LoginResponse;
 import com.doan1.identity.entity.Account;
 import com.doan1.identity.enums.Role;
+import com.doan1.identity.enums.AccountStatus;
 import com.doan1.identity.mapper.AccountMapper;
 import com.doan1.identity.repository.AccountRepository;
 import com.doan1.identity.security.JwtTokenService;
@@ -26,10 +27,12 @@ public class AuthServiceImpl implements AuthService {
     private final AccountRepository accounts;
     private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
     private final JwtTokenService tokens;
+    private final RefreshTokenService refreshTokens;
 
-    public AuthServiceImpl(AccountRepository accounts, JwtTokenService tokens) {
+    public AuthServiceImpl(AccountRepository accounts, JwtTokenService tokens, RefreshTokenService refreshTokens) {
         this.accounts = accounts;
         this.tokens = tokens;
+        this.refreshTokens = refreshTokens;
     }
 
     @Override
@@ -70,7 +73,24 @@ public class AuthServiceImpl implements AuthService {
         if (account == null || !passwordEncoder.matches(request.password(), account.getPasswordHash())) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Thông tin đăng nhập không chính xác.");
         }
-        return new LoginResponse(tokens.issue(account), tokens.ttlSeconds(), AccountMapper.toResponse(account));
+        if (account.getStatus() != AccountStatus.ACTIVE) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Tài khoản đã bị tạm ngưng.");
+        }
+        RefreshTokenService.IssuedToken refresh = refreshTokens.issue(account.getId());
+        return response(account, refresh);
+    }
+
+    @Override
+    public LoginResponse refresh(String refreshToken) {
+        RefreshTokenService.IssuedToken rotated = refreshTokens.rotate(refreshToken);
+        Account account = accounts.findById(rotated.accountId())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Tài khoản không còn tồn tại."));
+        return response(account, rotated);
+    }
+
+    @Override
+    public void logout(String refreshToken) {
+        refreshTokens.revoke(refreshToken);
     }
 
     @Override
@@ -79,6 +99,9 @@ public class AuthServiceImpl implements AuthService {
         UUID accountId = tokens.authenticate(request).accountId();
         Account account = accounts.findById(accountId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Tài khoản không còn tồn tại."));
+        if (account.getStatus() != AccountStatus.ACTIVE) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Tài khoản đã bị tạm ngưng.");
+        }
         return AccountMapper.toResponse(account);
     }
 
@@ -88,10 +111,16 @@ public class AuthServiceImpl implements AuthService {
             if (role == Role.ADMIN) {
                 throw new IllegalArgumentException();
             }
+
             return role;
         } catch (IllegalArgumentException exception) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Vai trò đăng ký không hợp lệ.");
         }
+    }
+
+    private LoginResponse response(Account account, RefreshTokenService.IssuedToken refresh) {
+        return new LoginResponse(tokens.issue(account), tokens.ttlSeconds(),
+                refresh.value(), refresh.expiresIn(), AccountMapper.toResponse(account));
     }
 
     private static String normalizePhone(String phoneNumber) {

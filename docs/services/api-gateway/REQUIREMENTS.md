@@ -1,10 +1,10 @@
 # Requirements — API Gateway
 
-Trạng thái: edge component đã được chọn; hiện chỉ có route skeleton, chưa có authentication enforcement hoặc production deployment.
+Trạng thái: routing và JWT RS256/issuer/audience validation đã triển khai; production hardening còn thiếu.
 
 ## Mục tiêu/phạm vi
 
-- Định tuyến public API đến Identity, Marketplace, Booking và Payment.
+- Định tuyến public API đến Identity, Profile, Catalog, Marketplace (legacy only), Booking, Review, Payment và Notification.
 - Là điểm vào API duy nhất từ browser; không thay thế authorization trong từng service.
 - Không sở hữu dữ liệu nghiệp vụ.
 
@@ -20,7 +20,7 @@ Gateway forward HTTP request/response; không chuyển đổi domain contract. R
 
 ## Bảo mật, dependencies, tests
 
-Admin Portal xác thực JWT/ADMIN tại Gateway khi security filter được thêm, và vẫn phải kiểm tra tại domain service. Server-to-server API key không được đưa vào browser. Unit/integration tests cần kiểm tra route destination, forwarding và lỗi upstream.
+Gateway xác minh JWT RS256/issuer/audience trên route cần auth; domain service vẫn kiểm tra role/ownership. Server-to-server API key không được đưa vào browser. Rate limiting, resilience và production hardening chưa hoàn tất.
 
 ## Dữ liệu/schema/events
 
@@ -28,4 +28,4 @@ Không có database/schema nghiệp vụ; không phát/nhận event trong skelet
 
 ## Acceptance / lỗi / chưa triển khai
 
-Acceptance: mỗi route tới đúng service; internal services không public; upstream timeout/error trả lỗi an toàn. Chưa có authentication filter, resilience, rate limit, request logging policy hoặc deployment hardening.
+Acceptance hiện đã test routing và JWT allow/deny cơ bản. Internal services không route công khai. Resilience, rate limit, request logging policy và deployment hardening chưa triển khai.

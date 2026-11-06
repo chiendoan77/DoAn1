@@ -1,0 +1,4 @@
+-------------------------------------------------------------------------------
+Test set: com.doan1.notification.PackageEventConsumerTests
+-------------------------------------------------------------------------------
+Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 8.485 s -- in com.doan1.notification.PackageEventConsumerTests

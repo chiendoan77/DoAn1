@@ -25,7 +25,7 @@ public class InternalProviderController {
 
     public InternalProviderController(
             MarketplaceService marketplace,
-            @Value("${service.api-key:}") String serviceApiKey) {
+            @Value("${service.api-keys.legacy-booking:}") String serviceApiKey) {
         this.marketplace = marketplace;
         this.serviceApiKey = serviceApiKey.getBytes(StandardCharsets.UTF_8);
     }

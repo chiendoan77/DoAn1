@@ -20,7 +20,7 @@ public class BookingReviewEligibilityClient {
     public BookingReviewEligibilityClient(
             RestClient.Builder builder,
             @Value("${services.booking.url}") String bookingUrl,
-            @Value("${service.api-key:}") String serviceApiKey) {
+            @Value("${service.api-keys.booking:}") String serviceApiKey) {
         this.restClient = builder.baseUrl(bookingUrl).build();
         this.serviceApiKey = serviceApiKey;
     }

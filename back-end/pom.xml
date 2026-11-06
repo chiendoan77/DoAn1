@@ -19,11 +19,17 @@
     <description>Microservices backend for the home services booking platform</description>
 
     <modules>
+        <module>security-common</module>
+        <module>security-test-support</module>
         <module>api-gateway</module>
         <module>identity-service</module>
+        <module>profile-service</module>
+        <module>catalog-service</module>
         <module>marketplace-service</module>
+        <module>review-service</module>
         <module>booking-service</module>
         <module>payment-service</module>
+        <module>notification-service</module>
     </modules>
 
     <properties>

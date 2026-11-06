@@ -1,112 +1,66 @@
 # Cấu trúc dự án hiện tại
 
-Tài liệu này mô tả cấu trúc source hiện tại, không phải cấu trúc mục tiêu hay scaffold đề xuất. Backend vẫn là Spring Boot microservices; frontend vẫn là Next.js.
+Tài liệu mô tả source hiện tại, không phải scaffold mục tiêu. Backend là Spring Boot microservices; frontend là Next.js.
 
-## Cây thư mục
+## Cây thư mục rút gọn
 
 ```text
 DoAn1/
-├── AGENTS.md
-├── Readme.md                    # Master prompt/phạm vi khởi đầu; không phải inventory runtime
 ├── docker-compose.yml
-├── docker/
-│   └── mysql/init/              # Tạo schema local
+├── docker/mysql/init/
 ├── back-end/
-│   ├── pom.xml                  # Maven reactor, Java 21
+│   ├── pom.xml
 │   ├── api-gateway/
-│   │   └── src/main/java/com/doan1/gateway/
-│   │       ├── config/          # GatewayRoutes, GatewayCorsConfiguration
-│   │       └── ApiGatewayApplication.java
 │   ├── identity-service/
-│   │   └── src/main/java/com/doan1/identity/
-│   │       ├── config/
-│   │       ├── controller/
-│   │       ├── dto/request/
-│   │       ├── dto/response/
-│   │       ├── entity/
-│   │       ├── enums/
-│   │       ├── exception/
-│   │       ├── mapper/
-│   │       ├── repository/
-│   │       ├── security/
-│   │       ├── service/
-│   │       └── IdentityServiceApplication.java
+│   ├── profile-service/
+│   ├── catalog-service/
 │   ├── marketplace-service/
-│   │   └── src/main/java/com/doan1/marketplace/
-│   │       ├── client/
-│   │       ├── config/
-│   │       ├── controller/
-│   │       ├── dto/request/
-│   │       ├── dto/response/
-│   │       ├── entity/
-│   │       ├── enums/
-│   │       ├── exception/
-│   │       ├── mapper/
-│   │       ├── repository/
-│   │       ├── security/
-│   │       ├── service/
-│   │       └── MarketplaceServiceApplication.java
+│   ├── review-service/
 │   ├── booking-service/
-│   │   └── src/main/java/com/doan1/booking/
-│   │       ├── client/
-│   │       ├── controller/
-│   │       ├── dto/request/
-│   │       ├── dto/response/
-│   │       ├── entity/
-│   │       ├── enums/
-│   │       ├── mapper/
-│   │       ├── repository/
-│   │       ├── security/
-│   │       ├── service/
-│   │       └── BookingServiceApplication.java
-│   └── payment-service/
-│       └── src/main/java/com/doan1/payment/
-│           ├── provider/        # Adapter contract/registry hiện ở mức skeleton
-│           └── PaymentServiceApplication.java
+│   ├── payment-service/
+│   └── notification-service/
 ├── font-end/
 │   └── src/
-│       ├── app/                 # Next.js App Router, pages và BFF routes
-│       ├── features/            # auth, admin, booking, marketplace
-│       ├── shared/components/   # UI dùng chung
-│       └── lib/                 # API client/DTO dùng chung
+│       ├── app/                 # App Router và BFF routes
+│       ├── features/            # auth, admin, booking, catalog, marketplace, notifications
+│       ├── shared/components/
+│       └── lib/
 └── docs/
     ├── architecture/
     ├── database/
     ├── frontend/
-    ├── requirements/
-    └── services/                # API Gateway và 4 business services
+    └── services/                # Gateway và business service docs
 ```
 
-Mỗi backend module có `src/test/java` riêng. Identity, Marketplace và Booking tách request/response DTO, entity, enum, mapper và nghiệp vụ theo package; Gateway và Payment giữ cấu trúc gọn phù hợp vai trò hiện tại.
+Mỗi backend module có `src/test/java` riêng. Domain services tách controller/DTO/entity/repository/service theo trách nhiệm; Payment hiện giữ cấu trúc gọn cho adapter skeleton.
 
-## Phân cấp theo trách nhiệm
+## Ownership
 
 | Thành phần | Nơi đặt | Sở hữu / trách nhiệm hiện tại |
 |---|---|---|
-| Web UI và BFF | `font-end/` | Next.js App Router; trình duyệt gọi BFF, BFF chuyển tiếp tới API Gateway và giữ JWT trong cookie HttpOnly. |
-| API Gateway | `back-end/api-gateway/` | Điểm định tuyến API; không sở hữu dữ liệu nghiệp vụ. |
-| Identity & Access | `back-end/identity-service/` | Tài khoản, mật khẩu đã băm, role, đăng ký/đăng nhập và JWT. Không có `user-service` riêng. |
-| Marketplace | `back-end/marketplace-service/` | Provider profile, category code cố định, duyệt provider, review và rating. |
-| Booking | `back-end/booking-service/` | Booking, participant snapshots và trạng thái booking cơ bản. |
-| Payment | `back-end/payment-service/` | Spring Boot skeleton và adapter registry; chưa có API giao dịch hoặc database nghiệp vụ. |
-| MySQL local | `docker-compose.yml`, `docker/mysql/init/` | Schema `doan1_identity`, `doan1_marketplace`, `doan1_booking`; MySQL không publish port host trong Compose. |
-| Tài liệu | `docs/` | Requirements, architecture, API/database contracts và implementation status. |
+| Web UI/BFF | `font-end/` | Next.js; browser gọi BFF, BFF chuyển tiếp tới Gateway và giữ JWT trong cookie HttpOnly. |
+| API Gateway | `back-end/api-gateway/` | Routing và JWT RS256 validation ở edge; không sở hữu dữ liệu nghiệp vụ. |
+| Identity & Access | `back-end/identity-service/` | Tài khoản, credential, role, account status/audit, RS256 và refresh-token rotation/revocation. |
+| Profile | `back-end/profile-service/` | Customer/provider profiles, approval/suspension, public lookup, eligibility và rating projection. |
+| Catalog | `back-end/catalog-service/` | Category, provider packages/prices, moderation, history và event outbox. |
+| Marketplace | `back-end/marketplace-service/` | Legacy provider/review tables and authenticated migration export APIs. |
+| Booking | `back-end/booking-service/` | Booking, Catalog package lookup, price/name/duration snapshots, state transitions and completion outbox. |
+| Review | `back-end/review-service/` | Review data, Booking eligibility, `ReviewSubmitted` outbox and legacy import API. |
+| Payment | `back-end/payment-service/` | Adapter registry skeleton; chưa có transaction API/schema. |
+| Notification | `back-end/notification-service/` | Package-event consumer và in-app notification inbox. |
+| MySQL | `docker-compose.yml`, `docker/mysql/init/` | Schema riêng cho các service có dữ liệu; không publish port host. |
+| RabbitMQ | `docker-compose.yml` | Catalog/Booking/Review outboxes; Notification consumes BookingCompleted and package events, Profile consumes ReviewSubmitted. |
+| Observability | `docker-compose.yml`, `docker/prometheus/`, `docker/grafana/` | Prometheus metrics, Grafana and Jaeger OTLP traces; centralized logs not yet integrated. |
 
-Admin là role/portal, không phải service. Review được lưu ở Marketplace; Marketplace gọi Booking qua API nội bộ để kiểm tra điều kiện review. Các service không dùng chung entity hoặc truy cập schema của service khác.
+Admin là role/portal, không phải service. Marketplace legacy tables remain as migration sources; Review is independently deployed. Các service không dùng chung entity hoặc truy cập schema của service khác.
 
-## Phân biệt hiện trạng và cấu trúc được đề xuất
+## Hiện trạng và phần chưa hoàn tất
 
-Các mẫu trong `Readme.md` và sơ đồ do người dùng cung cấp là định hướng tham khảo, không phải cấu trúc repository:
-
-- Frontend hiện là **Next.js/React/TypeScript**, không phải Angular; tên thư mục hiện tại là `font-end/`.
-- Backend hiện là Maven reactor gồm **API Gateway và bốn Spring Boot apps**, không phải một backend modular monolith.
-- Không có các module/deployable độc lập `user`, `review`, `notification` hoặc `admin`; capability thuộc Identity, Marketplace hoặc service sở hữu workflow.
-- Marketplace hiện **chưa có** entity/bảng/API quản lý gói dịch vụ (`ServiceOffering`/`service_offerings`). Yêu cầu provider tạo/sửa giá/xóa gói đã được nêu nhưng chưa có trong source snapshot này.
-- Booking hiện nhận provider/category, không nhận offering ID và không lưu price snapshot.
-- Payment chưa có API giao dịch, schema hoặc tích hợp cổng thanh toán.
-- `db/migration/` chưa có migration scripts; schema được Hibernate cập nhật trong cấu hình local.
-
-Nếu có quyết định chuyển sang Angular hoặc modular monolith, cần xác nhận đó là thay đổi kiến trúc riêng trước khi thay đổi source hoặc sơ đồ triển khai.
+- Frontend là **Next.js/React/TypeScript**, không phải Angular; tên thư mục là `font-end/`.
+- Backend là Maven reactor gồm API Gateway và 8 Spring Boot services, không phải modular monolith.
+- Payment chưa có API giao dịch, schema nghiệp vụ hoặc tích hợp cổng thanh toán; Payment events/saga được hoãn.
+- Identity, Profile, Catalog, Marketplace, Booking, Review và Notification dùng Flyway; Marketplace/Booking baseline chưa được rehearsal trên bản sao dữ liệu hiện hữu.
+- `docker compose config -q` đã pass; full Compose runtime, contract/Pact suite, browser E2E, production deployment và centralized logs chưa được xác minh/hoàn thiện.
 
 ## Điểm vào để tra cứu
 

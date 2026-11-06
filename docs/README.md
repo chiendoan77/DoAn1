@@ -7,13 +7,15 @@ Tài liệu ghi nhận yêu cầu đã xác nhận, quyết định kiến trúc
 - [PROJECT_STRUCTURE.md](./PROJECT_STRUCTURE.md): cây thư mục và phân cấp source code đang có trong repository.
 - [PROJECT_OVERVIEW.md](./PROJECT_OVERVIEW.md): mục tiêu và hiện trạng repository.
 - [REQUIREMENTS.md](./REQUIREMENTS.md): yêu cầu tổng hợp và trạng thái xác nhận.
-- [ARCHITECTURE.md](./ARCHITECTURE.md): kiến trúc bốn service đã chọn.
+- [ARCHITECTURE.md](./ARCHITECTURE.md): kiến trúc và trạng thái triển khai hiện tại.
 - [SYSTEM_DESIGN.md](./SYSTEM_DESIGN.md): luồng và thành phần ở mức hệ thống.
 - [DATABASE_DESIGN.md](./DATABASE_DESIGN.md): schema hiện tại và giới hạn migration.
 - [API_DOCUMENTATION.md](./API_DOCUMENTATION.md): API đã triển khai và phần còn dự kiến.
+- [API_INTEGRATION_GUIDE.md](./API_INTEGRATION_GUIDE.md): cách client bên ngoài kết nối Gateway, xác thực, gọi endpoint và các giới hạn network.
 - [SECURITY.md](./SECURITY.md): baseline bảo mật đề xuất.
 - [DEVELOPMENT_GUIDE.md](./DEVELOPMENT_GUIDE.md): quy trình phát triển.
 - [TESTING_STRATEGY.md](./TESTING_STRATEGY.md): chiến lược kiểm thử.
+- [TEST_CASES.csv](./TEST_CASES.csv): danh sách testcase và trạng thái thực thi gần nhất; mỗi trạng thái có đường dẫn bằng chứng.
 - [DEPLOYMENT_GUIDE.md](./DEPLOYMENT_GUIDE.md): hướng triển khai dự kiến.
 - [DEVELOPMENT_STATUS.md](./DEVELOPMENT_STATUS.md): trạng thái đã kiểm kê.
 - [ROADMAP.md](./ROADMAP.md): các phase đề xuất.
@@ -26,7 +28,7 @@ Tài liệu ghi nhận yêu cầu đã xác nhận, quyết định kiến trúc
 - `architecture/`: ngữ cảnh, ranh giới service, giao tiếp, xác thực, đặt lịch và triển khai.
 - `database/`: ownership và mô hình dữ liệu khái niệm.
 - `frontend/`: phạm vi và tích hợp giao diện.
-- `services/`: tài liệu domain-service; Identity, Marketplace, Booking có một phần business API, Payment còn ở mức adapter registry.
+- `services/`: tài liệu API Gateway và tám business services.
 
 ## Quy ước trạng thái
 
