@@ -15,7 +15,7 @@ Open `http://localhost:3000`. The Next.js BFF calls the Gateway inside the Docke
 For frontend-only development, Node.js 22+ and npm are required:
 
 ```powershell
-cd font-end
+cd front-end
 npm ci
 npm run dev
 ```

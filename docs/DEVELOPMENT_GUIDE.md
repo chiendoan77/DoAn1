@@ -26,7 +26,7 @@ Không có Maven cục bộ thì dùng Maven 3.9.9/JDK 21 Docker image và mount
 
 ## Frontend
 
-Từ `font-end/`:
+Từ `front-end/`:
 
 ```powershell
 npm ci

@@ -5,7 +5,7 @@ Ngày đối chiếu source/configuration, full backend tests và frontend check
 ## Kiến trúc và inventory
 
 - Backend Maven reactor gồm API Gateway, 1 module `security-common` và 6 Spring Boot services: Identity, Profile, Catalog, Booking, Review và Notification. Marketplace, Payment và security-test-support đã được dọn dẹp/gom gọn.
-- Frontend là Next.js App Router/React/TypeScript trong `font-end/`; browser đi qua BFF và API Gateway.
+- Frontend là Next.js App Router/React/TypeScript trong `front-end/`; browser đi qua BFF và API Gateway.
 - Các service có dữ liệu sở hữu schema riêng.
 - Admin là role/portal, không có `admin-service`; Review có service và database riêng.
 - `security-common` chứa `RsaJwtKeyLoader` và `JwtPrincipalService` dùng chung cho tất cả services; không còn bản copy cục bộ tại từng service.

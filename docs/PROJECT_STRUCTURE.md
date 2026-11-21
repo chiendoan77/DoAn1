@@ -18,7 +18,7 @@ DoAn1/
 │   ├── review-service/
 │   ├── booking-service/
 │   └── notification-service/
-├── font-end/
+├── front-end/
 │   └── src/
 │       ├── app/                 # App Router và BFF routes
 │       ├── features/            # auth, admin, booking, catalog, marketplace, notifications
@@ -37,7 +37,7 @@ Mỗi backend module có `src/test/java` riêng. Domain services tách controlle
 
 | Thành phần | Nơi đặt | Sở hữu / trách nhiệm hiện tại |
 |---|---|---|
-| Web UI/BFF | `font-end/` | Next.js; browser gọi BFF, BFF chuyển tiếp tới Gateway và giữ JWT trong cookie HttpOnly. |
+| Web UI/BFF | `front-end/` | Next.js; browser gọi BFF, BFF chuyển tiếp tới Gateway và giữ JWT trong cookie HttpOnly. |
 | API Gateway | `back-end/api-gateway/` | Routing và JWT RS256 validation ở edge; không sở hữu dữ liệu nghiệp vụ. |
 | Security Common | `back-end/security-common/` | `RsaJwtKeyLoader` (tải RSA key), `JwtPrincipalService` (xác thực token) và `JwtTestKeys` (hỗ trợ sinh key/token cho test); được dùng chung bởi tất cả services. |
 | Identity & Access | `back-end/identity-service/` | Tài khoản, credential, role, account status/audit, RS256 và refresh-token rotation/revocation. |
@@ -55,7 +55,7 @@ Admin là role/portal, không phải service. Review is independently deployed. 
 
 ## Hiện trạng và phần chưa hoàn tất
 
-- Frontend là **Next.js/React/TypeScript**, không phải Angular; tên thư mục là `font-end/`.
+- Frontend là **Next.js/React/TypeScript**, không phải Angular; tên thư mục là `front-end/`.
 - Backend là Maven reactor gồm API Gateway, 1 module `security-common` và 6 Spring Boot services: Identity, Profile, Catalog, Booking, Review và Notification.
 - Identity, Profile, Catalog, Booking, Review và Notification dùng Flyway.
 - `docker compose config -q` đã pass; full Compose runtime, contract/Pact suite, browser E2E, production deployment và centralized logs chưa được xác minh/hoàn thiện.

@@ -18,7 +18,7 @@ Choose the relevant references; do not read all of them automatically:
 | API contract | Owning service's `API.md`, controller/DTO and callers/clients. |
 | Database or migration | Owning service's `DATABASE.md`, migrations/entities/repositories and migration tests. |
 | Cross-service workflow or new boundary | Relevant `docs/DECISIONS.md`, `docs/ARCHITECTURE.md` or one matching file under `docs/architecture/`; inspect each involved service's API/client/event code. |
-| Frontend | `font-end/AGENTS.md`, the affected feature and its API integration. For Next.js-specific APIs, follow the applicable local Next.js guide required by `font-end/AGENTS.md`. |
+| Frontend | `front-end/AGENTS.md`, the affected feature and its API integration. For Next.js-specific APIs, follow the applicable local Next.js guide required by `front-end/AGENTS.md`. |
 | Documentation-only task | Read the target document and the nearest index/status page it updates; source inspection is needed only to verify factual claims. |
 | Build/test/configuration | Read the relevant manifest/config and the command-specific guide; do not load unrelated domain documents. |
 
