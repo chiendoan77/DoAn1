@@ -35,7 +35,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
         "spring.datasource.password=",
         "spring.jpa.hibernate.ddl-auto=create-drop",
         "spring.flyway.enabled=false",
-        "app.profile-migration.enabled=false",
+        "spring.rabbitmq.listener.simple.auto-startup=false",
         "service.api-keys.booking=booking-internal-key-for-profile-tests",
         "service.api-keys.catalog=catalog-internal-key-for-profile-tests",
         "service.api-keys.review=review-internal-key-for-profile-tests"

@@ -14,7 +14,6 @@ public class GatewayRoutes {
             @Value("${services.identity.url:http://localhost:8081}") String identityUrl,
             @Value("${services.profile.url:http://localhost:8085}") String profileUrl,
             @Value("${services.catalog.url:http://localhost:8086}") String catalogUrl,
-            @Value("${services.marketplace.url:http://localhost:8082}") String marketplaceUrl,
             @Value("${services.review.url:http://localhost:8088}") String reviewUrl,
             @Value("${services.booking.url:http://localhost:8083}") String bookingUrl,
             @Value("${services.payment.url:http://localhost:8084}") String paymentUrl,
@@ -36,7 +35,7 @@ public class GatewayRoutes {
                 .route("notification", route -> route
                         .path("/api/notifications/**")
                         .uri(notificationUrl))
-                .route("marketplace", route -> route
+                .route("review", route -> route
                         .path("/api/reviews/**")
                         .uri(reviewUrl))
                 .route("booking", route -> route

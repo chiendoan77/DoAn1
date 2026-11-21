@@ -14,7 +14,6 @@ DoAn1/
 │   ├── identity-service/
 │   ├── profile-service/
 │   ├── catalog-service/
-│   ├── marketplace-service/
 │   ├── review-service/
 │   ├── booking-service/
 │   ├── payment-service/
@@ -44,7 +43,6 @@ Mỗi backend module có `src/test/java` riêng. Domain services tách controlle
 | Identity & Access | `back-end/identity-service/` | Tài khoản, credential, role, account status/audit, RS256 và refresh-token rotation/revocation. |
 | Profile | `back-end/profile-service/` | Customer/provider profiles, approval/suspension, public lookup, eligibility và rating projection. |
 | Catalog | `back-end/catalog-service/` | Category, provider packages/prices, moderation, history và event outbox. |
-| Marketplace | `back-end/marketplace-service/` | Legacy provider/review tables and authenticated migration export APIs. |
 | Booking | `back-end/booking-service/` | Booking, Catalog package lookup, price/name/duration snapshots, state transitions and completion outbox. |
 | Review | `back-end/review-service/` | Review data, Booking eligibility, `ReviewSubmitted` outbox and legacy import API. |
 | Payment | `back-end/payment-service/` | Adapter registry skeleton; chưa có transaction API/schema. |
@@ -53,14 +51,13 @@ Mỗi backend module có `src/test/java` riêng. Domain services tách controlle
 | RabbitMQ | `docker-compose.yml` | Catalog/Booking/Review outboxes; Notification consumes BookingCompleted and package events, Profile consumes ReviewSubmitted. |
 | Observability | `docker-compose.yml`, `docker/prometheus/`, `docker/grafana/` | Prometheus metrics, Grafana and Jaeger OTLP traces; centralized logs not yet integrated. |
 
-Admin là role/portal, không phải service. Marketplace legacy tables remain as migration sources; Review is independently deployed. Các service không dùng chung entity hoặc truy cập schema của service khác.
+Admin là role/portal, không phải service. Review is independently deployed. Các service không dùng chung entity hoặc truy cập schema của service khác.
 
 ## Hiện trạng và phần chưa hoàn tất
 
 - Frontend là **Next.js/React/TypeScript**, không phải Angular; tên thư mục là `font-end/`.
-- Backend là Maven reactor gồm API Gateway và 8 Spring Boot services, không phải modular monolith.
-- Payment chưa có API giao dịch, schema nghiệp vụ hoặc tích hợp cổng thanh toán; Payment events/saga được hoãn.
-- Identity, Profile, Catalog, Marketplace, Booking, Review và Notification dùng Flyway; Marketplace/Booking baseline chưa được rehearsal trên bản sao dữ liệu hiện hữu.
+- Backend là Maven reactor gồm API Gateway, security modules và 7 Spring Boot services: Identity, Profile, Catalog, Booking, Review, Payment và Notification.
+- Identity, Profile, Catalog, Booking, Review và Notification dùng Flyway.
 - `docker compose config -q` đã pass; full Compose runtime, contract/Pact suite, browser E2E, production deployment và centralized logs chưa được xác minh/hoàn thiện.
 
 ## Điểm vào để tra cứu

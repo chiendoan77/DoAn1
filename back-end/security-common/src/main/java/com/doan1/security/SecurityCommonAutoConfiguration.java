@@ -1,0 +1,11 @@
+package com.doan1.security;
+
+import org.springframework.boot.autoconfigure.AutoConfiguration;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
+import org.springframework.context.annotation.Import;
+
+@AutoConfiguration
+@ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
+@Import(JwtPrincipalService.class)
+public class SecurityCommonAutoConfiguration {
+}

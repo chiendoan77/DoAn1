@@ -25,7 +25,6 @@
         <module>identity-service</module>
         <module>profile-service</module>
         <module>catalog-service</module>
-        <module>marketplace-service</module>
         <module>review-service</module>
         <module>booking-service</module>
         <module>payment-service</module>

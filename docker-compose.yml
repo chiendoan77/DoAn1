@@ -23,6 +23,9 @@ services:
     environment:
       RABBITMQ_DEFAULT_USER: ${RABBITMQ_USERNAME:-doan1}
       RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD:-doan1-local-only}
+    ports:
+      - "127.0.0.1:${RABBITMQ_PORT:-5672}:5672"
+      - "127.0.0.1:${RABBITMQ_MANAGEMENT_PORT:-15672}:15672"
     healthcheck:
       test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
       interval: 10s
@@ -115,9 +118,7 @@ services:
       DB_PASSWORD: ""
       JWT_PUBLIC_KEY_BASE64: ${JWT_PUBLIC_KEY_BASE64:-}
       IDENTITY_SERVICE_URL: http://identity-service:8081
-      MARKETPLACE_SERVICE_URL: http://marketplace-service:8082
       PROFILE_IDENTITY_API_KEY: ${PROFILE_IDENTITY_API_KEY:-doan1-local-profile-identity-key-change-me}
-      PROFILE_MIGRATION_API_KEY: ${PROFILE_MIGRATION_API_KEY:-doan1-local-profile-migration-key-change-me}
       BOOKING_PROFILE_API_KEY: ${BOOKING_PROFILE_API_KEY:-doan1-local-booking-profile-key-change-me}
       CATALOG_PROFILE_API_KEY: ${CATALOG_PROFILE_API_KEY:-doan1-local-catalog-profile-key-change-me}
       REVIEW_PROFILE_API_KEY: ${REVIEW_PROFILE_API_KEY:-doan1-local-review-profile-key-change-me}
@@ -131,8 +132,6 @@ services:
       mysql:
         condition: service_healthy
       identity-service:
-        condition: service_healthy
-      marketplace-service:
         condition: service_healthy
       rabbitmq:
         condition: service_healthy
@@ -182,40 +181,6 @@ services:
     networks:
       - backend
 
-  marketplace-service:
-    build:
-      context: ./back-end
-      args:
-        SERVICE_MODULE: marketplace-service
-    environment:
-      SERVER_PORT: "8082"
-      OTEL_EXPORTER_OTLP_ENDPOINT: http://jaeger:4318/v1/traces
-      MARKETPLACE_DB_URL: jdbc:mysql://mysql:3306/doan1_marketplace?serverTimezone=UTC
-      DB_USERNAME: root
-      DB_PASSWORD: ""
-      JWT_PUBLIC_KEY_BASE64: ${JWT_PUBLIC_KEY_BASE64:-}
-      PROFILE_MIGRATION_API_KEY: ${PROFILE_MIGRATION_API_KEY:-doan1-local-profile-migration-key-change-me}
-      REVIEW_PROFILE_API_KEY: ${REVIEW_PROFILE_API_KEY:-doan1-local-review-profile-key-change-me}
-      REVIEW_MIGRATION_API_KEY: ${REVIEW_MIGRATION_API_KEY:-doan1-local-review-migration-key-change-me}
-      MARKETPLACE_BOOKING_API_KEY: ${MARKETPLACE_BOOKING_API_KEY:-doan1-local-marketplace-booking-key-change-me}
-      BOOKING_MARKETPLACE_API_KEY: ${BOOKING_MARKETPLACE_API_KEY:-doan1-local-booking-marketplace-key-change-me}
-      PROFILE_SERVICE_URL: http://profile-service:8085
-      BOOKING_SERVICE_URL: http://booking-service:8083
-      SEED_DEMO_PROVIDERS: "true"
-    ports:
-      - "127.0.0.1:${MARKETPLACE_PORT:-8082}:8082"
-    depends_on:
-      mysql:
-        condition: service_healthy
-    healthcheck:
-      test: ["CMD-SHELL", "wget -q -O /dev/null http://127.0.0.1:8082/actuator/health || exit 1"]
-      interval: 10s
-      timeout: 5s
-      retries: 20
-      start_period: 60s
-    networks:
-      - backend
-
   booking-service:
     build:
       context: ./back-end
@@ -229,7 +194,6 @@ services:
       DB_PASSWORD: ""
       JWT_PUBLIC_KEY_BASE64: ${JWT_PUBLIC_KEY_BASE64:-}
       BOOKING_PROFILE_API_KEY: ${BOOKING_PROFILE_API_KEY:-doan1-local-booking-profile-key-change-me}
-      MARKETPLACE_BOOKING_API_KEY: ${MARKETPLACE_BOOKING_API_KEY:-doan1-local-marketplace-booking-key-change-me}
       BOOKING_CATALOG_API_KEY: ${BOOKING_CATALOG_API_KEY:-doan1-local-booking-catalog-key-change-me}
       PROFILE_SERVICE_URL: http://profile-service:8085
       CATALOG_SERVICE_URL: http://catalog-service:8086
@@ -270,7 +234,6 @@ services:
       DB_PASSWORD: ""
       JWT_PUBLIC_KEY_BASE64: ${JWT_PUBLIC_KEY_BASE64:-}
       REVIEW_BOOKING_API_KEY: ${REVIEW_BOOKING_API_KEY:-doan1-local-review-booking-key-change-me}
-      REVIEW_MIGRATION_API_KEY: ${REVIEW_MIGRATION_API_KEY:-doan1-local-review-migration-key-change-me}
       BOOKING_SERVICE_URL: http://booking-service:8083
       RABBITMQ_HOST: rabbitmq
       RABBITMQ_PORT: "5672"
@@ -357,7 +320,6 @@ services:
       IDENTITY_SERVICE_URL: http://identity-service:8081
       PROFILE_SERVICE_URL: http://profile-service:8085
       CATALOG_SERVICE_URL: http://catalog-service:8086
-      MARKETPLACE_SERVICE_URL: http://marketplace-service:8082
       BOOKING_SERVICE_URL: http://booking-service:8083
       PAYMENT_SERVICE_URL: http://payment-service:8084
       NOTIFICATION_SERVICE_URL: http://notification-service:8087
@@ -370,8 +332,6 @@ services:
       profile-service:
         condition: service_healthy
       catalog-service:
-        condition: service_healthy
-      marketplace-service:
         condition: service_healthy
       booking-service:
         condition: service_healthy

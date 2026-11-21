@@ -30,15 +30,9 @@ service:
     booking: ${BOOKING_PROFILE_API_KEY:}
     catalog: ${CATALOG_PROFILE_API_KEY:}
     review: ${REVIEW_PROFILE_API_KEY:}
-  profile-migration-api-key: ${PROFILE_MIGRATION_API_KEY:}
-app:
-  profile-migration:
-    enabled: ${PROFILE_MIGRATION_ENABLED:true}
 services:
   identity:
     url: ${IDENTITY_SERVICE_URL:http://localhost:8081}
-  marketplace:
-    url: ${MARKETPLACE_SERVICE_URL:http://localhost:8082}
 
 management:
   tracing:

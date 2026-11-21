@@ -1,5 +1,23 @@
 # Changelog
 
+## 2026-11-21 — Chạy Docker toàn stack, test RabbitMQ và chuẩn hóa credentials
+
+- Publish cổng RabbitMQ host loopback `5672` (AMQP) và `15672` (Management UI).
+- Đổi thông tin đăng nhập mặc định cho RabbitMQ và Grafana thành `admin / admin123`; cấu hình qua `.env` và template tại `.env.example`.
+- Kiểm thử end-to-end RabbitMQ: gửi thành công `PackageSubmitted` và `BookingCompleted` events qua exchange `doan1.events`, `notification-service` tiêu thụ và ghi đúng vào schema `doan1_notification`.
+- Toàn bộ 14 containers trong `docker-compose.yml` (Gateway, 7 services, frontend, MySQL, RabbitMQ, Jaeger, Prometheus, Grafana) đều khởi động thành công và đạt trạng thái healthy.
+- Cập nhật tài liệu triển khai (`DEPLOYMENT_GUIDE.md`) khớp bảng cổng và credential mới.
+
+## 2026-11-21 — Loại bỏ hoàn toàn marketplace-service (DEC-018)
+
+- Xóa toàn bộ thư mục `back-end/marketplace-service/`.
+- Xóa `LegacyProfileMigrationClient` khỏi `profile-service`; xóa cấu hình `services.marketplace.url` khỏi `profile-service` và `api-gateway`.
+- Dọn `GatewayRoutes.java`: xóa tham số không dùng `marketplaceUrl`, đổi tên route `"marketplace"` thành `"review"`.
+- Xóa `marketplace-service` khỏi `back-end/pom.xml` reactor modules.
+- Xóa `marketplace-service` và toàn bộ biến môi trường/phụ thuộc liên quan khỏi `docker-compose.yml`.
+- Xóa schema `doan1_marketplace` khỏi `docker/mysql/init/001-create-schemas.sql`.
+- Backend rút gọn từ 8 business services xuống 7; kiến trúc trở nên trong sạch, không còn legacy migration debt.
+
 ## 2026-11-21 — Ưu tiên 2: service layer, exception handler, payment và marketplace
 
 ### notification-service — Thêm NotificationService layer

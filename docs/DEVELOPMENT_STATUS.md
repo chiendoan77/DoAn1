@@ -4,10 +4,10 @@ Ngày đối chiếu source/configuration, full backend tests và frontend check
 
 ## Kiến trúc và inventory
 
-- Backend Maven reactor gồm API Gateway, security modules và 8 Spring Boot services: Identity, Profile, Catalog, Marketplace, Booking, Review, Payment và Notification.
+- Backend Maven reactor gồm API Gateway, security modules và 7 Spring Boot services: Identity, Profile, Catalog, Booking, Review, Payment và Notification. Marketplace đã được loại bỏ hoàn toàn (DEC-018).
 - Frontend là Next.js App Router/React/TypeScript trong `font-end/`; browser đi qua BFF và API Gateway.
 - Các service có dữ liệu sở hữu schema riêng. Payment lifecycle/database chưa triển khai.
-- Admin là role/portal, không có `admin-service`; Review có service và database riêng. Marketplace giữ dữ liệu/API legacy phục vụ migration.
+- Admin là role/portal, không có `admin-service`; Review có service và database riêng.
 - `security-common` chứa `RsaJwtKeyLoader` và `JwtPrincipalService` dùng chung cho tất cả services; không còn bản copy cục bộ tại từng service.
 - Inventory source nằm trong [PROJECT_STRUCTURE.md](./PROJECT_STRUCTURE.md).
 
@@ -27,20 +27,21 @@ Ngày đối chiếu source/configuration, full backend tests và frontend check
 - **notification-service refactor:** Thêm `NotificationService` layer; `NotificationController` và 2 consumers không còn inject repository trực tiếp.
 - **review-service:** Thêm `ReviewExceptionHandler` (`@RestControllerAdvice`) trả RFC 7807 cho `ResponseStatusException`, `MethodArgumentNotValidException` và `DataIntegrityViolationException`.
 - **payment-service (DEC-019):** Thêm `PaymentController` (501 Not Implemented) và `PaymentExceptionHandler`; skeleton vẫn giữ trong reactor chờ payment provider được chọn.
-- **marketplace-service (DEC-018):** Kế hoạch deprecate 6 bước đã ghi vào `DECISIONS.md`; service chưa bị xóa vì migration export API còn cần thiết.
+- **marketplace-service (DEC-018):** Đã loại bỏ hoàn toàn (chấp nhận bắt đầu dữ liệu từ đầu); không còn service, schema hay route nào liên quan.
 
 ## Persistence và vận hành
 
-- Identity, Profile, Catalog, Marketplace, Booking, Review và Notification dùng Flyway với Hibernate `ddl-auto: validate`; Payment chưa có schema nghiệp vụ.
-- Marketplace/Booking có baseline/versioned migrations; chưa dry-run nâng cấp trên bản sao MySQL hiện hữu.
+- Identity, Profile, Catalog, Booking, Review và Notification dùng Flyway với Hibernate `ddl-auto: validate`; Payment chưa có schema nghiệp vụ.
 - Booking/Review/Catalog outbox events được dùng cho luồng đã triển khai; không có transaction xuyên service. Payment event/saga chưa làm.
 - Compose định nghĩa RabbitMQ, Prometheus, Grafana và Jaeger. Metrics/tracing đã cấu hình nhưng chưa xác minh runtime; centralized log collection chưa tích hợp.
 - API keys riêng bảo vệ một số giao tiếp nội bộ; production mTLS/secret management chưa xác minh.
 
 ## Kiểm thử và xác minh
 
-- `mvn compile` cho 9 module (security-common + 6 service bị ảnh hưởng + security-test-support + parent): BUILD SUCCESS sau refactor JwtPrincipalService 2026-11-21.
-- `mvn -DskipTests package`: toàn bộ 12 reactor modules build thành công (lần kiểm trước 2026-11-06).
+- **Docker Compose runtime & RabbitMQ:** Toàn bộ 14 containers khởi động thành công và healthy. Đã kiểm thử gửi/nhận message qua RabbitMQ topic exchange `doan1.events` thành công vào database. RabbitMQ management và Grafana đã được cấu hình credential `admin / admin123`.
+- `mvn compile` toàn bộ reactor sau khi xóa marketplace: BUILD SUCCESS.
+- `mvn test -pl profile-service`: 6/6 tests PASS.
+- `mvn test -pl notification-service`: 2/2 tests PASS.
 - Full `mvn test` gần nhất trước thay đổi phân trang: 39 tests trên 12 suite, 0 failure, 0 error, 0 skipped. Sau thay đổi, Profile suite có 6 tests và Identity suite có 9 tests pass riêng. [TEST_CASES.csv](./TEST_CASES.csv) có 60 dòng: 44 `PASS`, 11 `NOT_RUN`, 4 `NOT_IMPLEMENTED`, 1 `DEFERRED`; từng backend test trỏ tới Surefire report hoặc ghi rõ lệnh kiểm thử tương ứng.
 - Frontend lint/typecheck/production build và `docker compose config -q` pass; frontend checks được chạy lại sau khi bổ sung PUT/DELETE cho BFF.
 - Xác minh phân trang provider: 6 Profile tests pass (bao gồm 11 hồ sơ qua hai trang); frontend lint, typecheck và production build pass.

@@ -104,18 +104,18 @@
 - **Lý do:** 6 bản sao phân kỳ (khác nhau về số trường `Principal`, có/không có `requireRole()`, thông điệp lỗi khác nhau) tạo rủi ro security — vá lỗi ở một chỗ không lan tới chỗ khác. Gom vào shared library đảm bảo mọi service dùng cùng một logic xác thực JWT.
 - **Phạm vi ảnh hưởng:** `security-common/pom.xml` nhận thêm `jjwt` và `spring-boot-starter-web`; 8 controller được cập nhật import; 6 thư mục `security/` cục bộ đã xóa.
 
-## DEC-018 — Kế hoạch deprecate marketplace-service
+## DEC-018 — Loại bỏ hoàn toàn marketplace-service
 
-- **Trạng thái:** Kế hoạch đã chốt (2026-11-21); chưa thực thi xóa.
-- **Quyết định:** `marketplace-service` giữ nguyên trong reactor cho đến khi hoàn thành checklist migration bên dưới. Sau đó xóa khỏi reactor, Docker Compose và API Gateway routes. Không thêm tính năng mới vào service này.
-- **Lý do:** Profile/Catalog/Review đã thay thế toàn bộ domain của marketplace. Service hiện chỉ còn hai vai trò: (1) export API cho migration và (2) phục vụ legacy routing qua Gateway đang chạy. Giữ lại chỉ gây nhầm lẫn về source of truth.
-- **Checklist trước khi xóa (theo thứ tự):**
-  1. Xác nhận `profile-service` đã import toàn bộ provider profiles qua `GET /internal/migration/provider-profiles`.
-  2. Xác nhận `review-service` đã import toàn bộ reviews qua `GET /internal/migration/reviews`.
-  3. Kiểm tra `api-gateway/GatewayRoutes.java` — xóa route `marketplace` trỏ tới port 8082.
-  4. Xác nhận không có service nào còn gọi `InternalProviderController` (`/internal/providers/**`) của marketplace — booking-service hiện dùng profile-service cho việc này.
-  5. Xóa `marketplace-service` khỏi `back-end/pom.xml` modules và `docker-compose.yml`.
-  6. Xóa thư mục `back-end/marketplace-service/`.
+- **Trạng thái:** Đã triển khai xóa (2026-11-21).
+- **Quyết định:** Người dùng chọn bắt đầu lại dữ liệu từ đầu, không cần migrate legacy data. `marketplace-service` được xóa hoàn toàn khỏi repository:
+  1. Xóa `LegacyProfileMigrationClient` khỏi `profile-service`.
+  2. Xóa cấu hình `services.marketplace.url` khỏi `profile-service` và `api-gateway`.
+  3. Dọn `GatewayRoutes.java`: xóa tham số không dùng và đổi tên route `"marketplace"` thành `"review"`.
+  4. Xóa `marketplace-service` khỏi `back-end/pom.xml`.
+  5. Xóa service `marketplace-service` và toàn bộ biến môi trường liên quan khỏi `docker-compose.yml`.
+  6. Xóa schema `doan1_marketplace` khỏi `docker/mysql/init/001-create-schemas.sql`.
+  7. Xóa toàn bộ thư mục `back-end/marketplace-service/`.
+- **Lý do:** Profile, Catalog và Review đã bao phủ toàn bộ domain; giữ lại service legacy chỉ gây phân tán source of truth và lãng phí tài nguyên runtime (port 8082, container, schema). Bỏ hẳn giúp kiến trúc trong sạch, rõ ràng.
 
 ## DEC-019 — payment-service giữ skeleton, thêm 501 endpoint
 
