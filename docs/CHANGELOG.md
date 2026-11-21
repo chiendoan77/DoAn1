@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-11-21 — Gom security-test-support vào security-common
+
+- Chuyển `JwtTestKeys.java` vào `security-common` (`com.doan1.security.test`).
+- Thêm `spring-test` (`optional=true`) vào `security-common/pom.xml`.
+- Xóa dependency `security-test-support` khỏi pom của 5 service: `api-gateway`, `identity-service`, `profile-service`, `catalog-service`, `booking-service`.
+- Xóa hoàn toàn module và thư mục `back-end/security-test-support/`.
+- Backend giờ chỉ còn **1 module security dùng chung duy nhất**: `security-common`.
+
 ## 2026-11-21 — Loại bỏ hoàn toàn payment-service (DEC-019)
 
 - Xóa toàn bộ thư mục `back-end/payment-service/`.

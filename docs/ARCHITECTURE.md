@@ -2,7 +2,7 @@
 
 ## Trạng thái
 
-Kiến trúc hiện tại có Identity & Access, Profile, Catalog, Booking, Review và Notification; API Gateway là edge component. Review có deployable riêng. Marketplace legacy service và Payment skeleton đã được loại bỏ hoàn toàn (DEC-018, DEC-019).
+Kiến trúc hiện tại có Identity & Access, Profile, Catalog, Booking, Review và Notification; API Gateway là edge component. Review có deployable riêng. Marketplace legacy service, Payment skeleton và module security-test-support thừa đã được loại bỏ hoàn toàn (DEC-018, DEC-019).
 
 ## Nguyên tắc
 

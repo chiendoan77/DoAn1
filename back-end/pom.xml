@@ -20,7 +20,6 @@
 
     <modules>
         <module>security-common</module>
-        <module>security-test-support</module>
         <module>api-gateway</module>
         <module>identity-service</module>
         <module>profile-service</module>

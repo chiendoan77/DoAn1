@@ -24,12 +24,6 @@
             </exclusions>
         </dependency>
         <dependency>
-            <groupId>com.doan1</groupId>
-            <artifactId>security-test-support</artifactId>
-            <version>${project.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
             <groupId>io.jsonwebtoken</groupId>
             <artifactId>jjwt-api</artifactId>
             <version>0.12.6</version>

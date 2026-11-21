@@ -1,0 +1,24 @@
+# Created at 2026-11-21T15:14:10.451
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '#'.
+
+# Created at 2026-11-21T15:14:10.455
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '# There is insufficient memory for the Java Runtime Environment to continue.'.
+
+# Created at 2026-11-21T15:14:10.459
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '# Native memory allocation (malloc) failed to allocate 18830680 bytes. Error detail: Chunk::new'.
+
+# Created at 2026-11-21T15:14:10.462
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '# An error report file with more information is saved as:'.
+
+# Created at 2026-11-21T15:14:10.672
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '# C:\Users\CHIEN\Downloads\DoAn1\back-end\booking-service\hs_err_pid4684.log'.
+
+# Created at 2026-11-21T15:14:10.674
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '#'.
+
+# Created at 2026-11-21T15:14:10.675
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '# Compiler replay data is saved as:'.
+
+# Created at 2026-11-21T15:14:10.700
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '# C:\Users\CHIEN\Downloads\DoAn1\back-end\booking-service\replay_pid4684.log'.
+

@@ -10,6 +10,7 @@ DoAn1/
 ├── docker/mysql/init/
 ├── back-end/
 │   ├── pom.xml
+│   ├── security-common/
 │   ├── api-gateway/
 │   ├── identity-service/
 │   ├── profile-service/
@@ -38,7 +39,7 @@ Mỗi backend module có `src/test/java` riêng. Domain services tách controlle
 |---|---|---|
 | Web UI/BFF | `font-end/` | Next.js; browser gọi BFF, BFF chuyển tiếp tới Gateway và giữ JWT trong cookie HttpOnly. |
 | API Gateway | `back-end/api-gateway/` | Routing và JWT RS256 validation ở edge; không sở hữu dữ liệu nghiệp vụ. |
-| Security Common | `back-end/security-common/` | `RsaJwtKeyLoader` (tải RSA key) và `JwtPrincipalService` (xác thực Bearer token, trả `Principal(accountId, fullName, role)`); được dùng chung bởi tất cả business services. |
+| Security Common | `back-end/security-common/` | `RsaJwtKeyLoader` (tải RSA key), `JwtPrincipalService` (xác thực token) và `JwtTestKeys` (hỗ trợ sinh key/token cho test); được dùng chung bởi tất cả services. |
 | Identity & Access | `back-end/identity-service/` | Tài khoản, credential, role, account status/audit, RS256 và refresh-token rotation/revocation. |
 | Profile | `back-end/profile-service/` | Customer/provider profiles, approval/suspension, public lookup, eligibility và rating projection. |
 | Catalog | `back-end/catalog-service/` | Category, provider packages/prices, moderation, history và event outbox. |
@@ -55,7 +56,7 @@ Admin là role/portal, không phải service. Review is independently deployed. 
 ## Hiện trạng và phần chưa hoàn tất
 
 - Frontend là **Next.js/React/TypeScript**, không phải Angular; tên thư mục là `font-end/`.
-- Backend là Maven reactor gồm API Gateway, security modules và 6 Spring Boot services: Identity, Profile, Catalog, Booking, Review và Notification.
+- Backend là Maven reactor gồm API Gateway, 1 module `security-common` và 6 Spring Boot services: Identity, Profile, Catalog, Booking, Review và Notification.
 - Identity, Profile, Catalog, Booking, Review và Notification dùng Flyway.
 - `docker compose config -q` đã pass; full Compose runtime, contract/Pact suite, browser E2E, production deployment và centralized logs chưa được xác minh/hoàn thiện.
 

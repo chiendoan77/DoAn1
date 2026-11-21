@@ -41,5 +41,11 @@
             <version>0.12.6</version>
             <scope>runtime</scope>
         </dependency>
+        <!-- Optional test dependency for JwtTestKeys helper -->
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-test</artifactId>
+            <optional>true</optional>
+        </dependency>
     </dependencies>
 </project>

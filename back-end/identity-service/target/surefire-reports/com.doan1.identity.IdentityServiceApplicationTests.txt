@@ -1,4 +1,4 @@
 -------------------------------------------------------------------------------
 Test set: com.doan1.identity.IdentityServiceApplicationTests
 -------------------------------------------------------------------------------
-Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 73.30 s -- in com.doan1.identity.IdentityServiceApplicationTests
+Tests run: 9, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 10.90 s -- in com.doan1.identity.IdentityServiceApplicationTests
