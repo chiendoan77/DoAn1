@@ -12,16 +12,40 @@
   @apply border-[#dce5dc] text-[#6c7971];
 }
 
+.roleChoiceGrid {
+  @apply grid grid-cols-2 gap-3;
+}
+
+.roleIcon {
+  @apply mr-2 text-lg;
+}
+
+.roleDesc {
+  @apply block mt-1 text-[11px] text-[#87938c] leading-4;
+}
+
+.fieldGrid {
+  @apply grid grid-cols-1 sm:grid-cols-2 gap-4;
+}
+
+.fieldIcon {
+  @apply absolute left-4 top-1/2 -translate-y-1/2 text-lg text-[#6c7971] pointer-events-none;
+}
+
+.passwordToggle {
+  @apply absolute right-3 top-1/2 -translate-y-1/2 text-lg text-[#6c7971] hover:text-[#1f594a] transition;
+}
+
 .style1 {
-  @apply grid min-h-screen bg-[#f7f8f4] lg:grid-cols-[1fr_0.85fr];
+  @apply grid min-h-screen bg-[#f7f8f4] lg:grid-cols-[1fr_0.85fr] max-w-7xl mx-auto px-6 lg:px-8;
 }
 
 .style2 {
-  @apply flex items-center justify-center px-5 py-12 sm:px-8;
+  @apply flex items-center justify-center px-6 py-12 sm:px-8 relative z-10;
 }
 
 .style3 {
-  @apply w-full max-w-xl rounded-[2rem] bg-white p-6 shadow-sm sm:p-10;
+  @apply w-full max-w-lg rounded-[2rem] bg-white p-6 shadow-sm sm:p-10 relative;
 }
 
 .style4 {
@@ -45,7 +69,7 @@
 }
 
 .style9 {
-  @apply mt-7 space-y-4;
+  @apply mt-7 space-y-5 relative;
 }
 
 .style10 {
@@ -57,11 +81,11 @@
 }
 
 .style12 {
-  @apply block text-sm font-medium text-[#315246];
+  @apply block text-sm font-medium text-[#315246] relative pl-10;
 }
 
 .style13 {
-  @apply mt-2 w-full rounded-xl border border-[#dce5dc] px-4 py-3 outline-none focus:border-[#4b7c58];
+  @apply mt-2 w-full rounded-xl border border-[#dce5dc] bg-white pl-12 pr-4 py-3 outline-none focus:border-[#4b7c58];
 }
 
 .style14 {
@@ -121,7 +145,7 @@
 }
 
 .style28 {
-  @apply hidden flex-col justify-end bg-[#244d3f] p-12 text-white lg:flex;
+  @apply hidden flex-col bg-[#244d3f] text-white lg:flex min-h-screen relative overflow-hidden;
 }
 
 .style29 {
@@ -134,4 +158,46 @@
 
 .style31 {
   @apply mt-4 max-w-lg text-sm leading-7 text-white/75;
+}
+
+.brandPanel {
+  @apply sticky top-0 h-screen flex flex-col justify-between p-8 lg:p-12 relative z-10 flex-1;
+}
+
+.brandContent {
+  @apply flex-1 flex flex-col justify-center;
+}
+
+.brandBadges {
+  @apply mt-8 space-y-4;
+}
+
+.benefitCard {
+  @apply flex items-start gap-3 rounded-xl bg-[#2d6a5f]/10 p-4 border border-[#2d6a5f]/20;
+}
+
+.benefitIcon {
+  @apply text-2xl shrink-0;
+}
+
+.benefitTitle {
+  @apply block font-semibold text-[#dce8dc];
+}
+
+.benefitDesc {
+  @apply block mt-1 text-sm text-[#a8c7b2] leading-5;
+}
+
+.trustBadge {
+  @apply flex items-center gap-2 rounded-lg bg-[#2d6a5f]/10 px-3 py-2 border border-[#2d6a5f]/20 text-xs text-[#b8d2b5];
+}
+
+.badgeIcon {
+  @apply text-lg;
+}
+
+.brandBackground {
+  @apply absolute inset-0 z-0;
+  background: radial-gradient(circle at 80% 20%, rgba(45, 106, 95, 0.20), transparent 40%),
+              radial-gradient(circle at 20% 80%, rgba(75, 124, 88, 0.15), transparent 40%);
 }

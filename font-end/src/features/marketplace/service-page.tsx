@@ -139,6 +139,31 @@ export function ServicePage({ service }: Props) {
           </div>
           <p className={styles.style13}>Hồ sơ đã duyệt, ưu tiên đánh giá cao.</p>
         </div>
+
+        <div className={styles.toolbar}>
+          <div className={styles.toolbarSearch}>
+            <span className={styles.toolbarIcon} aria-hidden="true">🔍</span>
+            <input type="text" placeholder="Tìm nhà cung cấp…" className={styles.toolbarInput} />
+          </div>
+          <div className={styles.toolbarFilter}>
+            <label className={styles.toolbarLabel}>Quận/huyện</label>
+            <select className={styles.toolbarSelect} defaultValue="Tất cả">
+              <option>Tất cả</option>
+              <option>Quận 1</option>
+              <option>Quận 2</option>
+              <option>Quận 3</option>
+            </select>
+          </div>
+          <div className={styles.toolbarSort}>
+            <label className={styles.toolbarLabel}>Sắp xếp</label>
+            <select className={styles.toolbarSelect} defaultValue="Đánh giá cao nhất">
+              <option>Đánh giá cao nhất</option>
+              <option>Nhiều đánh giá nhất</option>
+              <option>Gần nhất</option>
+            </select>
+          </div>
+        </div>
+
         {loadingProviders ? (
           <p className={styles.style14}>Đang tìm nhà cung cấp…</p>
         ) : providerError ? (
@@ -149,14 +174,16 @@ export function ServicePage({ service }: Props) {
           <div className={styles.style17}>
             {providers.map((provider) => (
               <article key={provider.id} className={styles.style18}>
-                <img className={styles.style19} src={provider.imageUrl} alt={`Hình ảnh ${provider.fullName}`} loading="lazy" />
+                <div className={styles.thumbnail}>
+                  <img className={styles.style19} src={provider.imageUrl} alt={`Hình ảnh ${provider.fullName}`} loading="lazy" />
+                </div>
                 <div className={styles.style20}>
-                  <div className={styles.style21}>
+                  <div className={styles.cardHeader}>
                     <h3 className={styles.style22}>{provider.fullName}</h3>
-                    <span className={styles.style23} aria-label={`Đánh giá ${provider.rating} trên 5 sao`}>★ {provider.rating.toFixed(1)}</span>
+                    <span className={styles.ratingPill} aria-label={`Đánh giá ${provider.rating} trên 5 sao`}>★ {provider.rating.toFixed(1)}</span>
                   </div>
                   <p className={styles.style24}>{provider.reviewCount} đánh giá{provider.demoData ? " · hồ sơ mẫu" : ""}</p>
-                  <p className={styles.style25}>⌖ {provider.address}</p>
+                  <p className={styles.style25}><span className={styles.pinIcon} aria-hidden="true">📍</span> {provider.address}</p>
                   <p className={styles.style26}>{provider.description}</p>
                   <button type="button" className={styles.style27} onClick={() => {
                     setSelectedProvider(provider);

@@ -13,7 +13,7 @@
 }
 
 .style4 {
-  @apply relative mx-auto grid max-w-7xl gap-10 px-5 py-20 sm:px-8 lg:grid-cols-[1.05fr_0.95fr] lg:px-10 lg:py-28;
+  @apply relative mx-auto grid max-w-7xl gap-10 px-6 py-20 sm:px-8 lg:grid-cols-[1.1fr_0.9fr] lg:px-8 lg:py-28;
 }
 
 .style5 {
@@ -29,7 +29,7 @@
 }
 
 .style8 {
-  @apply max-w-2xl text-5xl font-semibold leading-[1.08] tracking-[-0.045em] text-[#173c33] sm:text-6xl lg:text-7xl;
+  @apply max-w-3xl text-5xl font-semibold leading-[1.12] tracking-[-0.02em] text-[#173c33] sm:text-6xl lg:text-6xl;
 }
 
 .style9 {
@@ -49,7 +49,7 @@
 }
 
 .style13 {
-  @apply grid min-h-72 grid-cols-2 gap-4 rounded-[2rem] bg-[#dce8dc] p-5 sm:p-8;
+  @apply grid min-h-[26rem] grid-cols-2 gap-6 rounded-[2rem] bg-[#dce8dc] p-6 sm:p-8 lg:p-10;
 }
 
 .style14 {
@@ -89,7 +89,7 @@
 }
 
 .style23 {
-  @apply mx-auto max-w-7xl px-5 sm:px-8 lg:px-10;
+  @apply mx-auto max-w-7xl px-6 sm:px-8 lg:px-8;
 }
 
 .style24 {
@@ -133,11 +133,11 @@
 }
 
 .style33 {
-  @apply px-5 py-16 sm:px-8 lg:px-10;
+  @apply px-6 py-16 sm:px-8 lg:px-8;
 }
 
 .style34 {
-  @apply mx-auto flex max-w-7xl flex-col justify-between gap-6 rounded-[2rem] bg-[#244d3f] px-7 py-9 text-white sm:px-10 lg:flex-row lg:items-center lg:px-14;
+  @apply mx-auto flex max-w-7xl flex-col justify-between gap-6 rounded-[2rem] bg-[#244d3f] px-7 py-9 text-white sm:px-10 lg:flex-row lg:items-center lg:px-8;
 }
 
 .style35 {
@@ -157,5 +157,5 @@
 }
 
 .style39 {
-  @apply mx-auto flex max-w-7xl flex-col gap-3 px-5 py-7 text-xs text-[#7b8980] sm:flex-row sm:justify-between lg:px-10;
+  @apply mx-auto flex max-w-7xl flex-col gap-3 px-6 py-7 text-xs text-[#7b8980] sm:flex-row sm:justify-between lg:px-8;
 }
