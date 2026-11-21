@@ -289,25 +289,6 @@ services:
     networks:
       - backend
 
-  payment-service:
-    build:
-      context: ./back-end
-      args:
-        SERVICE_MODULE: payment-service
-    environment:
-      SERVER_PORT: "8084"
-      OTEL_EXPORTER_OTLP_ENDPOINT: http://jaeger:4318/v1/traces
-    ports:
-      - "127.0.0.1:${PAYMENT_PORT:-8084}:8084"
-    healthcheck:
-      test: ["CMD-SHELL", "wget -q -O /dev/null http://127.0.0.1:8084/actuator/health || exit 1"]
-      interval: 10s
-      timeout: 5s
-      retries: 20
-      start_period: 60s
-    networks:
-      - backend
-
   api-gateway:
     build:
       context: ./back-end
@@ -321,7 +302,6 @@ services:
       PROFILE_SERVICE_URL: http://profile-service:8085
       CATALOG_SERVICE_URL: http://catalog-service:8086
       BOOKING_SERVICE_URL: http://booking-service:8083
-      PAYMENT_SERVICE_URL: http://payment-service:8084
       NOTIFICATION_SERVICE_URL: http://notification-service:8087
       REVIEW_SERVICE_URL: http://review-service:8088
     ports:
@@ -336,8 +316,6 @@ services:
       booking-service:
         condition: service_healthy
       review-service:
-        condition: service_healthy
-      payment-service:
         condition: service_healthy
       notification-service:
         condition: service_healthy

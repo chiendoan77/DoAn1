@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-11-21 — Loại bỏ hoàn toàn payment-service (DEC-019)
+
+- Xóa toàn bộ thư mục `back-end/payment-service/`.
+- Xóa `payment-service` khỏi `back-end/pom.xml` reactor modules.
+- Xóa route `/api/payments/**` và cấu hình `paymentUrl` khỏi `api-gateway` (`GatewayRoutes.java` và `application.yml`).
+- Xóa service `payment-service` khỏi `docker-compose.yml`.
+- Backend rút gọn xuống 6 core business services (Identity, Profile, Catalog, Booking, Review, Notification) + API Gateway + Security modules.
+
 ## 2026-11-21 — Chạy Docker toàn stack, test RabbitMQ và chuẩn hóa credentials
 
 - Publish cổng RabbitMQ host loopback `5672` (AMQP) và `15672` (Management UI).

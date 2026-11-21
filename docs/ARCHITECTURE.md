@@ -2,7 +2,7 @@
 
 ## Trạng thái
 
-Kiến trúc hiện tại có Identity & Access, Profile, Catalog, Booking, Review, Payment và Notification; API Gateway là edge component. Review có deployable riêng. Payment hiện chỉ có adapter registry skeleton; lifecycle/payment saga đang được hoãn. Marketplace legacy service đã được loại bỏ hoàn toàn (DEC-018).
+Kiến trúc hiện tại có Identity & Access, Profile, Catalog, Booking, Review và Notification; API Gateway là edge component. Review có deployable riêng. Marketplace legacy service và Payment skeleton đã được loại bỏ hoàn toàn (DEC-018, DEC-019).
 
 ## Nguyên tắc
 
@@ -21,12 +21,11 @@ Kiến trúc hiện tại có Identity & Access, Profile, Catalog, Booking, Revi
 3. **Catalog** — categories, provider packages/prices, Admin moderation/history, Flyway và package outbox.
 4. **Booking** — package validation, price/name/duration snapshots, state transitions và `BookingCompleted` outbox. Slot conflict/repeat policy chưa triển khai.
 5. **Review** — API riêng, Booking eligibility check, review storage và `ReviewSubmitted` outbox.
-6. **Payment** — adapter abstraction; chưa có giao dịch/database/provider thật.
-7. **Notification** — tiêu thụ package và `BookingCompleted` events, lưu inbox in-app; chưa có email/push/SMS.
-8. **API Gateway** — public entry, routing và JWT RS256 validation cho route cần auth; backend services tiếp tục kiểm tra role.
-9. **Next.js frontend** — public/customer/provider/Admin flows một phần; mọi API qua Gateway qua BFF.
+6. **Notification** — tiêu thụ package và `BookingCompleted` events, lưu inbox in-app; chưa có email/push/SMS.
+7. **API Gateway** — public entry, routing và JWT RS256 validation cho route cần auth; backend services tiếp tục kiểm tra role.
+8. **Next.js frontend** — public/customer/provider/Admin flows một phần; mọi API qua Gateway qua BFF.
 
-Booking là source of truth cho booking status/participants; Review hỏi endpoint nội bộ để xác minh eligibility. Booking/Review/Catalog events được ghi bằng outbox; Notification tiêu thụ `BookingCompleted`, Profile tiêu thụ `ReviewSubmitted`. `PaymentSucceeded`, Payment saga và complaint workflow chưa triển khai.
+Booking là source of truth cho booking status/participants; Review hỏi endpoint nội bộ để xác minh eligibility. Booking/Review/Catalog events được ghi bằng outbox; Notification tiêu thụ `BookingCompleted`, Profile tiêu thụ `ReviewSubmitted`. Complaint workflow chưa triển khai.
 
 Các service có API/DTO và schema riêng. Identity/Profile/Catalog/Booking/Review/Notification dùng Flyway. Tích hợp nội bộ dùng API keys riêng; Gateway không route `/internal/**`. Compose định nghĩa MySQL, RabbitMQ, Prometheus, Grafana và Jaeger. Metrics/traces có cấu hình; central log collection chưa được nối. Chi tiết ở [PROJECT_STRUCTURE.md](./PROJECT_STRUCTURE.md).
 

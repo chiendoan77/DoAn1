@@ -36,7 +36,5 @@ services:
     url: ${REVIEW_SERVICE_URL:http://localhost:8088}
   booking:
     url: ${BOOKING_SERVICE_URL:http://localhost:8083}
-  payment:
-    url: ${PAYMENT_SERVICE_URL:http://localhost:8084}
   notification:
     url: ${NOTIFICATION_SERVICE_URL:http://localhost:8087}

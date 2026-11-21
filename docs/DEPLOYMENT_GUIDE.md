@@ -21,7 +21,6 @@ Các host ports bind vào `127.0.0.1`; đây không phải cấu hình public.
 | MySQL (local development) | `localhost:${MYSQL_PORT:-3306}` |
 | Identity | `http://localhost:8081` |
 | Booking | `http://localhost:8083` |
-| Payment skeleton | `http://localhost:8084` |
 | Profile | `http://localhost:8085` |
 | Catalog | `http://localhost:8086` |
 | Notification | `http://localhost:8087` |
@@ -43,7 +42,7 @@ Các port có thể override qua biến trong `.env`; xem `docker-compose.yml` �
 
 ## Database và migrations
 
-Identity, Profile, Catalog, Marketplace, Booking, Review và Notification dùng Flyway; Payment chưa có schema nghiệp vụ. Marketplace/Booking baseline migrations chưa được rehearsal trên backup MySQL hiện hữu. Trước khi nâng cấp database có dữ liệu: backup, phục hồi vào môi trường riêng, chạy migration, đối chiếu số lượng/constraint và xác nhận rollback/restore.
+Identity, Profile, Catalog, Booking, Review và Notification dùng Flyway. Trước khi nâng cấp database có dữ liệu: backup, phục hồi vào môi trường riêng, chạy migration, đối chiếu số lượng/constraint và xác nhận rollback/restore.
 
 ## Production — chưa được chứng nhận
 

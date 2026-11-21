@@ -4,9 +4,9 @@ Ngày đối chiếu source/configuration, full backend tests và frontend check
 
 ## Kiến trúc và inventory
 
-- Backend Maven reactor gồm API Gateway, security modules và 7 Spring Boot services: Identity, Profile, Catalog, Booking, Review, Payment và Notification. Marketplace đã được loại bỏ hoàn toàn (DEC-018).
+- Backend Maven reactor gồm API Gateway, security modules và 6 Spring Boot services: Identity, Profile, Catalog, Booking, Review và Notification. Marketplace và Payment đã được loại bỏ hoàn toàn (DEC-018, DEC-019).
 - Frontend là Next.js App Router/React/TypeScript trong `font-end/`; browser đi qua BFF và API Gateway.
-- Các service có dữ liệu sở hữu schema riêng. Payment lifecycle/database chưa triển khai.
+- Các service có dữ liệu sở hữu schema riêng.
 - Admin là role/portal, không có `admin-service`; Review có service và database riêng.
 - `security-common` chứa `RsaJwtKeyLoader` và `JwtPrincipalService` dùng chung cho tất cả services; không còn bản copy cục bộ tại từng service.
 - Inventory source nằm trong [PROJECT_STRUCTURE.md](./PROJECT_STRUCTURE.md).
@@ -26,12 +26,12 @@ Ngày đối chiếu source/configuration, full backend tests và frontend check
 - **security-common refactor (DEC-017):** `JwtPrincipalService` được gom vào `security-common`; 6 bản duplicate đã xóa; 8 controller đã cập nhật import; `mvn compile` 9 module — BUILD SUCCESS.
 - **notification-service refactor:** Thêm `NotificationService` layer; `NotificationController` và 2 consumers không còn inject repository trực tiếp.
 - **review-service:** Thêm `ReviewExceptionHandler` (`@RestControllerAdvice`) trả RFC 7807 cho `ResponseStatusException`, `MethodArgumentNotValidException` và `DataIntegrityViolationException`.
-- **payment-service (DEC-019):** Thêm `PaymentController` (501 Not Implemented) và `PaymentExceptionHandler`; skeleton vẫn giữ trong reactor chờ payment provider được chọn.
+- **payment-service (DEC-019):** Đã loại bỏ hoàn toàn khỏi backend reactor, docker-compose và gateway routing.
 - **marketplace-service (DEC-018):** Đã loại bỏ hoàn toàn (chấp nhận bắt đầu dữ liệu từ đầu); không còn service, schema hay route nào liên quan.
 
 ## Persistence và vận hành
 
-- Identity, Profile, Catalog, Booking, Review và Notification dùng Flyway với Hibernate `ddl-auto: validate`; Payment chưa có schema nghiệp vụ.
+- Identity, Profile, Catalog, Booking, Review và Notification dùng Flyway với Hibernate `ddl-auto: validate`.
 - Booking/Review/Catalog outbox events được dùng cho luồng đã triển khai; không có transaction xuyên service. Payment event/saga chưa làm.
 - Compose định nghĩa RabbitMQ, Prometheus, Grafana và Jaeger. Metrics/tracing đã cấu hình nhưng chưa xác minh runtime; centralized log collection chưa tích hợp.
 - API keys riêng bảo vệ một số giao tiếp nội bộ; production mTLS/secret management chưa xác minh.

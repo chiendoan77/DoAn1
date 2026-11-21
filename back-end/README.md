@@ -1,10 +1,10 @@
 # Backend
 
-Java 21 / Spring Boot Maven reactor. It contains the API Gateway, shared security modules and eight independently configured services: Identity, Profile, Catalog, Marketplace (legacy migration), Booking, Review, Payment and Notification.
+Java 21 / Spring Boot Maven reactor. It contains the API Gateway, shared security modules and six independently configured services: Identity, Profile, Catalog, Booking, Review and Notification.
 
 ## Architecture and API
 
-The API Gateway is the client entry point. Domain services own their data; service-to-service calls use HTTP DTOs or RabbitMQ events rather than shared database access. Review is a separate service. Payment currently has only an adapter-registry skeleton and no payment lifecycle API.
+The API Gateway is the client entry point. Domain services own their data; service-to-service calls use HTTP DTOs or RabbitMQ events rather than shared database access. Review is a separate service.
 
 See [service architecture](../docs/architecture/service-architecture.md), the [API catalog](../docs/API_DOCUMENTATION.md), [external API guide](../docs/API_INTEGRATION_GUIDE.md), [architecture](../docs/ARCHITECTURE.md) and [development status](../docs/DEVELOPMENT_STATUS.md).
 

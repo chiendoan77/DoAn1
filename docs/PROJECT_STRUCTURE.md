@@ -16,7 +16,6 @@ DoAn1/
 │   ├── catalog-service/
 │   ├── review-service/
 │   ├── booking-service/
-│   ├── payment-service/
 │   └── notification-service/
 ├── font-end/
 │   └── src/
@@ -31,7 +30,7 @@ DoAn1/
     └── services/                # Gateway và business service docs
 ```
 
-Mỗi backend module có `src/test/java` riêng. Domain services tách controller/DTO/entity/repository/service theo trách nhiệm; Payment hiện giữ cấu trúc gọn cho adapter skeleton. `security-common` chứa `RsaJwtKeyLoader` và `JwtPrincipalService` dùng chung — không còn bản sao cục bộ tại từng service.
+Mỗi backend module có `src/test/java` riêng. Domain services tách controller/DTO/entity/repository/service theo trách nhiệm. `security-common` chứa `RsaJwtKeyLoader` và `JwtPrincipalService` dùng chung — không còn bản sao cục bộ tại từng service.
 
 ## Ownership
 
@@ -56,7 +55,7 @@ Admin là role/portal, không phải service. Review is independently deployed. 
 ## Hiện trạng và phần chưa hoàn tất
 
 - Frontend là **Next.js/React/TypeScript**, không phải Angular; tên thư mục là `font-end/`.
-- Backend là Maven reactor gồm API Gateway, security modules và 7 Spring Boot services: Identity, Profile, Catalog, Booking, Review, Payment và Notification.
+- Backend là Maven reactor gồm API Gateway, security modules và 6 Spring Boot services: Identity, Profile, Catalog, Booking, Review và Notification.
 - Identity, Profile, Catalog, Booking, Review và Notification dùng Flyway.
 - `docker compose config -q` đã pass; full Compose runtime, contract/Pact suite, browser E2E, production deployment và centralized logs chưa được xác minh/hoàn thiện.
 

@@ -117,8 +117,12 @@
   7. Xóa toàn bộ thư mục `back-end/marketplace-service/`.
 - **Lý do:** Profile, Catalog và Review đã bao phủ toàn bộ domain; giữ lại service legacy chỉ gây phân tán source of truth và lãng phí tài nguyên runtime (port 8082, container, schema). Bỏ hẳn giúp kiến trúc trong sạch, rõ ràng.
 
-## DEC-019 — payment-service giữ skeleton, thêm 501 endpoint
+## DEC-019 — Loại bỏ hoàn toàn payment-service
 
-- **Trạng thái:** Đã triển khai (2026-11-21).
-- **Quyết định:** Giữ `payment-service` trong reactor với adapter skeleton; thêm `PaymentController` trả `501 Not Implemented` cho `/api/payments/**` và `PaymentExceptionHandler` theo chuẩn RFC 7807. Service không bị xóa vì cần giữ port allocation (8084), Docker Compose slot và cấu trúc cho khi Payment lifecycle được triển khai.
-- **Điều kiện để implement thực:** Payment lifecycle chỉ bắt đầu khi chọn được payment provider cụ thể (vnpay, momo, stripe, v.v.) và xác định webhook/callback/idempotency/refund semantics. Xem DEC-015.
+- **Trạng thái:** Đã triển khai xóa (2026-11-21).
+- **Quyết định:** Loại bỏ hoàn toàn `payment-service` khỏi repository và docker stack:
+  1. Xóa `payment-service` khỏi `back-end/pom.xml`.
+  2. Xóa cấu hình route `/api/payments/**` và `paymentUrl` khỏi `api-gateway` (`GatewayRoutes.java` và `application.yml`).
+  3. Xóa service `payment-service` khỏi `docker-compose.yml`.
+  4. Xóa thư mục `back-end/payment-service/`.
+- **Lý do:** Payment lifecycle chưa có logic nghiệp vụ thật (chỉ có adapter skeleton) và chưa có nhu cầu sử dụng thực tế trong đồ án. Bỏ hẳn giúp hệ thống tập trung hoàn toàn vào core business: Identity, Profile, Catalog, Booking, Review và Notification. Khi nào triển khai cổng thanh toán thực sẽ thiết kế lại trực tiếp theo provider cụ thể.

@@ -16,7 +16,6 @@ public class GatewayRoutes {
             @Value("${services.catalog.url:http://localhost:8086}") String catalogUrl,
             @Value("${services.review.url:http://localhost:8088}") String reviewUrl,
             @Value("${services.booking.url:http://localhost:8083}") String bookingUrl,
-            @Value("${services.payment.url:http://localhost:8084}") String paymentUrl,
             @Value("${services.notification.url:http://localhost:8087}") String notificationUrl) {
         return builder.routes()
                 .route("identity", route -> route
@@ -41,9 +40,6 @@ public class GatewayRoutes {
                 .route("booking", route -> route
                         .path("/api/bookings/**", "/api/provider/bookings/**", "/api/admin/bookings/**")
                         .uri(bookingUrl))
-                .route("payment", route -> route
-                        .path("/api/payments/**", "/api/admin/payments/**")
-                        .uri(paymentUrl))
                 .build();
     }
 }
