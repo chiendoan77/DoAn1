@@ -38,11 +38,10 @@ Ngày đối chiếu source/configuration, full backend tests và frontend check
 
 ## Kiểm thử và xác minh
 
-- **Docker Compose runtime & RabbitMQ:** Toàn bộ 14 containers khởi động thành công và healthy. Đã kiểm thử gửi/nhận message qua RabbitMQ topic exchange `doan1.events` thành công vào database. RabbitMQ management và Grafana đã được cấu hình credential `admin / admin123`.
-- `mvn compile` toàn bộ reactor sau khi xóa marketplace: BUILD SUCCESS.
-- `mvn test -pl profile-service`: 6/6 tests PASS.
-- `mvn test -pl notification-service`: 2/2 tests PASS.
-- Full `mvn test` gần nhất trước thay đổi phân trang: 39 tests trên 12 suite, 0 failure, 0 error, 0 skipped. Sau thay đổi, Profile suite có 6 tests và Identity suite có 9 tests pass riêng. [TEST_CASES.csv](./TEST_CASES.csv) có 60 dòng: 44 `PASS`, 11 `NOT_RUN`, 4 `NOT_IMPLEMENTED`, 1 `DEFERRED`; từng backend test trỏ tới Surefire report hoặc ghi rõ lệnh kiểm thử tương ứng.
+- **Docker Compose runtime & RabbitMQ:** Toàn bộ 13 containers khởi động thành công và healthy (MAN-013). Đã kiểm thử gửi/nhận message qua RabbitMQ topic exchange `doan1.events` thành công vào database (MAN-003). RabbitMQ management và Grafana đã được cấu hình credential `admin / admin123`.
+- `mvn compile` toàn bộ reactor sau khi xóa marketplace, payment và gom security-test-support: BUILD SUCCESS.
+- `mvn test` trên các service cốt lõi: Profile (6/6 tests PASS), Notification (2/2 tests PASS), Identity (9/9 tests PASS), Catalog (7/7 tests PASS), Booking (3/3 tests PASS), Review (2/2 tests PASS), API Gateway (6/6 tests PASS). Tổng cộng: 35 backend tests chạy trực tiếp và PASS 100%.
+- [TEST_CASES.csv](./TEST_CASES.csv) có 51 test cases (52 dòng gồm header): 38 `PASS`, 9 `NOT_RUN`, 4 `NOT_IMPLEMENTED`. Toàn bộ test case của Marketplace legacy (MK-001..005) và Payment skeleton (PAY-001..003, MAN-012) đã được xóa khớp với phạm vi hệ thống mới. Các test case runtime RabbitMQ (MAN-003) và Compose health (MAN-013) đã được chuyển sang `PASS`.
 - Frontend lint/typecheck/production build và `docker compose config -q` pass; frontend checks được chạy lại sau khi bổ sung PUT/DELETE cho BFF.
 - Xác minh phân trang provider: 6 Profile tests pass (bao gồm 11 hồ sơ qua hai trang); frontend lint, typecheck và production build pass.
 - Xác minh Admin logout/delete: 9 Identity tests pass, gồm xóa Admin cùng mọi refresh session, giữ nguyên account CUSTOMER và không xóa account bằng token không hợp lệ.
