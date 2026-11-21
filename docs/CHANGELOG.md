@@ -1,5 +1,34 @@
 # Changelog
 
+## 2026-11-21 — Ưu tiên 2: service layer, exception handler, payment và marketplace
+
+### notification-service — Thêm NotificationService layer
+- Tạo `NotificationService` (`service/NotificationService.java`) với `forUser()`, `forAdmin()`, `savePackageNotification()`, `saveBookingNotification()`; idempotency check nằm trong service thay vì consumer.
+- `NotificationController` không còn inject `NotificationRepository` trực tiếp; chuyển sang dùng `NotificationService`.
+- `PackageEventConsumer` và `BookingCompletedConsumer` inject `NotificationService` thay vì repository; xóa `@Transactional` ở consumer vì transaction nằm trong service.
+
+### review-service — Thêm @RestControllerAdvice
+- Tạo `exception/ReviewExceptionHandler.java` với handler cho `ResponseStatusException` (401/403/404/409), `MethodArgumentNotValidException` (422) và `DataIntegrityViolationException` (409).
+- Đảm bảo tất cả lỗi trả RFC 7807 `ProblemDetail` nhất quán với các service khác.
+
+### payment-service — Làm rõ trạng thái skeleton (DEC-019)
+- Tạo `controller/PaymentController.java`: trả `501 Not Implemented` cho `GET /api/payments/**`; mọi request đến payment đều có phản hồi rõ ràng thay vì im lặng.
+- Tạo `exception/PaymentExceptionHandler.java` theo chuẩn RFC 7807.
+- Quyết định: giữ trong reactor để giữ port 8084 và adapter skeleton cho đến khi payment provider được chọn.
+
+### marketplace-service — Kế hoạch deprecate (DEC-018)
+- Ghi nhận kế hoạch 6 bước deprecate trong `DECISIONS.md`; không xóa code vì migration export API vẫn cần thiết.
+- Không thêm tính năng mới vào service này.
+
+## 2026-11-21 — Gom JwtPrincipalService về security-common (DRY refactor)
+
+- Xóa 6 bản sao `JwtPrincipalService` nằm rải rác tại package `security/` của từng service (catalog, booking, profile, review, notification, marketplace).
+- Tạo class dùng chung duy nhất tại `security-common/src/main/java/com/doan1/security/JwtPrincipalService.java` với `Principal(accountId, fullName, role)` là superset của tất cả các biến thể cũ; cả hai method `authenticate()` và `requireRole()` đều có mặt.
+- Cập nhật `security-common/pom.xml`: thêm `jjwt-api/impl/jackson` và `spring-boot-starter-web` (servlet API, `@Service`, `ResponseStatusException`).
+- Cập nhật 8 controller file để dùng import `com.doan1.security.JwtPrincipalService` thay cho import cục bộ.
+- Xóa 6 thư mục `security/` đã trống sau refactor.
+- Xác minh: `mvn compile` cho 9 module bị ảnh hưởng thành công — BUILD SUCCESS, 0 lỗi.
+
 ## 2026-11-06 — Xóa tài khoản Admin khi đăng xuất
 
 - Logout bằng refresh token hợp lệ của Admin thu hồi mọi refresh-token session của account đó và xóa account trong cùng transaction.

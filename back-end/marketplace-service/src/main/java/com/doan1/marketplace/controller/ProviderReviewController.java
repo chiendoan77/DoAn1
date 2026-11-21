@@ -7,7 +7,7 @@ import com.doan1.marketplace.dto.response.ReviewResponse;
 import com.doan1.marketplace.entity.ProviderReview;
 import com.doan1.marketplace.mapper.MarketplaceMapper;
 import com.doan1.marketplace.repository.ProviderReviewRepository;
-import com.doan1.marketplace.security.JwtPrincipalService;
+import com.doan1.security.JwtPrincipalService;
 import com.doan1.marketplace.service.ProviderReviewService;
 
 import jakarta.servlet.http.HttpServletRequest;

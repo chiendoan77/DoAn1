@@ -96,3 +96,29 @@
 - **Quyết định:** Logout bằng refresh token còn hiệu lực của tài khoản `ADMIN` sẽ thu hồi/xóa toàn bộ refresh-token sessions của chính account đó, sau đó xóa account trong cùng transaction. Logout bằng token không hợp lệ không xóa account; logout CUSTOMER/PROVIDER chỉ thu hồi family hiện tại như trước.
 - **Hệ quả:** Admin nào đăng xuất thì account đó bị xóa; Admin khác không bị ảnh hưởng và chỉ bị xóa khi chính họ đăng xuất. Cần bootstrap lại account đã bị xóa. Access JWT đã phát chưa bị denylist và còn hiệu lực tới hết TTL; account deletion không thu hồi tức thời access JWT ở các service chỉ xác minh chữ ký/claims.
 - **Lý do:** Theo yêu cầu xóa tài khoản Admin sau logout. Hành vi này cố ý áp dụng cho tất cả Admin, không chỉ tài khoản bootstrap.
+
+## DEC-017 — JwtPrincipalService tập trung trong security-common
+
+- **Trạng thái:** Đã triển khai (2026-11-21).
+- **Quyết định:** Một class `JwtPrincipalService` duy nhất nằm trong module `security-common` (`com.doan1.security`); không có bản sao cục bộ tại từng service. `Principal` record có ba trường: `accountId`, `fullName`, `role`. Cả hai method `authenticate()` và `requireRole()` đều được cung cấp sẵn.
+- **Lý do:** 6 bản sao phân kỳ (khác nhau về số trường `Principal`, có/không có `requireRole()`, thông điệp lỗi khác nhau) tạo rủi ro security — vá lỗi ở một chỗ không lan tới chỗ khác. Gom vào shared library đảm bảo mọi service dùng cùng một logic xác thực JWT.
+- **Phạm vi ảnh hưởng:** `security-common/pom.xml` nhận thêm `jjwt` và `spring-boot-starter-web`; 8 controller được cập nhật import; 6 thư mục `security/` cục bộ đã xóa.
+
+## DEC-018 — Kế hoạch deprecate marketplace-service
+
+- **Trạng thái:** Kế hoạch đã chốt (2026-11-21); chưa thực thi xóa.
+- **Quyết định:** `marketplace-service` giữ nguyên trong reactor cho đến khi hoàn thành checklist migration bên dưới. Sau đó xóa khỏi reactor, Docker Compose và API Gateway routes. Không thêm tính năng mới vào service này.
+- **Lý do:** Profile/Catalog/Review đã thay thế toàn bộ domain của marketplace. Service hiện chỉ còn hai vai trò: (1) export API cho migration và (2) phục vụ legacy routing qua Gateway đang chạy. Giữ lại chỉ gây nhầm lẫn về source of truth.
+- **Checklist trước khi xóa (theo thứ tự):**
+  1. Xác nhận `profile-service` đã import toàn bộ provider profiles qua `GET /internal/migration/provider-profiles`.
+  2. Xác nhận `review-service` đã import toàn bộ reviews qua `GET /internal/migration/reviews`.
+  3. Kiểm tra `api-gateway/GatewayRoutes.java` — xóa route `marketplace` trỏ tới port 8082.
+  4. Xác nhận không có service nào còn gọi `InternalProviderController` (`/internal/providers/**`) của marketplace — booking-service hiện dùng profile-service cho việc này.
+  5. Xóa `marketplace-service` khỏi `back-end/pom.xml` modules và `docker-compose.yml`.
+  6. Xóa thư mục `back-end/marketplace-service/`.
+
+## DEC-019 — payment-service giữ skeleton, thêm 501 endpoint
+
+- **Trạng thái:** Đã triển khai (2026-11-21).
+- **Quyết định:** Giữ `payment-service` trong reactor với adapter skeleton; thêm `PaymentController` trả `501 Not Implemented` cho `/api/payments/**` và `PaymentExceptionHandler` theo chuẩn RFC 7807. Service không bị xóa vì cần giữ port allocation (8084), Docker Compose slot và cấu trúc cho khi Payment lifecycle được triển khai.
+- **Điều kiện để implement thực:** Payment lifecycle chỉ bắt đầu khi chọn được payment provider cụ thể (vnpay, momo, stripe, v.v.) và xác định webhook/callback/idempotency/refund semantics. Xem DEC-015.

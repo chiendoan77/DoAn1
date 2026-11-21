@@ -1,23 +1,22 @@
 package com.doan1.notification.event;
 
-import com.doan1.notification.entity.Notification;
-import com.doan1.notification.repository.NotificationRepository;
+import com.doan1.notification.service.NotificationService;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
+
+import java.util.UUID;
 
 @Component
 public class PackageEventConsumer {
-    private final NotificationRepository notifications;
 
-    public PackageEventConsumer(NotificationRepository notifications) {
-        this.notifications = notifications;
+    private final NotificationService notificationService;
+
+    public PackageEventConsumer(NotificationService notificationService) {
+        this.notificationService = notificationService;
     }
 
     @RabbitListener(queues = "${app.rabbitmq.queue}")
-    @Transactional
     public void receive(PackageEvent event) {
-        if (notifications.existsByEventId(event.eventId())) return;
         boolean admin = "PackageSubmitted".equals(event.eventType())
                 || "PackageResubmitted".equals(event.eventType());
         String role = admin ? "ADMIN" : "PROVIDER";
@@ -29,7 +28,8 @@ public class PackageEventConsumer {
             case "PackageDeactivated" -> "Gói dịch vụ đã được ngừng hoạt động.";
             default -> throw new IllegalArgumentException("Unsupported package event: " + event.eventType());
         };
-        notifications.save(new Notification(event.eventId(), admin ? event.adminId() : event.providerId(),
-                role, event.eventType(), event.packageId(), message));
+        UUID recipientId = admin ? event.adminId() : event.providerId();
+        notificationService.savePackageNotification(
+                event.eventId(), recipientId, role, event.eventType(), event.packageId(), message);
     }
 }

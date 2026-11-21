@@ -6,7 +6,7 @@ import com.doan1.profile.dto.request.CustomerProfileRequest;
 import com.doan1.profile.dto.response.CategoryResponse;
 import com.doan1.profile.dto.response.ProviderPageResponse;
 import com.doan1.profile.dto.response.ProviderResponse;
-import com.doan1.profile.security.JwtPrincipalService;
+import com.doan1.security.JwtPrincipalService;
 import com.doan1.profile.service.ProfileService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;

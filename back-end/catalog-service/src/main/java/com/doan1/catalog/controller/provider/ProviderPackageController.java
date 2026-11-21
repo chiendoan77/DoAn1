@@ -5,7 +5,7 @@ import com.doan1.catalog.dto.request.UpdatePackageRequest;
 import com.doan1.catalog.dto.request.VersionRequest;
 import com.doan1.catalog.dto.response.PackageResponse;
 import com.doan1.catalog.dto.response.PageResponse;
-import com.doan1.catalog.security.JwtPrincipalService;
+import com.doan1.security.JwtPrincipalService;
 import com.doan1.catalog.service.ProviderPackageService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;

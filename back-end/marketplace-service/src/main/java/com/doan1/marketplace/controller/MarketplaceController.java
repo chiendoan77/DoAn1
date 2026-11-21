@@ -4,7 +4,7 @@ import com.doan1.marketplace.dto.response.CategoryResponse;
 import com.doan1.marketplace.dto.request.ProviderApplicationRequest;
 import com.doan1.marketplace.dto.request.ProviderDecisionRequest;
 import com.doan1.marketplace.dto.response.ProviderResponse;
-import com.doan1.marketplace.security.JwtPrincipalService;
+import com.doan1.security.JwtPrincipalService;
 import com.doan1.marketplace.service.MarketplaceService;
 
 import jakarta.servlet.http.HttpServletRequest;

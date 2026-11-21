@@ -2,7 +2,7 @@ package com.doan1.review.controller;
 
 import com.doan1.review.dto.ReviewRequest;
 import com.doan1.review.dto.ReviewResponse;
-import com.doan1.review.security.JwtPrincipalService;
+import com.doan1.security.JwtPrincipalService;
 import com.doan1.review.service.ReviewService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;

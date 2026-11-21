@@ -32,7 +32,7 @@ DoAn1/
     └── services/                # Gateway và business service docs
 ```
 
-Mỗi backend module có `src/test/java` riêng. Domain services tách controller/DTO/entity/repository/service theo trách nhiệm; Payment hiện giữ cấu trúc gọn cho adapter skeleton.
+Mỗi backend module có `src/test/java` riêng. Domain services tách controller/DTO/entity/repository/service theo trách nhiệm; Payment hiện giữ cấu trúc gọn cho adapter skeleton. `security-common` chứa `RsaJwtKeyLoader` và `JwtPrincipalService` dùng chung — không còn bản sao cục bộ tại từng service.
 
 ## Ownership
 
@@ -40,6 +40,7 @@ Mỗi backend module có `src/test/java` riêng. Domain services tách controlle
 |---|---|---|
 | Web UI/BFF | `font-end/` | Next.js; browser gọi BFF, BFF chuyển tiếp tới Gateway và giữ JWT trong cookie HttpOnly. |
 | API Gateway | `back-end/api-gateway/` | Routing và JWT RS256 validation ở edge; không sở hữu dữ liệu nghiệp vụ. |
+| Security Common | `back-end/security-common/` | `RsaJwtKeyLoader` (tải RSA key) và `JwtPrincipalService` (xác thực Bearer token, trả `Principal(accountId, fullName, role)`); được dùng chung bởi tất cả business services. |
 | Identity & Access | `back-end/identity-service/` | Tài khoản, credential, role, account status/audit, RS256 và refresh-token rotation/revocation. |
 | Profile | `back-end/profile-service/` | Customer/provider profiles, approval/suspension, public lookup, eligibility và rating projection. |
 | Catalog | `back-end/catalog-service/` | Category, provider packages/prices, moderation, history và event outbox. |

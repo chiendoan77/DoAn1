@@ -3,7 +3,7 @@ package com.doan1.booking.controller;
 import com.doan1.booking.dto.request.CreateBookingRequest;
 import com.doan1.booking.dto.request.UpdateBookingStatusRequest;
 import com.doan1.booking.dto.response.BookingResponse;
-import com.doan1.booking.security.JwtPrincipalService;
+import com.doan1.security.JwtPrincipalService;
 import com.doan1.booking.service.BookingService;
 
 import jakarta.servlet.http.HttpServletRequest;
