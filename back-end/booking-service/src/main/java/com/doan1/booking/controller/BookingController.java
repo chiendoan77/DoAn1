@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 import java.util.UUID;
+import org.springframework.web.bind.annotation.RequestParam;
 
 @RestController
 @RequestMapping("/api")
@@ -36,9 +37,14 @@ public class BookingController {
     }
 
     @GetMapping("/bookings/mine")
-    public List<BookingResponse> history(HttpServletRequest request) {
+    public List<BookingResponse> history(
+            HttpServletRequest request,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size) {
         JwtPrincipalService.Principal principal = principals.authenticate(request);
-        return bookings.history(principal.accountId(), principal.role());
+        int safeSize = Math.min(Math.max(size, 1), 100);
+        int safePage = Math.max(page, 0);
+        return bookings.history(principal.accountId(), principal.role(), safePage, safeSize);
     }
 
     @PatchMapping("/provider/bookings/{bookingId}/status")

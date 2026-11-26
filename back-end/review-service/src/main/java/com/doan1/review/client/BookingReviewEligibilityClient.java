@@ -3,11 +3,14 @@ package com.doan1.review.client;
 import com.doan1.review.dto.ReviewEligibility;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.client.JdkClientHttpRequestFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestClientResponseException;
 import org.springframework.web.server.ResponseStatusException;
+import java.net.http.HttpClient;
+import java.time.Duration;
 import java.util.UUID;
 
 @Component
@@ -18,7 +21,12 @@ public class BookingReviewEligibilityClient {
     public BookingReviewEligibilityClient(RestClient.Builder builder,
             @Value("${services.booking.url}") String bookingUrl,
             @Value("${service.api-keys.booking:}") String key) {
-        rest = builder.baseUrl(bookingUrl).build();
+        HttpClient httpClient = HttpClient.newBuilder()
+                .connectTimeout(Duration.ofSeconds(2))
+                .build();
+        JdkClientHttpRequestFactory requestFactory = new JdkClientHttpRequestFactory(httpClient);
+        requestFactory.setReadTimeout(Duration.ofSeconds(3));
+        rest = builder.baseUrl(bookingUrl).requestFactory(requestFactory).build();
         this.key = key;
     }
 

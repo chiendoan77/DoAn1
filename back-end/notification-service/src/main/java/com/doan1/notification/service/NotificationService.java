@@ -5,6 +5,7 @@ import com.doan1.notification.entity.Notification;
 import com.doan1.notification.repository.NotificationRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.data.domain.PageRequest;
 
 import java.util.List;
 import java.util.UUID;
@@ -20,14 +21,26 @@ public class NotificationService {
 
     @Transactional(readOnly = true)
     public List<NotificationResponse> forUser(UUID accountId) {
-        return notifications.findByRecipientIdOrderByCreatedAtDesc(accountId)
-                .stream().map(NotificationService::toResponse).toList();
+        return forUser(accountId, 0, 20);
+    }
+
+    @Transactional(readOnly = true)
+    public List<NotificationResponse> forUser(UUID accountId, int page, int size) {
+        return notifications.findByRecipientIdOrderByCreatedAtDesc(
+                        accountId, PageRequest.of(page, size))
+                .getContent().stream().map(NotificationService::toResponse).toList();
     }
 
     @Transactional(readOnly = true)
     public List<NotificationResponse> forAdmin() {
-        return notifications.findByRecipientRoleOrderByCreatedAtDesc("ADMIN")
-                .stream().map(NotificationService::toResponse).toList();
+        return forAdmin(0, 20);
+    }
+
+    @Transactional(readOnly = true)
+    public List<NotificationResponse> forAdmin(int page, int size) {
+        return notifications.findByRecipientRoleOrderByCreatedAtDesc(
+                        "ADMIN", PageRequest.of(page, size))
+                .getContent().stream().map(NotificationService::toResponse).toList();
     }
 
     @Transactional

@@ -11,16 +11,16 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import java.time.Instant;
-import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.Map;
 
 @Component
 public class ReviewOutboxPublisher {
     private static final Logger logger = LoggerFactory.getLogger(ReviewOutboxPublisher.class);
     private final ReviewOutboxEventRepository events;
     private final RabbitTemplate rabbit;
-    private final Set<UUID> inFlight = ConcurrentHashMap.newKeySet();
+    private final Map<UUID, Instant> inFlight = new ConcurrentHashMap<>();
 
     public ReviewOutboxPublisher(ReviewOutboxEventRepository events, RabbitTemplate rabbit) {
         this.events = events;
@@ -30,8 +30,10 @@ public class ReviewOutboxPublisher {
 
     @Scheduled(fixedDelayString = "${app.outbox.poll-interval-ms:1000}")
     public void publishPending() {
+        Instant staleBefore = Instant.now().minusSeconds(30);
+        inFlight.entrySet().removeIf(entry -> entry.getValue().isBefore(staleBefore));
         for (ReviewOutboxEvent event : events.findTop50ByStatusOrderByCreatedAtAsc("PENDING")) {
-            if (inFlight.add(event.getId())) publish(event);
+            if (inFlight.putIfAbsent(event.getId(), Instant.now()) == null) publish(event);
         }
     }
 

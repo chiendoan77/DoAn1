@@ -13,9 +13,9 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.time.Instant;
-import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.Map;
 
 @Component
 @ConditionalOnProperty(name = "app.outbox.enabled", havingValue = "true", matchIfMissing = true)
@@ -23,7 +23,7 @@ public class BookingOutboxPublisher {
     private static final Logger logger = LoggerFactory.getLogger(BookingOutboxPublisher.class);
     private final BookingOutboxEventRepository events;
     private final RabbitTemplate rabbit;
-    private final Set<UUID> inFlight = ConcurrentHashMap.newKeySet();
+    private final Map<UUID, Instant> inFlight = new ConcurrentHashMap<>();
 
     public BookingOutboxPublisher(BookingOutboxEventRepository events, RabbitTemplate rabbit) {
         this.events = events;
@@ -33,8 +33,10 @@ public class BookingOutboxPublisher {
 
     @Scheduled(fixedDelayString = "${app.outbox.poll-interval-ms:1000}")
     public void publishPending() {
+        Instant staleBefore = Instant.now().minusSeconds(30);
+        inFlight.entrySet().removeIf(entry -> entry.getValue().isBefore(staleBefore));
         for (BookingOutboxEvent event : events.findTop50ByStatusOrderByCreatedAtAsc("PENDING")) {
-            if (inFlight.add(event.getId())) publish(event);
+            if (inFlight.putIfAbsent(event.getId(), Instant.now()) == null) publish(event);
         }
     }
 

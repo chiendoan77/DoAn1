@@ -20,6 +20,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
@@ -48,6 +49,11 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     public BookingResponse create(UUID customerAccountId, String customerName, CreateBookingRequest input) {
+        if (bookings.existsByCustomerAccountIdAndPackageIdAndScheduledAtAndStatus(
+                customerAccountId, input.packageId(), input.scheduledAt(), BookingStatus.REQUESTED)) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT,
+                    "Bạn đã có yêu cầu đặt lịch trùng gói và thời gian.");
+        }
         PackageDetailsResponse servicePackage = catalog.getApprovedPackage(input.packageId());
         ProviderDetailsResponse provider =
                 profiles.getApprovedProvider(servicePackage.categoryId(), servicePackage.providerId());
@@ -81,11 +87,19 @@ public class BookingServiceImpl implements BookingService {
     @Override
     @Transactional(readOnly = true)
     public List<BookingResponse> history(UUID accountId, String role) {
+        return history(accountId, role, 0, 20);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<BookingResponse> history(UUID accountId, String role, int page, int size) {
         if ("CUSTOMER".equals(role)) {
-            return BookingMapper.toResponses(bookings.findByCustomerAccountIdOrderByCreatedAtDesc(accountId));
+            return BookingMapper.toResponses(bookings.findByCustomerAccountIdOrderByCreatedAtDesc(
+                    accountId, PageRequest.of(page, size)).getContent());
         }
         if ("PROVIDER".equals(role)) {
-            return BookingMapper.toResponses(bookings.findByProviderAccountIdOrderByCreatedAtDesc(accountId));
+            return BookingMapper.toResponses(bookings.findByProviderAccountIdOrderByCreatedAtDesc(
+                    accountId, PageRequest.of(page, size)).getContent());
         }
         throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Bạn không có quyền xem lịch sử này.");
     }

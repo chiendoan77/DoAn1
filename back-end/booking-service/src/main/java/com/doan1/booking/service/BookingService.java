@@ -12,6 +12,7 @@ public interface BookingService {
     BookingResponse create(UUID customerAccountId, String customerName, CreateBookingRequest input);
 
     List<BookingResponse> history(UUID accountId, String role);
+    List<BookingResponse> history(UUID accountId, String role, int page, int size);
 
     BookingResponse updateStatus(UUID providerAccountId, UUID bookingId, BookingStatus status);
 

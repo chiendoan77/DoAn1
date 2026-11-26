@@ -2,11 +2,14 @@ package com.doan1.profile.client;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.client.JdkClientHttpRequestFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.net.http.HttpClient;
+import java.time.Duration;
 import java.util.UUID;
 
 @Component
@@ -17,7 +20,12 @@ public class IdentityAccountClient {
     public IdentityAccountClient(RestClient.Builder builder,
             @Value("${services.identity.url}") String identityUrl,
             @Value("${service.api-keys.identity:}") String apiKey) {
-        this.client = builder.baseUrl(identityUrl).build();
+        HttpClient httpClient = HttpClient.newBuilder()
+                .connectTimeout(Duration.ofSeconds(2))
+                .build();
+        JdkClientHttpRequestFactory requestFactory = new JdkClientHttpRequestFactory(httpClient);
+        requestFactory.setReadTimeout(Duration.ofSeconds(3));
+        this.client = builder.baseUrl(identityUrl).requestFactory(requestFactory).build();
         this.apiKey = apiKey;
     }
 

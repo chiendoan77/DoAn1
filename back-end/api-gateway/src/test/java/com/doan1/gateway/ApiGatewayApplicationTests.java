@@ -10,6 +10,8 @@ import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 
+import java.util.UUID;
+
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
         properties = {})
 @AutoConfigureWebTestClient
@@ -52,5 +54,28 @@ class ApiGatewayApplicationTests {
                 .header("Authorization", "Bearer invalid")
                 .exchange()
                 .expectStatus().isUnauthorized();
+    }
+
+    @Test
+    void rejectsAdminRouteForCustomerRole() {
+        String token = JwtTestKeys.token(UUID.randomUUID(), "CUSTOMER", "Customer");
+        webTestClient.get()
+                .uri("http://localhost:" + port + "/api/admin/packages/pending")
+                .header("Authorization", "Bearer " + token)
+                .exchange()
+                .expectStatus().isForbidden();
+    }
+
+    @Test
+    void rateLimitsRepeatedAuthRequests() {
+        for (int i = 0; i < 10; i++) {
+            webTestClient.post()
+                    .uri("http://localhost:" + port + "/api/auth/login")
+                    .exchange();
+        }
+        webTestClient.post()
+                .uri("http://localhost:" + port + "/api/auth/login")
+                .exchange()
+                .expectStatus().isEqualTo(429);
     }
 }

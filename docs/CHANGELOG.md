@@ -124,6 +124,21 @@
 - Gỡ `GatewayCorsConfiguration` và các kiểm thử preflight cố định theo origin `localhost:4200`.
 - CORS không còn được cấu hình trong application; môi trường triển khai phải cấu hình tại reverse proxy hoặc tầng phù hợp nếu cần browser gọi Gateway trực tiếp.
 
+## 2026-11-26 — Thêm timeout cho HTTP liên service
+
+- Booking đặt 2 giây connect timeout và 3 giây read timeout khi gọi Catalog/Profile.
+- Review đặt 2 giây connect timeout và 3 giây read timeout khi gọi Booking.
+- Profile đặt 2 giây connect timeout và 3 giây read timeout khi gọi Identity.
+
+## 2026-11-26 — Tăng cường bảo mật và độ tin cậy backend
+
+- Gateway chặn sai role theo prefix `/api/admin/**`, `/api/provider/**`, `/api/customer/**`; giới hạn `/api/auth/**` và thêm security headers.
+- Admin logout chỉ thu hồi refresh session, không xóa tài khoản admin.
+- Booking thêm optimistic locking, exception handler thống nhất, index trạng thái/thời gian và kiểm tra trùng gói/thời gian.
+- Booking, Review và Notification thêm phân trang với `page`/`size`, giới hạn tối đa 100.
+- Booking, Review và Catalog tự gỡ outbox in-flight quá 30 giây để scheduler thử lại.
+- Thêm GitHub Actions chạy toàn bộ Maven test.
+
 ## 2026-11-04 — Tài liệu khởi tạo
 
 - Ghi nhận repository rỗng ở các thư mục backend/frontend/docs/skill.

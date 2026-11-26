@@ -1,6 +1,6 @@
 # Trạng thái phát triển
 
-Ngày đối chiếu source/configuration, full backend tests và frontend checks: 2026-11-21.
+Ngày đối chiếu source/configuration, full backend tests và frontend checks: 2026-11-26.
 
 ## Kiến trúc và inventory
 
@@ -32,6 +32,10 @@ Ngày đối chiếu source/configuration, full backend tests và frontend check
 ## Persistence và vận hành
 
 - Identity, Profile, Catalog, Booking, Review và Notification dùng Flyway với Hibernate `ddl-auto: validate`.
+- Booking/Catalog/Profile/Review đặt timeout 2 giây cho kết nối và 3 giây cho phản hồi HTTP liên service.
+- Gateway có kiểm tra role theo prefix, rate limit cho `/api/auth/**` và security headers.
+- Booking có optimistic locking, exception handler, index trạng thái/thời gian và kiểm tra trùng gói/thời gian.
+- Booking/Review/Notification hỗ trợ phân trang `page`/`size` tối đa 100.
 - Booking/Review/Catalog outbox events được dùng cho luồng đã triển khai; không có transaction xuyên service. Payment event/saga chưa làm.
 - Compose định nghĩa RabbitMQ, Prometheus, Grafana và Jaeger. Metrics/tracing đã cấu hình nhưng chưa xác minh runtime; centralized log collection chưa tích hợp.
 - API keys riêng bảo vệ một số giao tiếp nội bộ; production mTLS/secret management chưa xác minh.
@@ -41,7 +45,8 @@ Ngày đối chiếu source/configuration, full backend tests và frontend check
 - **Docker Compose runtime & RabbitMQ:** Toàn bộ 13 containers khởi động thành công và healthy (MAN-013). Đã kiểm thử gửi/nhận message qua RabbitMQ topic exchange `doan1.events` thành công vào database (MAN-003). RabbitMQ management và Grafana đã được cấu hình credential `admin / admin123`.
 - `mvn compile` toàn bộ reactor sau khi xóa marketplace, payment và gom security-test-support: BUILD SUCCESS.
 - `mvn test` trên các service cốt lõi: Profile (6/6 tests PASS), Notification (2/2 tests PASS), Identity (9/9 tests PASS), Catalog (7/7 tests PASS), Booking (3/3 tests PASS), Review (2/2 tests PASS), API Gateway (6/6 tests PASS). Tổng cộng: 35 backend tests chạy trực tiếp và PASS 100%.
-- [TEST_CASES.csv](./TEST_CASES.csv) có 49 test cases (50 dòng gồm header): 36 `PASS`, 9 `NOT_RUN`, 4 `NOT_IMPLEMENTED`. Toàn bộ test case của Marketplace legacy (MK-001..005) và Payment skeleton (PAY-001..003, MAN-012) đã được xóa khớp với phạm vi hệ thống mới. Các test case runtime RabbitMQ (MAN-003) và Compose health (MAN-013) đã được chuyển sang `PASS`.
+- [TEST_CASES.csv](./TEST_CASES.csv) có 78 test cases (79 dòng gồm header): 37 `PASS`, 9 `NOT_RUN`, 4 `NOT_IMPLEMENTED`, 28 `PLANNED`. Hai test CORS đã gỡ cùng cấu hình cố định khỏi API Gateway. Các testcase bổ sung ghi nhận các hạng mục chưa triển khai hoặc chưa có bằng chứng chạy, không được xem là PASS.
+- Full backend reactor chạy lại 2026-11-26: Gateway 6/6, Identity 9/9, Profile 6/6, Catalog 7/7, Review 2/2, Booking 3/3, Notification 2/2 — tổng 35 test PASS.
 - Frontend lint/typecheck/production build và `docker compose config -q` pass; frontend checks được chạy lại sau khi bổ sung PUT/DELETE cho BFF.
 - Xác minh phân trang provider: 6 Profile tests pass (bao gồm 11 hồ sơ qua hai trang); frontend lint, typecheck và production build pass.
 - Xác minh Admin logout/delete: 9 Identity tests pass, gồm xóa Admin cùng mọi refresh session, giữ nguyên account CUSTOMER và không xóa account bằng token không hợp lệ.

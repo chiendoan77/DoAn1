@@ -7,6 +7,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
 
@@ -23,11 +24,16 @@ public class NotificationController {
     }
 
     @GetMapping("/mine")
-    public List<NotificationResponse> mine(HttpServletRequest request) {
+    public List<NotificationResponse> mine(
+            HttpServletRequest request,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size) {
         JwtPrincipalService.Principal principal = principals.authenticate(request);
+        int safeSize = Math.min(Math.max(size, 1), 100);
+        int safePage = Math.max(page, 0);
         if ("ADMIN".equals(principal.role())) {
-            return notificationService.forAdmin();
+            return notificationService.forAdmin(safePage, safeSize);
         }
-        return notificationService.forUser(principal.accountId());
+        return notificationService.forUser(principal.accountId(), safePage, safeSize);
     }
 }

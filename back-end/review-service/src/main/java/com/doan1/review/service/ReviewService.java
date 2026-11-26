@@ -12,6 +12,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.web.server.ResponseStatusException;
 import java.time.Instant;
 import java.util.List;
@@ -58,8 +59,14 @@ public class ReviewService {
 
     @Transactional(readOnly = true)
     public List<ReviewResponse> mine(UUID accountId) {
-        return reviews.findByReviewerAccountIdOrderByCreatedAtDesc(accountId)
-                .stream().map(ReviewService::response).toList();
+        return mine(accountId, 0, 20);
+    }
+
+    @Transactional(readOnly = true)
+    public List<ReviewResponse> mine(UUID accountId, int page, int size) {
+        return reviews.findByReviewerAccountIdOrderByCreatedAtDesc(
+                        accountId, PageRequest.of(page, size))
+                .getContent().stream().map(ReviewService::response).toList();
     }
 
     @Transactional

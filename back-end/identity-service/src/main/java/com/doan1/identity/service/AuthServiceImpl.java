@@ -96,7 +96,6 @@ public class AuthServiceImpl implements AuthService {
                 .filter(account -> account.getRole() == Role.ADMIN)
                 .ifPresent(account -> {
                     refreshTokens.revokeAndDeleteAllForAccount(account.getId());
-                    accounts.delete(account);
                 });
     }
 

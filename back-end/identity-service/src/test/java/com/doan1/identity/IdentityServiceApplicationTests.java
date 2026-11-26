@@ -240,7 +240,7 @@ class IdentityServiceApplicationTests {
     }
 
     @Test
-    void logoutDeletesAdminAndInvalidatesAllOfTheirRefreshSessions() throws Exception {
+    void logoutRevokesAdminSessionsWithoutDeletingAdminAccount() throws Exception {
         String identity = UUID.randomUUID().toString().replace("-", "").substring(0, 12);
         String email = "admin-" + identity + "@example.com";
         String password = "StrongPass123";
@@ -269,7 +269,7 @@ class IdentityServiceApplicationTests {
                         .content("{\"refreshToken\":\"" + firstRefresh + "\"}"))
                 .andExpect(status().isOk());
 
-        org.junit.jupiter.api.Assertions.assertTrue(accounts.findByEmailIgnoreCase(email).isEmpty());
+        org.junit.jupiter.api.Assertions.assertTrue(accounts.findByEmailIgnoreCase(email).isPresent());
         org.junit.jupiter.api.Assertions.assertTrue(accounts.findById(otherAdmin.getId()).isPresent());
         mockMvc.perform(post("/api/auth/refresh")
                         .contentType(MediaType.APPLICATION_JSON)

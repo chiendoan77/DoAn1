@@ -34,8 +34,13 @@ public class ReviewController {
     }
 
     @GetMapping("/api/reviews/mine")
-    public List<ReviewResponse> mine(HttpServletRequest request) {
-        return reviews.mine(principals.authenticate(request).accountId());
+    public List<ReviewResponse> mine(
+            HttpServletRequest request,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size) {
+        int safeSize = Math.min(Math.max(size, 1), 100);
+        int safePage = Math.max(page, 0);
+        return reviews.mine(principals.authenticate(request).accountId(), safePage, safeSize);
     }
 
     @PostMapping("/internal/migration/reviews/import")

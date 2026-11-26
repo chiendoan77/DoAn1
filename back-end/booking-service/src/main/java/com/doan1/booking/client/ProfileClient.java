@@ -5,12 +5,15 @@ import com.doan1.booking.entity.Booking;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.client.JdkClientHttpRequestFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestClientResponseException;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.net.http.HttpClient;
+import java.time.Duration;
 import java.util.UUID;
 
 @Component
@@ -22,7 +25,12 @@ public class ProfileClient {
             RestClient.Builder builder,
             @Value("${services.profile.url:http://localhost:8085}") String profileUrl,
             @Value("${service.api-keys.profile:}") String serviceApiKey) {
-        this.restClient = builder.baseUrl(profileUrl).build();
+        HttpClient httpClient = HttpClient.newBuilder()
+                .connectTimeout(Duration.ofSeconds(2))
+                .build();
+        JdkClientHttpRequestFactory requestFactory = new JdkClientHttpRequestFactory(httpClient);
+        requestFactory.setReadTimeout(Duration.ofSeconds(3));
+        this.restClient = builder.baseUrl(profileUrl).requestFactory(requestFactory).build();
         this.serviceApiKey = serviceApiKey;
     }
 
