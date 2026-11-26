@@ -1,11 +1,12 @@
 "use client";
 
-
-import styles from "./notifications-page.module.css";
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { Bell, CalendarCheck, Package } from "lucide-react";
 import { Account, Notification, apiRequest } from "@/lib/api";
 import { SiteHeader } from "@/shared/components/site-header";
+import { EmptyState, Skeleton } from "@/shared/ui/skeleton";
 
 export function NotificationsPage() {
   const router = useRouter();
@@ -35,29 +36,44 @@ export function NotificationsPage() {
   }, [router]);
 
   return (
-    <main className={styles.style1}>
+    <main id="main-content" className="min-h-screen bg-bg">
       <SiteHeader />
-      <section className={styles.style2}>
-        <p className={styles.style3}>Tài khoản</p>
-        <h1 className={styles.style4}>Thông báo</h1>
-        {error && <p role="alert" className={styles.style5}>{error}</p>}
-        {loading ? <p className={styles.style6}>Đang tải…</p> : notifications.length === 0 ? (
-          <p className={styles.style7}>Bạn chưa có thông báo nào.</p>
+      <section className="mx-auto max-w-4xl px-4 py-10 md:px-6 md:py-14">
+        <p className="text-sm font-bold text-brand-600">Tài khoản</p>
+        <h1 className="mt-2 text-3xl font-bold text-text">Thông báo</h1>
+        {error && <p role="alert" className="mt-6 rounded-md border border-danger/20 bg-danger-bg p-4 text-sm text-danger">{error}</p>}
+        {loading ? (
+          <div className="mt-8 space-y-3" aria-label="Đang tải thông báo">
+            <Skeleton className="h-24" /><Skeleton className="h-24" /><Skeleton className="h-24" />
+          </div>
+        ) : notifications.length === 0 ? (
+          <div className="mt-8">
+            <EmptyState
+              icon={<Bell className="h-8 w-8" />}
+              title="Bạn chưa có thông báo"
+              description="Thông báo về gói dịch vụ và lịch hẹn sẽ xuất hiện tại đây."
+              action={<Link href="/#services" className="inline-flex min-h-11 items-center rounded-md bg-brand-600 px-4 text-sm font-semibold text-white">Khám phá dịch vụ</Link>}
+            />
+          </div>
         ) : (
-          <ol className={styles.style8}>
-            {notifications.map((notification) => (
-              <li key={notification.id} className={styles.style9}>
-                <p className={styles.style10}>{notification.message}</p>
-                <p className={styles.style11}>
-                  {new Date(notification.createdAt).toLocaleString("vi-VN")}
-                  {notification.relatedType === "BOOKING" && notification.relatedId
-                    ? ` · Lịch hẹn ${notification.relatedId.slice(0, 8)}`
-                    : notification.packageId
-                      ? ` · Gói ${notification.packageId.slice(0, 8)}`
-                      : ""}
-                </p>
-              </li>
-            ))}
+          <ol className="mt-8 space-y-3">
+            {notifications.map((notification) => {
+              const isBooking = notification.relatedType === "BOOKING";
+              const href = isBooking ? "/history" : notification.packageId ? "/provider/packages" : "/notifications";
+              return (
+                <li key={notification.id}>
+                  <Link href={href} className="flex gap-4 rounded-lg border border-border bg-surface p-4 hover:border-brand-500">
+                    <span className="grid h-10 w-10 shrink-0 place-items-center rounded-md bg-brand-50 text-brand-700">
+                      {isBooking ? <CalendarCheck className="h-5 w-5" /> : notification.packageId ? <Package className="h-5 w-5" /> : <Bell className="h-5 w-5" />}
+                    </span>
+                    <div>
+                      <p className="text-sm font-semibold leading-6 text-text">{notification.message}</p>
+                      <p className="mt-1 text-xs text-muted">{new Date(notification.createdAt).toLocaleString("vi-VN")}</p>
+                    </div>
+                  </Link>
+                </li>
+              );
+            })}
           </ol>
         )}
       </section>

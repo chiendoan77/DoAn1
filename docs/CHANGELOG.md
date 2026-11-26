@@ -139,6 +139,15 @@
 - Booking, Review và Catalog tự gỡ outbox in-flight quá 30 giây để scheduler thử lại.
 - Thêm GitHub Actions chạy toàn bộ Maven test.
 
+## 2026-11-26 — Nền giao diện frontend và xác nhận thao tác
+
+- Thêm design tokens Tailwind, shared UI `Button`, `Badge`, `Dialog`, `ConfirmDialog`, `Toast`, `Skeleton` và `EmptyState`.
+- Cài `lucide-react`; thay Unicode/icon ký tự bằng icon đồng bộ ở trang chủ và header.
+- Thêm `SessionProvider` để tái sử dụng dữ liệu `/me`, header theo vai trò và menu di động.
+- Thêm xác nhận cho ngừng gói, duyệt/từ chối gói và hồ sơ, cập nhật lịch hẹn và gửi đánh giá.
+- Đặt lịch bổ sung địa chỉ thực hiện và mô tả công việc, rồi hiển thị tóm tắt trước khi gửi.
+- Thêm route tài khoản rút gọn, build production, lint và typecheck frontend PASS.
+
 ## 2026-11-04 — Tài liệu khởi tạo
 
 - Ghi nhận repository rỗng ở các thư mục backend/frontend/docs/skill.

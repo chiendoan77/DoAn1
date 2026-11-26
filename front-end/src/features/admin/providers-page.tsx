@@ -7,12 +7,18 @@ import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Account, Provider, apiRequest } from "@/lib/api";
 import { SiteHeader } from "@/shared/components/site-header";
+import { ConfirmDialog } from "@/shared/ui/confirm-dialog";
+import { useToast } from "@/shared/ui/toast";
 
 export function AdminProvidersPage() {
   const router = useRouter();
+  const toast = useToast();
   const [providers, setProviders] = useState<Provider[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [approveProvider, setApproveProvider] = useState<Provider | null>(null);
+  const [rejectProvider, setRejectProvider] = useState<Provider | null>(null);
+  const [actionBusy, setActionBusy] = useState(false);
 
   const loadPending = useCallback(async () => {
     setError("");
@@ -34,16 +40,22 @@ export function AdminProvidersPage() {
     void Promise.resolve().then(loadPending);
   }, [loadPending]);
 
-  async function decide(provider: Provider, approved: boolean) {
+  async function decide(provider: Provider, approved: boolean, reason?: string) {
+    setActionBusy(true);
     setError("");
     try {
       await apiRequest<Provider>(`admin/providers/${provider.id}/approval`, {
         method: "PATCH",
-        body: JSON.stringify({ approved }),
+        body: JSON.stringify({ approved, reason: reason?.trim() || undefined }),
       });
+      toast.success(approved ? "Đã duyệt hồ sơ nhà cung cấp." : "Đã từ chối hồ sơ nhà cung cấp.");
+      setApproveProvider(null);
+      setRejectProvider(null);
       setProviders((current) => current.filter((item) => item.id !== provider.id));
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : "Không cập nhật được hồ sơ.");
+    } finally {
+      setActionBusy(false);
     }
   }
 
@@ -70,8 +82,8 @@ export function AdminProvidersPage() {
                   <p className={styles.style5}>{provider.address}</p>
                   <p className={styles.style15}>{provider.description}</p>
                   <div className={styles.style16}>
-                    <button className={styles.style17} onClick={() => void decide(provider, true)}>Duyệt hồ sơ</button>
-                    <button className={styles.style18} onClick={() => void decide(provider, false)}>Từ chối</button>
+                    <button className={styles.style17} onClick={() => setApproveProvider(provider)}>Duyệt hồ sơ</button>
+                    <button className={styles.style18} onClick={() => setRejectProvider(provider)}>Từ chối</button>
                   </div>
                 </div>
               </article>
@@ -79,6 +91,25 @@ export function AdminProvidersPage() {
           </div>
         )}
       </section>
+      <ConfirmDialog
+        open={approveProvider !== null}
+        title={approveProvider ? `Duyệt hồ sơ "${approveProvider.fullName}"?` : "Duyệt hồ sơ?"}
+        description="Hồ sơ sẽ xuất hiện công khai trong danh mục nhà cung cấp."
+        confirmLabel="Duyệt hồ sơ"
+        loading={actionBusy}
+        onCancel={() => setApproveProvider(null)}
+        onConfirm={() => approveProvider ? void decide(approveProvider, true) : undefined}
+      />
+      <ConfirmDialog
+        open={rejectProvider !== null}
+        title={rejectProvider ? `Từ chối hồ sơ "${rejectProvider.fullName}"?` : "Từ chối hồ sơ?"}
+        description="Nhà cung cấp sẽ nhận thông báo và không xuất hiện trong danh sách công khai."
+        confirmLabel="Từ chối hồ sơ"
+        requireReason
+        loading={actionBusy}
+        onCancel={() => setRejectProvider(null)}
+        onConfirm={(reason) => rejectProvider ? void decide(rejectProvider, false, reason) : undefined}
+      />
     </main>
   );
 }

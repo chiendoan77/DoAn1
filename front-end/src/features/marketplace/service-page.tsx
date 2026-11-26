@@ -7,10 +7,13 @@ import Link from "next/link";
 import { FormEvent, useEffect, useState } from "react";
 import { Booking, CustomerProfile, PageResult, Provider, ServiceCategory, ServicePackage, apiRequest } from "@/lib/api";
 import { SiteHeader } from "@/shared/components/site-header";
+import { ConfirmDialog } from "@/shared/ui/confirm-dialog";
+import { useToast } from "@/shared/ui/toast";
+import { ArrowLeft, MapPin, Search, Sparkles, Wrench, X } from "lucide-react";
 
 const serviceDetails = {
-  cleaning: { id: "cleaning", name: "Dọn dẹp nhà", description: "Dọn dẹp định kỳ và tổng vệ sinh.", icon: "⌂" },
-  repair: { id: "repair", name: "Sửa chữa gia đình", description: "Kết nối thợ sửa chữa cho ngôi nhà.", icon: "＋" },
+  cleaning: { id: "cleaning", name: "Dọn dẹp nhà", description: "Dọn dẹp định kỳ và tổng vệ sinh.", icon: "cleaning" },
+  repair: { id: "repair", name: "Sửa chữa gia đình", description: "Kết nối thợ sửa chữa cho ngôi nhà.", icon: "repair" },
 } satisfies Record<string, ServiceCategory & { icon: string }>;
 
 type Props = { service: keyof typeof serviceDetails };
@@ -29,6 +32,7 @@ function localDateTimeMinimum() {
 }
 
 export function ServicePage({ service }: Props) {
+  const toast = useToast();
   const category = serviceDetails[service];
   const [providerPage, setProviderPage] = useState(0);
   const [providerPageState, setProviderPageState] = useState<ProviderPageState | null>(null);
@@ -38,6 +42,9 @@ export function ServicePage({ service }: Props) {
   const [selectedProvider, setSelectedProvider] = useState<Provider | null>(null);
   const [selectedPackage, setSelectedPackage] = useState<ServicePackage | null>(null);
   const [scheduledAt, setScheduledAt] = useState("");
+  const [address, setAddress] = useState("");
+  const [description, setDescription] = useState("");
+  const [confirmOpen, setConfirmOpen] = useState(false);
   const [bookingError, setBookingError] = useState("");
   const [bookingMessage, setBookingMessage] = useState("");
   const [bookingSubmitting, setBookingSubmitting] = useState(false);
@@ -65,34 +72,51 @@ export function ServicePage({ service }: Props) {
       .finally(() => setLoadingPackages(false));
   }, [category.id]);
 
+  useEffect(() => {
+    if (!selectedProvider) return;
+    function handleEscape(event: KeyboardEvent) {
+      if (event.key === "Escape") closeBooking();
+    }
+    window.addEventListener("keydown", handleEscape);
+    return () => window.removeEventListener("keydown", handleEscape);
+  }, [selectedProvider]);
+
   function closeBooking() {
     setSelectedProvider(null);
     setSelectedPackage(null);
     setScheduledAt("");
+    setAddress("");
+    setDescription("");
+    setConfirmOpen(false);
     setBookingError("");
   }
 
-  async function submitBooking(event: FormEvent<HTMLFormElement>) {
+  async function prepareBooking(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (!selectedProvider || !selectedPackage || !scheduledAt || !address.trim() || !description.trim()) {
+      setBookingError("Vui lòng chọn gói, thời gian, địa chỉ và mô tả công việc.");
+      return;
+    }
+    setBookingError("");
+    setConfirmOpen(true);
+  }
+
+  async function confirmBooking() {
     if (!selectedProvider || !selectedPackage || !scheduledAt) return;
     setBookingError("");
     setBookingSubmitting(true);
     try {
-      const profile = await apiRequest<CustomerProfile>("customer/profile");
-      if (!profile.defaultAddress.trim()) {
-        setBookingError("Lưu địa chỉ mặc định trong hồ sơ cá nhân trước khi đặt lịch.");
-        return;
-      }
       const booking = await apiRequest<Booking>("bookings", {
         method: "POST",
         body: JSON.stringify({
           packageId: selectedPackage.id,
           scheduledAt: new Date(scheduledAt).toISOString(),
-          address: profile.defaultAddress,
-          description: `Đặt theo gói dịch vụ: ${selectedPackage.name}`.slice(0, 1000),
+          address: address.trim(),
+          description: description.trim().slice(0, 1000),
         }),
       });
-      setBookingMessage(`Đã gửi yêu cầu ${booking.id.slice(0, 8)} cho ${booking.providerName}.`);
+      setBookingMessage(`Đã gửi yêu cầu cho ${booking.providerName}.`);
+      toast.success("Đã gửi yêu cầu đặt lịch.");
       closeBooking();
     } catch (cause) {
       setBookingError(`Chưa thể tạo lịch hẹn. Hãy đăng nhập bằng tài khoản khách hàng và lưu địa chỉ trong hồ sơ cá nhân; chi tiết: ${cause instanceof Error ? cause.message : "yêu cầu không thành công."}`);
@@ -107,8 +131,10 @@ export function ServicePage({ service }: Props) {
     try {
       const provider = providers.find((item) => item.id === servicePackage.providerId)
         ?? await apiRequest<Provider>(`services/providers/${servicePackage.providerId}`);
+      const profile = await apiRequest<CustomerProfile>("customer/profile").catch(() => null);
       setSelectedProvider(provider);
       setSelectedPackage(servicePackage);
+      setAddress(profile?.defaultAddress ?? "");
     } catch (cause) {
       setBookingError(cause instanceof Error ? cause.message : "Không tải được nhà cung cấp của gói.");
     }
@@ -119,14 +145,16 @@ export function ServicePage({ service }: Props) {
       <SiteHeader />
       <section className={styles.style2}>
         <div className={styles.style3}>
-          <Link href="/" className={styles.style4}>← Trang chủ</Link>
+          <Link href="/" className={styles.style4}><ArrowLeft className="mr-1 inline h-4 w-4" /> Trang chủ</Link>
           <div className={styles.style5}>
             <div>
               <p className={styles.style6}>Dịch vụ Nhà Tốt</p>
               <h1 className={styles.style7}>{category.name}</h1>
               <p className={styles.style8}>{category.description} Chọn nhà cung cấp hoặc gói dịch vụ, rồi chọn thời gian hẹn.</p>
             </div>
-            <span className={styles.style9} aria-hidden="true">{category.icon}</span>
+            <span className={styles.style9} aria-hidden="true">
+              {category.icon === "repair" ? <Wrench /> : <Sparkles />}
+            </span>
           </div>
         </div>
       </section>
@@ -142,7 +170,7 @@ export function ServicePage({ service }: Props) {
 
         <div className={styles.toolbar}>
           <div className={styles.toolbarSearch}>
-            <span className={styles.toolbarIcon} aria-hidden="true">🔍</span>
+            <span className={styles.toolbarIcon} aria-hidden="true"><Search /></span>
             <input type="text" placeholder="Tìm nhà cung cấp…" className={styles.toolbarInput} />
           </div>
           <div className={styles.toolbarFilter}>
@@ -183,13 +211,19 @@ export function ServicePage({ service }: Props) {
                     <span className={styles.ratingPill} aria-label={`Đánh giá ${provider.rating} trên 5 sao`}>★ {provider.rating.toFixed(1)}</span>
                   </div>
                   <p className={styles.style24}>{provider.reviewCount} đánh giá{provider.demoData ? " · hồ sơ mẫu" : ""}</p>
-                  <p className={styles.style25}><span className={styles.pinIcon} aria-hidden="true">📍</span> {provider.address}</p>
+                  <p className={styles.style25}><span className={styles.pinIcon} aria-hidden="true"><MapPin /></span> {provider.address}</p>
                   <p className={styles.style26}>{provider.description}</p>
-                  <button type="button" className={styles.style27} onClick={() => {
+                  <button type="button" className={styles.style27} onClick={async () => {
                     setSelectedProvider(provider);
                     setSelectedPackage(null);
                     setBookingError("");
                     setBookingMessage("");
+                    try {
+                      const profile = await apiRequest<CustomerProfile>("customer/profile");
+                      setAddress(profile.defaultAddress);
+                    } catch {
+                      setAddress("");
+                    }
                   }}>Chọn nhà cung cấp</button>
                 </div>
               </article>
@@ -258,9 +292,9 @@ export function ServicePage({ service }: Props) {
                 <p className={styles.style41}>Gửi yêu cầu</p>
                 <h2 id="booking-title" className={styles.style12}>Đặt lịch dịch vụ</h2>
               </div>
-              <button type="button" className={styles.style42} onClick={closeBooking} aria-label="Đóng">×</button>
+              <button autoFocus type="button" className={styles.style42} onClick={closeBooking} aria-label="Đóng"><X /></button>
             </div>
-            <form className={styles.style44} onSubmit={(event) => void submitBooking(event)}>
+            <form className={styles.style44} onSubmit={(event) => void prepareBooking(event)}>
               <div className={styles.style58}>
                 <img
                   className={styles.style59}
@@ -290,16 +324,42 @@ export function ServicePage({ service }: Props) {
                       <p className={styles.style48}>Thời lượng dự kiến: {selectedPackage.durationMinutes} phút</p>
                     </div>
                   )}
+                  {selectedProvider && selectedPackage && (
+                    <ConfirmDialog
+                      open={confirmOpen}
+                      title="Gửi yêu cầu đặt lịch?"
+                      description="Kiểm tra lại thông tin dưới đây trước khi gửi."
+                      confirmLabel="Gửi yêu cầu"
+                      loading={bookingSubmitting}
+                      onCancel={() => setConfirmOpen(false)}
+                      onConfirm={() => void confirmBooking()}
+                    >
+                      <dl className="grid gap-3 rounded-md border border-border bg-bg p-4 text-sm">
+                        <div><dt className="text-muted">Gói dịch vụ</dt><dd className="mt-1 font-bold">{selectedPackage.name}</dd></div>
+                        <div><dt className="text-muted">Giá · thời lượng</dt><dd className="mt-1 font-semibold">{new Intl.NumberFormat("vi-VN").format(selectedPackage.price)} ₫ · {selectedPackage.durationMinutes} phút</dd></div>
+                        <div><dt className="text-muted">Thời gian</dt><dd className="mt-1 font-semibold">{scheduledAt ? new Date(scheduledAt).toLocaleString("vi-VN") : ""}</dd></div>
+                        <div><dt className="text-muted">Địa chỉ</dt><dd className="mt-1 font-semibold">{address}</dd></div>
+                        <div><dt className="text-muted">Mô tả</dt><dd className="mt-1">{description}</dd></div>
+                      </dl>
+                    </ConfirmDialog>
+                  )}
                   <div className={styles.style56}>
                     <label className={styles.style45}>
                       Thời gian hẹn
                       <input required min={localDateTimeMinimum()} type="datetime-local" value={scheduledAt} onChange={(event) => setScheduledAt(event.target.value)} className={styles.style49} />
                     </label>
-                    <button disabled={bookingSubmitting || !selectedPackage} className={styles.style61}>
-                      {bookingSubmitting ? "Đang gửi…" : "Đặt lịch"}
-                    </button>
                   </div>
-                  <p className={styles.style50}>Yêu cầu sẽ dùng địa chỉ mặc định trong hồ sơ của bạn.</p>
+                  <label className={styles.style45}>
+                    Địa chỉ thực hiện
+                    <input required maxLength={500} value={address} onChange={(event) => setAddress(event.target.value)} className={styles.style49} />
+                  </label>
+                  <label className={styles.style45}>
+                    Mô tả công việc
+                    <textarea required maxLength={1000} rows={3} value={description} onChange={(event) => setDescription(event.target.value)} className={styles.style49} placeholder="Ví dụ: Dọn phòng khách, lau cửa sổ..." />
+                  </label>
+                  <button disabled={bookingSubmitting || !selectedPackage} className={styles.style61}>
+                    {bookingSubmitting ? "Đang gửi…" : "Tiếp tục"}
+                  </button>
                   {bookingError && (
                     <div role="alert" className={styles.style51}>
                       <p>{bookingError}</p>

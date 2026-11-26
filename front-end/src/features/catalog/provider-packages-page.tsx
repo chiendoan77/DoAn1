@@ -7,6 +7,9 @@ import { FormEvent, useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Account, PageResult, ServiceCategory, ServicePackage, apiRequest } from "@/lib/api";
 import { SiteHeader } from "@/shared/components/site-header";
+import { ConfirmDialog } from "@/shared/ui/confirm-dialog";
+import { useToast } from "@/shared/ui/toast";
+import { ArrowLeft } from "lucide-react";
 
 type PackageForm = {
   categoryId: string;
@@ -36,6 +39,7 @@ const statusLabels: Record<ServicePackage["status"], string> = {
 
 export function ProviderPackagesPage() {
   const router = useRouter();
+  const toast = useToast();
   const [categories, setCategories] = useState<ServiceCategory[]>([]);
   const [packages, setPackages] = useState<ServicePackage[]>([]);
   const [editing, setEditing] = useState<ServicePackage | null>(null);
@@ -43,6 +47,8 @@ export function ProviderPackagesPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
+  const [archivePackage, setArchivePackage] = useState<ServicePackage | null>(null);
+  const [archiving, setArchiving] = useState(false);
 
   const load = useCallback(async () => {
     setError("");
@@ -118,6 +124,7 @@ export function ProviderPackagesPage() {
         method: "POST",
         body: JSON.stringify({ expectedVersion: servicePackage.version }),
       });
+      toast.success("Đã gửi gói để Admin duyệt.");
       await load();
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : "Không gửi duyệt được gói dịch vụ.");
@@ -125,12 +132,17 @@ export function ProviderPackagesPage() {
   }
 
   async function archive(servicePackage: ServicePackage) {
+    setArchiving(true);
     setError("");
     try {
       await apiRequest<void>(`provider/packages/${servicePackage.id}?expectedVersion=${servicePackage.version}`, { method: "DELETE" });
+      toast.success("Đã ngừng hoạt động gói.");
+      setArchivePackage(null);
       await load();
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : "Không ngừng hoạt động được gói dịch vụ.");
+    } finally {
+      setArchiving(false);
     }
   }
 
@@ -138,7 +150,7 @@ export function ProviderPackagesPage() {
     <main className={styles.style1}>
       <SiteHeader />
       <section className={styles.style2}>
-        <Link className={styles.style3} href="/history">← Quay lại tài khoản</Link>
+        <Link className={styles.style3} href="/history"><ArrowLeft className="mr-1 inline h-4 w-4" /> Quay lại tài khoản</Link>
         <p className={styles.style4}>Catalog</p>
         <h1 className={styles.style5}>Gói dịch vụ của tôi</h1>
         <p className={styles.style6}>Gói mới và mọi thay đổi nội dung cần được Admin duyệt trước khi công khai.</p>
@@ -208,7 +220,7 @@ export function ProviderPackagesPage() {
                       <button onClick={() => void submitForApproval(servicePackage)} className={styles.style32}>Gửi duyệt</button>
                     )}
                     {servicePackage.status !== "INACTIVE" && (
-                      <button onClick={() => void archive(servicePackage)} className={styles.style33}>Ngừng hoạt động</button>
+                      <button onClick={() => setArchivePackage(servicePackage)} className={styles.style33}>Ngừng hoạt động</button>
                     )}
                   </div>
                 </article>
@@ -217,6 +229,16 @@ export function ProviderPackagesPage() {
           )}
         </section>
       </section>
+      <ConfirmDialog
+        open={archivePackage !== null}
+        title={archivePackage ? `Ngừng hoạt động "${archivePackage.name}"?` : "Ngừng hoạt động gói?"}
+        description="Gói sẽ ngừng hiển thị với khách hàng. Các lịch hẹn đã tạo không bị ảnh hưởng."
+        confirmLabel="Ngừng hoạt động"
+        requireText={archivePackage?.name}
+        loading={archiving}
+        onCancel={() => setArchivePackage(null)}
+        onConfirm={() => archivePackage ? void archive(archivePackage) : undefined}
+      />
     </main>
   );
 }

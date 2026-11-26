@@ -6,6 +6,8 @@ import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Account, PackageApproval, PageResult, ServicePackage, apiRequest } from "@/lib/api";
 import { SiteHeader } from "@/shared/components/site-header";
+import { ConfirmDialog } from "@/shared/ui/confirm-dialog";
+import { useToast } from "@/shared/ui/toast";
 
 const statusLabels: Record<ServicePackage["status"], string> = {
   DRAFT: "Bản nháp",
@@ -15,14 +17,29 @@ const statusLabels: Record<ServicePackage["status"], string> = {
   INACTIVE: "Đã ngừng hoạt động",
 };
 
+const actionLabels: Record<string, string> = {
+  SUBMITTED: "Gửi duyệt",
+  APPROVED: "Duyệt gói",
+  REJECTED: "Từ chối",
+  INACTIVE: "Ngừng hoạt động",
+};
+
+function formatDateTime(value: string) {
+  return new Intl.DateTimeFormat("vi-VN", { dateStyle: "short", timeStyle: "short" }).format(new Date(value));
+}
+
 export function AdminPackagesPage() {
   const router = useRouter();
+  const toast = useToast();
   const [packages, setPackages] = useState<ServicePackage[]>([]);
   const [allPackages, setAllPackages] = useState(false);
-  const [reasons, setReasons] = useState<Record<string, string>>({});
   const [history, setHistory] = useState<Record<string, PackageApproval[]>>({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [approvePackage, setApprovePackage] = useState<ServicePackage | null>(null);
+  const [rejectPackage, setRejectPackage] = useState<ServicePackage | null>(null);
+  const [deactivatePackage, setDeactivatePackage] = useState<ServicePackage | null>(null);
+  const [actionBusy, setActionBusy] = useState(false);
 
   const load = useCallback(async () => {
     setError("");
@@ -47,24 +64,30 @@ export function AdminPackagesPage() {
   useEffect(() => { void Promise.resolve().then(load); }, [load]);
 
   async function approve(servicePackage: ServicePackage) {
+    setActionBusy(true);
     setError("");
     try {
       await apiRequest<ServicePackage>(`admin/packages/${servicePackage.id}/approve`, {
         method: "POST",
         body: JSON.stringify({ expectedVersion: servicePackage.version }),
       });
+      toast.success("Đã duyệt gói dịch vụ.");
+      setApprovePackage(null);
       await load();
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : "Không duyệt được gói dịch vụ.");
+    } finally {
+      setActionBusy(false);
     }
   }
 
-  async function reject(servicePackage: ServicePackage) {
-    const reason = reasons[servicePackage.id]?.trim();
+  async function reject(servicePackage: ServicePackage, suppliedReason?: string) {
+    const reason = suppliedReason?.trim();
     if (!reason) {
       setError("Vui lòng nhập lý do từ chối.");
       return;
     }
+    setActionBusy(true);
     setError("");
     try {
       await apiRequest<ServicePackage>(`admin/packages/${servicePackage.id}/reject`, {
@@ -72,22 +95,31 @@ export function AdminPackagesPage() {
         headers: { "If-Match": String(servicePackage.version) },
         body: JSON.stringify({ reason }),
       });
+      toast.success("Đã từ chối gói dịch vụ.");
+      setRejectPackage(null);
       await load();
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : "Không từ chối được gói dịch vụ.");
+    } finally {
+      setActionBusy(false);
     }
   }
 
   async function deactivate(servicePackage: ServicePackage) {
+    setActionBusy(true);
     setError("");
     try {
       await apiRequest<ServicePackage>(`admin/packages/${servicePackage.id}/deactivate`, {
         method: "POST",
         body: JSON.stringify({ expectedVersion: servicePackage.version }),
       });
+      toast.success("Đã ngừng hoạt động gói.");
+      setDeactivatePackage(null);
       await load();
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : "Không ngừng hoạt động được gói dịch vụ.");
+    } finally {
+      setActionBusy(false);
     }
   }
 
@@ -121,7 +153,7 @@ export function AdminPackagesPage() {
               <article key={servicePackage.id} className={styles.style11}>
                 <div className={styles.style12}>
                   <div>
-                    <p className={styles.style13}>{servicePackage.categoryId} · Provider {servicePackage.providerId.slice(0, 8)}</p>
+                    <p className={styles.style13}>Gói dịch vụ đã đăng ký</p>
                     <h2 className={styles.style14}>{servicePackage.name}</h2>
                   </div>
                   <span className={styles.style15}>{statusLabels[servicePackage.status]}</span>
@@ -131,19 +163,18 @@ export function AdminPackagesPage() {
                 <div className={styles.style18}>
                   {servicePackage.status === "PENDING_APPROVAL" && (
                     <>
-                      <button onClick={() => void approve(servicePackage)} className={styles.style19}>Duyệt</button>
-                      <input aria-label={`Lý do từ chối ${servicePackage.name}`} maxLength={500} placeholder="Lý do từ chối" value={reasons[servicePackage.id] ?? ""} onChange={(event) => setReasons((current) => ({ ...current, [servicePackage.id]: event.target.value }))} className={styles.style20} />
-                      <button onClick={() => void reject(servicePackage)} className={styles.style21}>Từ chối</button>
+                      <button onClick={() => setApprovePackage(servicePackage)} className={styles.style19}>Duyệt</button>
+                      <button onClick={() => setRejectPackage(servicePackage)} className={styles.style21}>Từ chối</button>
                     </>
                   )}
-                  {servicePackage.status === "APPROVED" && <button onClick={() => void deactivate(servicePackage)} className={styles.style21}>Ngừng hoạt động</button>}
+                  {servicePackage.status === "APPROVED" && <button onClick={() => setDeactivatePackage(servicePackage)} className={styles.style21}>Ngừng hoạt động</button>}
                   <button onClick={() => void showHistory(servicePackage)} className={styles.style22}>Lịch sử duyệt</button>
                 </div>
                 {history[servicePackage.id] && (
                   <ol className={styles.style23}>
                     {history[servicePackage.id].map((item, index) => (
                       <li key={item.id ?? `${item.createdAt}-${index}`} className={styles.style24}>
-                        <span className={styles.style25}>{item.action}</span> · {item.createdAt} · {item.adminId ?? item.actorId}{item.reason ? ` · ${item.reason}` : ""}
+                        <span className={styles.style25}>{actionLabels[item.action] ?? "Cập nhật"}</span> · {formatDateTime(item.createdAt)}{item.reason ? ` · ${item.reason}` : ""}
                       </li>
                     ))}
                   </ol>
@@ -153,6 +184,35 @@ export function AdminPackagesPage() {
           </div>
         )}
       </section>
+      <ConfirmDialog
+        open={approvePackage !== null}
+        title={approvePackage ? `Duyệt gói "${approvePackage.name}"?` : "Duyệt gói?"}
+        description="Gói sẽ hiển thị công khai cho khách hàng sau khi được duyệt."
+        confirmLabel="Duyệt gói"
+        loading={actionBusy}
+        onCancel={() => setApprovePackage(null)}
+        onConfirm={() => approvePackage ? void approve(approvePackage) : undefined}
+      />
+      <ConfirmDialog
+        open={rejectPackage !== null}
+        title={rejectPackage ? `Từ chối gói "${rejectPackage.name}"?` : "Từ chối gói?"}
+        description="Nhà cung cấp sẽ nhận thông báo cùng lý do từ chối."
+        confirmLabel="Từ chối gói"
+        requireReason
+        loading={actionBusy}
+        onCancel={() => setRejectPackage(null)}
+        onConfirm={(reason) => rejectPackage ? void reject(rejectPackage, reason) : undefined}
+      />
+      <ConfirmDialog
+        open={deactivatePackage !== null}
+        title={deactivatePackage ? `Ngừng hoạt động "${deactivatePackage.name}"?` : "Ngừng hoạt động gói?"}
+        description="Gói sẽ ngừng hiển thị công khai; các lịch hẹn đã tạo không bị ảnh hưởng."
+        confirmLabel="Ngừng hoạt động"
+        requireText={deactivatePackage?.name}
+        loading={actionBusy}
+        onCancel={() => setDeactivatePackage(null)}
+        onConfirm={() => deactivatePackage ? void deactivate(deactivatePackage) : undefined}
+      />
     </main>
   );
 }

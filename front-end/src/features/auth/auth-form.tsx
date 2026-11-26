@@ -6,6 +6,7 @@ import Link from "next/link";
 import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Account, CustomerProfile, Provider, ServiceCategory, apiRequest } from "@/lib/api";
+import { Building2, CheckCircle2, Eye, EyeOff, LockKeyhole, Mail, MapPin, Phone, ShieldCheck, Tag, UserRound, House, Wrench } from "lucide-react";
 
 type Props = {
   mode: "login" | "register";
@@ -173,7 +174,7 @@ export function AuthForm({ mode, defaultRole = "CUSTOMER" }: Props) {
                   <div className={styles.roleChoiceGrid}>
                     {(["CUSTOMER", "PROVIDER"] as const).map((choice) => (
                       <button key={choice} type="button" aria-pressed={role === choice} onClick={() => setRole(choice)} className={`${styles.roleChoice} ${role === choice ? styles.roleChoiceSelected : styles.roleChoiceUnselected}`}>
-                        <span className={styles.roleIcon} aria-hidden="true">{choice === "CUSTOMER" ? "👤" : "🏢"}</span>
+                        <span className={styles.roleIcon} aria-hidden="true">{choice === "CUSTOMER" ? <UserRound /> : <Building2 />}</span>
                         <span>{choice === "CUSTOMER" ? "Khách hàng" : "Nhà cung cấp"}</span>
                         <span className={styles.roleDesc}>{choice === "CUSTOMER" ? "Đặt lịch dịch vụ" : "Cung cấp dịch vụ đến nhà"}</span>
                       </button>
@@ -184,12 +185,12 @@ export function AuthForm({ mode, defaultRole = "CUSTOMER" }: Props) {
                 <div className={styles.fieldGrid}>
                   <label className={styles.style12}>
                     Họ và tên
-                    <span className={styles.fieldIcon} aria-hidden="true">👤</span>
+                    <span className={styles.fieldIcon} aria-hidden="true"><UserRound /></span>
                     <input required autoComplete="name" maxLength={120} value={form.fullName} onInvalid={(event) => showInputValidationError(event, "Họ và tên")} onInput={clearInputValidationError} onChange={(event) => update("fullName", event.target.value)} className={styles.style13} />
                   </label>
                   <label className={styles.style12}>
                     Tên đăng nhập
-                    <span className={styles.fieldIcon} aria-hidden="true">🏷️</span>
+                    <span className={styles.fieldIcon} aria-hidden="true"><Tag /></span>
                     <input required autoComplete="username" minLength={3} maxLength={40} pattern="(?:[a-zA-Z0-9._]|-)+" value={form.username} onInvalid={(event) => showInputValidationError(event, "Tên đăng nhập")} onInput={clearInputValidationError} onChange={(event) => update("username", event.target.value)} className={styles.style13} />
                   </label>
                 </div>
@@ -198,14 +199,14 @@ export function AuthForm({ mode, defaultRole = "CUSTOMER" }: Props) {
 
             <label className={styles.style12}>
               {isRegister ? "Email" : "Email hoặc số điện thoại"}
-              <span className={styles.fieldIcon} aria-hidden="true">✉️</span>
+              <span className={styles.fieldIcon} aria-hidden="true"><Mail /></span>
               <input required autoComplete={isRegister ? "email" : "username"} type={isRegister ? "email" : "text"} maxLength={isRegister ? 320 : undefined} value={form.email} onInvalid={(event) => showInputValidationError(event, isRegister ? "Email" : "Email hoặc số điện thoại")} onInput={clearInputValidationError} onChange={(event) => update("email", event.target.value)} className={styles.style13} placeholder={isRegister ? "ban@example.com" : "ban@example.com hoặc 090…"} />
             </label>
 
             {isRegister && (
               <label className={styles.style12}>
                 Số điện thoại
-                <span className={styles.fieldIcon} aria-hidden="true">📱</span>
+                <span className={styles.fieldIcon} aria-hidden="true"><Phone /></span>
                 <input required autoComplete="tel" type="tel" pattern="[+]?[0-9](?:[0-9]| |\\(|\\)|-){6,19}" value={form.phoneNumber} onInvalid={(event) => showInputValidationError(event, "Số điện thoại")} onInput={clearInputValidationError} onChange={(event) => update("phoneNumber", event.target.value)} className={styles.style13} placeholder="+84…" />
               </label>
             )}
@@ -213,17 +214,17 @@ export function AuthForm({ mode, defaultRole = "CUSTOMER" }: Props) {
             {isRegister && role === "CUSTOMER" && (
               <label className={styles.style12}>
                 Địa chỉ mặc định để đặt lịch
-                <span className={styles.fieldIcon} aria-hidden="true">📍</span>
+                <span className={styles.fieldIcon} aria-hidden="true"><MapPin /></span>
                 <input required maxLength={500} value={form.address} onInvalid={(event) => showInputValidationError(event, "Địa chỉ mặc định")} onInput={clearInputValidationError} onChange={(event) => update("address", event.target.value)} className={styles.style13} placeholder="Số nhà, đường, quận/huyện" />
               </label>
             )}
 
             <label className={styles.style12}>
               Mật khẩu
-              <span className={styles.fieldIcon} aria-hidden="true">🔒</span>
+              <span className={styles.fieldIcon} aria-hidden="true"><LockKeyhole /></span>
               <input required autoComplete={isRegister ? "new-password" : "current-password"} minLength={isRegister ? 8 : undefined} maxLength={72} type={showPassword ? "text" : "password"} value={form.password} onInvalid={(event) => showInputValidationError(event, "Mật khẩu")} onInput={clearInputValidationError} onChange={(event) => update("password", event.target.value)} className={styles.style13} />
               <button type="button" onClick={() => setShowPassword(!showPassword)} className={styles.passwordToggle} aria-label={showPassword ? "Ẩn mật khẩu" : "Hiện mật khẩu"}>
-                {showPassword ? "🙈" : "👁️"}
+                {showPassword ? <EyeOff /> : <Eye />}
               </button>
               {isRegister && <span className={styles.style14}>Tối thiểu 8 ký tự</span>}
             </label>
@@ -281,29 +282,29 @@ export function AuthForm({ mode, defaultRole = "CUSTOMER" }: Props) {
           </div>
           <div className={styles.brandBadges}>
             <div className={styles.benefitCard}>
-              <span className={styles.benefitIcon}>🏠</span>
+              <span className={styles.benefitIcon}><House /></span>
               <div>
                 <p className={styles.benefitTitle}>Khách hàng</p>
                 <p className={styles.benefitDesc}>Đặt lịch dọn dẹp và sửa chữa ngay tại nhà trong vài lần nhấp.</p>
               </div>
             </div>
             <div className={styles.benefitCard}>
-              <span className={styles.benefitIcon}>🛠️</span>
+              <span className={styles.benefitIcon}><Wrench /></span>
               <div>
                 <p className={styles.benefitTitle}>Nhà cung cấp</p>
                 <p className={styles.benefitDesc}>Kết nối với khách hàng, quản lý gói dịch vụ và lịch hẹn của bạn.</p>
               </div>
             </div>
             <div className={styles.trustBadge}>
-              <span className={styles.badgeIcon}>✅</span>
+              <span className={styles.badgeIcon}><CheckCircle2 /></span>
               <span>Hồ sơ được duyệt trước khi hiển thị</span>
             </div>
             <div className={styles.trustBadge}>
-              <span className={styles.badgeIcon}>🔒</span>
+              <span className={styles.badgeIcon}><ShieldCheck /></span>
               <span>Thông tin được bảo mật mã hóa</span>
             </div>
             <div className={styles.trustBadge}>
-              <span className={styles.badgeIcon}>📍</span>
+              <span className={styles.badgeIcon}><MapPin /></span>
               <span>Nhà cung cấp gần khu vực bạn</span>
             </div>
           </div>

@@ -7,6 +7,8 @@ import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Account, Booking, CustomerProfile, Provider, Review, ServiceCategory, apiRequest } from "@/lib/api";
 import { SiteHeader } from "@/shared/components/site-header";
+import { ConfirmDialog } from "@/shared/ui/confirm-dialog";
+import { useToast } from "@/shared/ui/toast";
 
 const statusLabels: Record<Booking["status"], string> = {
   REQUESTED: "Chờ nhà cung cấp xác nhận",
@@ -25,6 +27,7 @@ function formatDate(value: string) {
 
 export function HistoryPage() {
   const router = useRouter();
+  const toast = useToast();
   const [account, setAccount] = useState<Account | null>(null);
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [profile, setProfile] = useState<Provider | null>(null);
@@ -42,6 +45,9 @@ export function HistoryPage() {
   const [reviewComment, setReviewComment] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [bookingAction, setBookingAction] = useState<{ bookingId: string; status: "ACCEPTED" | "REJECTED" | "COMPLETED"; title: string; description: string } | null>(null);
+  const [actionBusy, setActionBusy] = useState(false);
+  const [reviewBookingId, setReviewBookingId] = useState<string | null>(null);
 
   const loadHistory = useCallback(async () => {
     setError("");
@@ -98,19 +104,25 @@ export function HistoryPage() {
   }, [loadHistory]);
 
   async function updateBooking(bookingId: string, status: "ACCEPTED" | "REJECTED" | "COMPLETED") {
+    setActionBusy(true);
     setError("");
     try {
       await apiRequest<Booking>(`provider/bookings/${bookingId}/status`, {
         method: "PATCH",
         body: JSON.stringify({ status }),
       });
+      toast.success(status === "COMPLETED" ? "Đã đánh dấu lịch hẹn hoàn thành." : status === "ACCEPTED" ? "Đã nhận lịch hẹn." : "Đã từ chối lịch hẹn.");
+      setBookingAction(null);
       await loadHistory();
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : "Không cập nhật được lịch hẹn.");
+    } finally {
+      setActionBusy(false);
     }
   }
 
   async function submitReview(bookingId: string) {
+    setActionBusy(true);
     setError("");
     try {
       await apiRequest<Review>("reviews", {
@@ -118,10 +130,14 @@ export function HistoryPage() {
         body: JSON.stringify({ bookingId, rating: Number(reviewRating), comment: reviewComment }),
       });
       setReviewingBookingId(null);
+      setReviewBookingId(null);
       setReviewComment("");
+      toast.success("Đã gửi đánh giá.");
       await loadHistory();
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : "Không gửi được đánh giá.");
+    } finally {
+      setActionBusy(false);
     }
   }
 
@@ -277,11 +293,11 @@ export function HistoryPage() {
                   <div className={styles.style33}>
                     {booking.status === "REQUESTED" && (
                       <>
-                        <button className={styles.style34} onClick={() => void updateBooking(booking.id, "ACCEPTED")}>Nhận lịch</button>
-                        <button className={styles.style35} onClick={() => void updateBooking(booking.id, "REJECTED")}>Từ chối</button>
+                        <button className={styles.style34} onClick={() => setBookingAction({ bookingId: booking.id, status: "ACCEPTED", title: "Xác nhận nhận lịch?", description: `Lịch hẹn của khách ${booking.customerName} sẽ chuyển sang trạng thái đã xác nhận.` })}>Nhận lịch</button>
+                        <button className={styles.style35} onClick={() => setBookingAction({ bookingId: booking.id, status: "REJECTED", title: "Từ chối lịch hẹn?", description: `Lịch hẹn của khách ${booking.customerName} sẽ kết thúc với trạng thái đã từ chối.` })}>Từ chối</button>
                       </>
                     )}
-                    {booking.status === "ACCEPTED" && <button className={styles.style34} onClick={() => void updateBooking(booking.id, "COMPLETED")}>Đánh dấu hoàn thành</button>}
+                    {booking.status === "ACCEPTED" && <button className={styles.style34} onClick={() => setBookingAction({ bookingId: booking.id, status: "COMPLETED", title: "Xác nhận đã hoàn thành?", description: "Thao tác này không hoàn tác được; hai bên có thể gửi đánh giá sau khi hoàn thành." })}>Đánh dấu hoàn thành</button>}
                   </div>
                 )}
                 {booking.status === "COMPLETED" && !reviews.some((review) => review.bookingId === booking.id) && (
@@ -298,7 +314,7 @@ export function HistoryPage() {
                           Nhận xét
                           <input maxLength={1000} value={reviewComment} onChange={(event) => setReviewComment(event.target.value)} className={styles.style40} placeholder="Chia sẻ trải nghiệm (không bắt buộc)" />
                         </label>
-                        <button className={styles.style41} onClick={() => void submitReview(booking.id)}>Gửi đánh giá</button>
+                        <button type="button" className={styles.style41} onClick={() => setReviewBookingId(booking.id)}>Xem lại đánh giá</button>
                       </div>
                     ) : (
                       <button className={styles.style42} onClick={() => setReviewingBookingId(booking.id)}>
@@ -315,6 +331,29 @@ export function HistoryPage() {
           </div>
         )}
       </section>
+      <ConfirmDialog
+        open={bookingAction !== null}
+        title={bookingAction?.title ?? "Cập nhật lịch hẹn?"}
+        description={bookingAction?.description ?? ""}
+        confirmLabel={bookingAction?.status === "ACCEPTED" ? "Nhận lịch" : bookingAction?.status === "REJECTED" ? "Từ chối" : "Xác nhận hoàn thành"}
+        loading={actionBusy}
+        onCancel={() => setBookingAction(null)}
+        onConfirm={() => bookingAction ? void updateBooking(bookingAction.bookingId, bookingAction.status) : undefined}
+      />
+      <ConfirmDialog
+        open={reviewBookingId !== null}
+        title="Gửi đánh giá?"
+        description="Đánh giá không thể sửa hoặc xóa sau khi gửi."
+        confirmLabel="Gửi đánh giá"
+        loading={actionBusy}
+        onCancel={() => setReviewBookingId(null)}
+        onConfirm={() => reviewBookingId ? void submitReview(reviewBookingId) : undefined}
+      >
+        <div className="rounded-md border border-border bg-bg p-4 text-sm">
+          <p className="font-bold">{reviewRating} sao</p>
+          <p className="mt-2 text-muted">{reviewComment.trim() || "Không có nhận xét."}</p>
+        </div>
+      </ConfirmDialog>
     </main>
   );
 }
