@@ -5,9 +5,12 @@ import styles from "./history-page.module.css";
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { Image as ImageIcon, MapPin, Sparkles } from "lucide-react";
 import { Account, Booking, CustomerProfile, Provider, Review, ServiceCategory, apiRequest } from "@/lib/api";
 import { SiteHeader } from "@/shared/components/site-header";
 import { ConfirmDialog } from "@/shared/ui/confirm-dialog";
+import { FormField } from "@/shared/ui/form-field";
+import { Input } from "@/shared/ui/input";
 import { useToast } from "@/shared/ui/toast";
 
 const statusLabels: Record<Booking["status"], string> = {
@@ -248,18 +251,41 @@ export function HistoryPage() {
                   ))}
                 </div>
               </fieldset>
-              <label className={styles.style11}>
-                Địa chỉ/khu vực hoạt động
-                <input required maxLength={500} value={application.address} onChange={(event) => setApplication({ ...application, address: event.target.value })} className={styles.style12} />
-              </label>
-              <label className={styles.style11}>
-                Liên kết ảnh đại diện (HTTPS)
-                <input required type="url" pattern="https://.+" value={application.imageUrl} onChange={(event) => setApplication({ ...application, imageUrl: event.target.value })} className={styles.style12} />
-              </label>
-              <label className={styles.style11}>
-                Giới thiệu dịch vụ
-                <textarea required maxLength={1000} rows={3} value={application.description} onChange={(event) => setApplication({ ...application, description: event.target.value })} className={styles.style12} />
-              </label>
+              <FormField htmlFor="provider-application-address" label="Địa chỉ/khu vực hoạt động">
+                <Input
+                  id="provider-application-address"
+                  required
+                  maxLength={500}
+                  value={application.address}
+                  icon={<MapPin />}
+                  onChange={(event) => setApplication({ ...application, address: event.target.value })}
+                />
+              </FormField>
+              <FormField htmlFor="provider-application-image" label="Liên kết ảnh đại diện (HTTPS)">
+                <Input
+                  id="provider-application-image"
+                  required
+                  type="url"
+                  pattern="https://.+"
+                  value={application.imageUrl}
+                  icon={<ImageIcon />}
+                  onChange={(event) => setApplication({ ...application, imageUrl: event.target.value })}
+                />
+              </FormField>
+              <FormField htmlFor="provider-application-description" label="Giới thiệu dịch vụ">
+                <div className="group relative">
+                  <Sparkles aria-hidden="true" className="pointer-events-none absolute left-3.5 top-3.5 h-5 w-5 text-muted transition-colors group-focus-within:text-brand-600" />
+                  <textarea
+                    id="provider-application-description"
+                    required
+                    maxLength={1000}
+                    rows={3}
+                    value={application.description}
+                    onChange={(event) => setApplication({ ...application, description: event.target.value })}
+                    className="w-full resize-y rounded-md border border-border bg-surface py-3 pl-11 pr-3.5 text-base text-text outline-none transition focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20"
+                  />
+                </div>
+              </FormField>
               <button type="submit" className={styles.style20}>Gửi hồ sơ chờ duyệt</button>
             </form>
           </section>

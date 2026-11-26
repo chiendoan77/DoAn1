@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-11-26 — Sửa UI desktop auth, catalog và đặt lịch
+
+- Chuẩn hóa icon/form, SafeImage và autofill cho trang auth và form dùng chung.
+- Catalog ẩn gói cho đến khi chọn nhà cung cấp; thêm trạng thái chọn, grid 2 cột, empty/error/loading và modal đặt lịch đầy đủ tương tác.
+- Cập nhật kết quả browser tại viewport 1366×768 vào `docs/TEST_CASES.csv`; build/lint/type-check frontend pass.
+- Tăng giới hạn trang provider public từ 10 lên 12 để catalog nhận đủ số lượng frontend yêu cầu.
+
 ## 2026-11-21 — Gom security-test-support vào security-common
 
 - Chuyển `JwtTestKeys.java` vào `security-common` (`com.doan1.security.test`).
@@ -147,6 +154,14 @@
 - Thêm xác nhận cho ngừng gói, duyệt/từ chối gói và hồ sơ, cập nhật lịch hẹn và gửi đánh giá.
 - Đặt lịch bổ sung địa chỉ thực hiện và mô tả công việc, rồi hiển thị tóm tắt trước khi gửi.
 - Thêm route tài khoản rút gọn, build production, lint và typecheck frontend PASS.
+
+## 2026-11-26 — Thiết kế lại desktop cho trang đăng nhập/đăng ký
+
+- Thêm `AuthLayout`, `Container`, `FormField`, `Input` và `RoleCard` dùng chung.
+- Chuyển `/register` và `/login` sang bố cục hai cột 50/50 toàn viewport.
+- Panel xanh đậm sát mép phải; thêm header auth tối giản, 3 lợi ích và trust strip.
+- Chuẩn hóa input icon bên trong, role card hai trạng thái, validate theo trường, CTA full width và trạng thái loading.
+- Giữ nguyên API, route, field submit và logic auth hiện có.
 
 ## 2026-11-04 — Tài liệu khởi tạo
 

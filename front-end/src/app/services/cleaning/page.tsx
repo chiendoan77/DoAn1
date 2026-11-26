@@ -1,5 +1,10 @@
-import { ServicePage } from "@/features/marketplace/service-page";
+import { ServiceCatalogPage } from "@/features/marketplace/service-catalog-page";
+import { Suspense } from "react";
 
 export default function CleaningPage() {
-  return <ServicePage service="cleaning" />;
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-bg" />}>
+      <ServiceCatalogPage service="cleaning" />
+    </Suspense>
+  );
 }

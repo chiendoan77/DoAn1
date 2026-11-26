@@ -6,7 +6,7 @@ Kịch bản chi tiết và trạng thái gần nhất nằm trong [TEST_CASES.c
 
 Ngày 2026-11-06 full Maven reactor gần nhất trước thay đổi phân trang đã pass: 39 tests/12 suites, không failure/error/skip. CSV hiện có 60 testcase: 44 `PASS`, 11 `NOT_RUN`, 4 `NOT_IMPLEMENTED`, 1 `DEFERRED`. Frontend lint/typecheck/build pass; Compose config cũng đã pass; full runtime Compose, các luồng browser E2E mới, production MySQL migration rehearsal và Pact suite chưa được xác minh. Xem [CSV testcase](./TEST_CASES.csv) để tra trạng thái từng case và bằng chứng.
 
-Sau thay đổi phân trang provider, `ProfileServiceApplicationTests` chạy riêng qua Maven Docker đạt 6 tests, không failure/error/skip; frontend lint, typecheck và production build đều pass. Đây là kiểm thử service/UI build, không thay thế browser E2E.
+Sau khi tăng page limit provider lên 12, `ProfileServiceApplicationTests` chạy riêng qua Maven Docker đạt 7 tests, không failure/error/skip; testcase mới xác nhận `limit=12` trả đủ 12 phần tử và giới hạn `limit=99` về 12. Đây là kiểm thử service/API, không thay thế browser E2E.
 
 Sau thay đổi Admin logout, `IdentityServiceApplicationTests` chạy qua Maven Docker đạt 9 tests, không failure/error/skip; không có browser E2E mới cho luồng xóa account Admin.
 

@@ -2,12 +2,12 @@
 
 
 import styles from "./providers-page.module.css";
-/* eslint-disable @next/next/no-img-element */
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Account, Provider, apiRequest } from "@/lib/api";
 import { SiteHeader } from "@/shared/components/site-header";
 import { ConfirmDialog } from "@/shared/ui/confirm-dialog";
+import { SafeImage } from "@/shared/ui/safe-image";
 import { useToast } from "@/shared/ui/toast";
 
 export function AdminProvidersPage() {
@@ -75,7 +75,7 @@ export function AdminProvidersPage() {
           <div className={styles.style9}>
             {providers.map((provider) => (
               <article key={provider.id} className={styles.style10}>
-                <img className={styles.style11} src={provider.imageUrl} alt={`Hình ảnh ${provider.fullName}`} />
+                <SafeImage className={styles.style11} src={provider.imageUrl} alt={provider.fullName} />
                 <div className={styles.style12}>
                   <p className={styles.style13}>{provider.categories.map((category) => category.name).join(" · ")}</p>
                   <h2 className={styles.style14}>{provider.fullName}</h2>

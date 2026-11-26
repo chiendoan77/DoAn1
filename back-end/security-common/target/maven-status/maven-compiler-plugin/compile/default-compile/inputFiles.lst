@@ -1,4 +1,4 @@
-C:\Users\CHIEN\Downloads\DoAn1\back-end\security-common\src\main\java\com\doan1\security\JwtPrincipalService.java
-C:\Users\CHIEN\Downloads\DoAn1\back-end\security-common\src\main\java\com\doan1\security\RsaJwtKeyLoader.java
-C:\Users\CHIEN\Downloads\DoAn1\back-end\security-common\src\main\java\com\doan1\security\SecurityCommonAutoConfiguration.java
-C:\Users\CHIEN\Downloads\DoAn1\back-end\security-common\src\main\java\com\doan1\security\test\JwtTestKeys.java
+/workspace/security-common/src/main/java/com/doan1/security/JwtPrincipalService.java
+/workspace/security-common/src/main/java/com/doan1/security/RsaJwtKeyLoader.java
+/workspace/security-common/src/main/java/com/doan1/security/SecurityCommonAutoConfiguration.java
+/workspace/security-common/src/main/java/com/doan1/security/test/JwtTestKeys.java

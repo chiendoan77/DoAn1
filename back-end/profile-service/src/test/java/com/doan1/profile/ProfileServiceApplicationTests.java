@@ -113,6 +113,31 @@ class ProfileServiceApplicationTests {
     }
 
     @Test
+    void publicProviderPageAllowsTwelveAndCapsLargerRequestsAtTwelve() throws Exception {
+        for (int index = 0; index < 25; index++) {
+            providers.save(new ProviderProfile(UUID.randomUUID(), "Provider %02d".formatted(index),
+                    Set.of("cleaning"), "Hà Nội", "https://example.com/image.jpg", "Dịch vụ",
+                    ProviderStatus.APPROVED));
+        }
+
+        mockMvc.perform(get("/api/services/cleaning/providers/page")
+                        .param("page", "0")
+                        .param("limit", "12"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content.length()", is(12)))
+                .andExpect(jsonPath("$.size", is(12)))
+                .andExpect(jsonPath("$.totalElements", is(25)))
+                .andExpect(jsonPath("$.totalPages", is(3)));
+
+        mockMvc.perform(get("/api/services/cleaning/providers/page")
+                        .param("page", "0")
+                        .param("limit", "99"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content.length()", is(12)))
+                .andExpect(jsonPath("$.size", is(12)));
+    }
+
+    @Test
     void catalogEligibilityRequiresActiveAccountAndApprovedProfile() throws Exception {
         UUID owner = UUID.randomUUID();
         ProviderProfile profile = providers.save(new ProviderProfile(owner, "Provider",

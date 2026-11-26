@@ -31,6 +31,8 @@ import java.util.UUID;
 
 @Service
 public class ProfileService {
+    private static final int MAX_PROVIDER_PAGE_SIZE = 12;
+
     private final ProviderProfileRepository providers;
     private final IdentityAccountClient identity;
     private final ProviderRatingReviewRepository ratingReviews;
@@ -77,7 +79,7 @@ public class ProfileService {
         requireCategory(categoryId);
         Page<ProviderProfile> result = providers.findPublicByCategory(
                 normalizeCategory(categoryId), ProviderStatus.APPROVED,
-                PageRequest.of(Math.max(0, page), Math.max(1, Math.min(limit, 10))));
+                PageRequest.of(Math.max(0, page), Math.max(1, Math.min(limit, MAX_PROVIDER_PAGE_SIZE))));
         return new ProviderPageResponse(
                 result.getContent().stream().map(ProfileMapper::toResponse).toList(),
                 result.getTotalElements(),

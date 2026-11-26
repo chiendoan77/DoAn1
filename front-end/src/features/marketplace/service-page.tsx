@@ -56,7 +56,7 @@ export function ServicePage({ service }: Props) {
   const loadingProviders = !isCurrentProviderPage;
 
   useEffect(() => {
-    apiRequest<PageResult<Provider>>(`services/${category.id}/providers/page?page=${providerPage}&limit=10`)
+    apiRequest<PageResult<Provider>>(`services/${category.id}/providers/page?page=${providerPage}&limit=12`)
       .then((result) => setProviderPageState({ categoryId: category.id, page: providerPage, result }))
       .catch((cause: Error) => setProviderPageState({
         categoryId: category.id,

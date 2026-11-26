@@ -23,8 +23,8 @@
 
 | Method | Path | Quyền | Hợp đồng |
 |---|---|---|---|
-| GET | `/api/services/{categoryId}/providers?limit=10` | Public | Tối đa 10 provider đã duyệt ở trang đầu (tương thích cũ). |
-| GET | `/api/services/{categoryId}/providers/page?page=0&limit=10` | Public | Trang provider đã duyệt; response có `content`, `totalElements`, `totalPages`, `size`, `number`. |
+| GET | `/api/services/{categoryId}/providers?limit=10` | Public | Provider đã duyệt ở trang đầu (tương thích cũ); mặc định 10, limit tối đa 12. |
+| GET | `/api/services/{categoryId}/providers/page?page=0&limit=10` | Public | Trang provider đã duyệt; response có `content`, `totalElements`, `totalPages`, `size`, `number`; mặc định 10, limit tối đa 12. |
 | GET | `/api/services/providers/{providerId}` | Public | Provider detail đã duyệt/không suspended. |
 | GET | `/api/services/{categoryId}/providers/{providerId}` | Public | Provider theo category. |
 | POST | `/api/provider/applications` | PROVIDER | Tạo provider application. |

@@ -2,7 +2,7 @@
 
 :root {
   --background: #f7f8f4;
-  --foreground: #173c33;
+  --foreground: #1a1a1a;
 }
 
 @theme inline {
@@ -16,12 +16,13 @@
   --color-brand-100: #dcebe4;
   --color-brand-500: #2f7a64;
   --color-brand-600: #1f594a;
+  --color-brand-500-accent: #2f7a64;
   --color-brand-700: #184a3d;
   --color-bg: #f7f8f4;
   --color-surface: #ffffff;
   --color-border: #d9e1da;
-  --color-text: #16342c;
-  --color-muted: #51605a;
+  --color-text: #1a1a1a;
+  --color-muted: #5f6b66;
   --color-success: #1d7a4b;
   --color-success-bg: #e6f4ec;
   --color-warning: #8a5a00;
@@ -42,6 +43,17 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: "Be Vietnam Pro", "Inter", Arial, Helvetica, sans-serif;
+}
+
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+textarea:-webkit-autofill,
+textarea:-webkit-autofill:hover,
+textarea:-webkit-autofill:focus {
+  -webkit-box-shadow: 0 0 0 1000px var(--color-surface) inset;
+  -webkit-text-fill-color: var(--color-text);
+  caret-color: var(--color-text);
 }
 
 :focus-visible {
