@@ -119,10 +119,10 @@
 - Mỗi lần cập nhật chuyển hồ sơ sang `PENDING`, ẩn khỏi public cho tới khi Admin duyệt lại.
 - Bổ sung kiểm thử ownership, ẩn hồ sơ và hiển thị lại sau duyệt.
 
-## 2026-11-05 — CORS cho origin local `localhost:4200` qua API Gateway
+## 2026-11-26 — Xóa cấu hình CORS cố định khỏi API Gateway
 
-- Cho phép origin `http://localhost:4200` gọi Gateway với các method API và headers `Content-Type`/`Authorization`; đây là origin dev client, không phải frontend framework đang có trong repository.
-- Thêm kiểm thử preflight cho origin được phép và từ chối origin ngoài allowlist.
+- Gỡ `GatewayCorsConfiguration` và các kiểm thử preflight cố định theo origin `localhost:4200`.
+- CORS không còn được cấu hình trong application; môi trường triển khai phải cấu hình tại reverse proxy hoặc tầng phù hợp nếu cần browser gọi Gateway trực tiếp.
 
 ## 2026-11-04 — Tài liệu khởi tạo
 

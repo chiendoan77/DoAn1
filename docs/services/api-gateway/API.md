@@ -18,4 +18,4 @@ Không có route `/internal/**`; internal HTTP và RabbitMQ chỉ hoạt động
 
 ## CORS
 
-Gateway CORS hiện cho phép dev origin `http://localhost:4200`, các method API và headers `Content-Type`/`Authorization`. Next.js frontend mặc định chạy ở `http://localhost:3000` và gọi Gateway server-side qua BFF; browser-origin khác cần được thêm rõ ràng trước khi gọi Gateway trực tiếp. CORS không thay thế JWT/role/ownership checks.
+API Gateway không cấu hình CORS trong application. Browser client gọi Gateway trực tiếp cần xử lý CORS ở reverse proxy hoặc tầng triển khai phù hợp.

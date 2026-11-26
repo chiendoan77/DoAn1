@@ -141,9 +141,7 @@ Prefix `/api/admin/bookings/**`, `/api/payments/**` có route cấu hình ở Ga
 
 ## 7. Browser, BFF và CORS
 
-Frontend trong repo dùng BFF tại `/api/backend/{path}` để thêm Bearer token từ HttpOnly cookie và forward request tới Gateway. BFF session endpoints xử lý login/refresh/logout; browser không đọc token trực tiếp. Các API bên ngoài có thể dùng Gateway trực tiếp.
-
-Gateway CORS hiện cho phép origin dev `http://localhost:4200`; frontend Next.js mặc định chạy ở `http://localhost:3000` và gọi Gateway server-side qua BFF nên không cần browser gọi thẳng Gateway. Browser client đặt ở origin khác phải cấu hình allowlist chính xác tại Gateway trước khi gọi trực tiếp. CORS không thay thế authentication/authorization.
+Frontend trong repo dùng BFF tại `/api/backend/{path}` để thêm Bearer token từ HttpOnly cookie và forward request tới Gateway. BFF session endpoints xử lý login/refresh/logout; browser không đọc token trực tiếp. API Gateway không cấu hình CORS trong application. Các API được gọi trực tiếp từ trình duyệt cần cấu hình CORS tại reverse proxy hoặc tầng triển khai phù hợp.
 
 ## 8. Giao tiếp nội bộ (không phải public integration)
 

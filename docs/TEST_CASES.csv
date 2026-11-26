@@ -1,7 +1,5 @@
 ID,Service,Test case,Preconditions,Steps,Expected result,Status,Evidence,Last verified
 GW-001,API Gateway,Application context starts,Test JWT public key configured,Start Spring Boot test context,Gateway context starts,PASS,back-end/api-gateway/target/surefire-reports/com.doan1.gateway.ApiGatewayApplicationTests.txt,2026-11-21
-GW-002,API Gateway,Allow configured CORS preflight,Origin http://localhost:4200,Send OPTIONS with POST and content-type authorization request headers,200 and configured allow headers are returned,PASS,back-end/api-gateway/target/surefire-reports/com.doan1.gateway.ApiGatewayApplicationTests.txt,2026-11-21
-GW-003,API Gateway,Reject unconfigured CORS origin,Origin http://localhost:4300,Send OPTIONS preflight,403 is returned,PASS,back-end/api-gateway/target/surefire-reports/com.doan1.gateway.ApiGatewayApplicationTests.txt,2026-11-21
 GW-004,API Gateway,Reject protected request without JWT,No Authorization header,GET /api/me,401 before routing,PASS,back-end/api-gateway/target/surefire-reports/com.doan1.gateway.ApiGatewayApplicationTests.txt,2026-11-21
 GW-005,API Gateway,Protect customer profile without JWT,No Authorization header,GET /api/customer/profile,401 before routing,PASS,back-end/api-gateway/target/surefire-reports/com.doan1.gateway.ApiGatewayApplicationTests.txt,2026-11-21
 GW-006,API Gateway,Reject malformed JWT,Malformed bearer token,GET protected Admin package endpoint,401 before routing,PASS,back-end/api-gateway/target/surefire-reports/com.doan1.gateway.ApiGatewayApplicationTests.txt,2026-11-21
